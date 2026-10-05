@@ -2,7 +2,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Website Mua Bán Xe Máy & Phụ Tùng</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
     <h1>Đăng ký tài khoản</h1>

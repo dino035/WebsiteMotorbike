@@ -2,7 +2,9 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>Đăng ký thành công</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
     <h1>Đăng ký thành công!</h1>
