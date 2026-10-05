@@ -23,6 +23,12 @@
     <label>Giá sản phẩm:</label>
     <input type = "number" name = "price" required value="${product.price}" min="0"><br>
 
+    <label>Trạng thái:</label>
+    <select name="status">
+        <option value="AVAILABLE" ${product.status == 'AVAILABLE' ? 'selected' : ''}>Có sẵn</option>
+        <option value="SOLD" ${product.status == 'SOLD' ? 'selected' : ''}>Hết hàng</option>
+    </select>
+
     <c:if test="${product.typeCode == 'Motorbike'}">
         <div id="motorbikeFields">
             <label>Hãng xe:</label>

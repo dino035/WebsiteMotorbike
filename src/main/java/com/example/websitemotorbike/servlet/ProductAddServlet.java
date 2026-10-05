@@ -4,6 +4,7 @@ import com.example.websitemotorbike.dao.MotorbikeDB;
 import com.example.websitemotorbike.dao.SparePartDB;
 import com.example.websitemotorbike.model.Motorbike;
 import com.example.websitemotorbike.model.PartOriginType;
+import com.example.websitemotorbike.model.ProductStatus;
 import com.example.websitemotorbike.model.SparePart;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -33,6 +34,8 @@ public class ProductAddServlet extends HttpServlet {
 
         try {
             BigDecimal price = new BigDecimal(request.getParameter("price"));
+            String productStatusStr = request.getParameter("status");
+            ProductStatus productStatus = ProductStatus.valueOf(productStatusStr);
 
             if (productType.equals("Motorbike")){
                 String brand = request.getParameter("brand");
@@ -55,6 +58,7 @@ public class ProductAddServlet extends HttpServlet {
                 motorbike.setChassisNumber(chassisNumber);
                 motorbike.setEngineNumber(engineNumber);
                 motorbike.setOdometerAtIntake(odometerAtIntake);
+                motorbike.setStatus(productStatus);
 
                 MotorbikeDB.insert(motorbike);
             }
@@ -69,11 +73,12 @@ public class ProductAddServlet extends HttpServlet {
                 sparePart.setPrice(price);
                 sparePart.setPartType(partType);
                 sparePart.setPartOrigin(partOrigin);
+                sparePart.setStatus(productStatus);
 
                 SparePartDB.insert(sparePart);
             }
         }
-        catch(NumberFormatException e){
+        catch(IllegalArgumentException e){
             request.setAttribute("error", "Không đúng định dạng");
             request.getRequestDispatcher("/WEB-INF/views/product-form.jsp").forward(request, response);
             return;

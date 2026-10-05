@@ -1,11 +1,7 @@
 package com.example.websitemotorbike.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +18,9 @@ public abstract class Product {
 
     protected String name;
     protected BigDecimal price;
+
+    @Enumerated(EnumType.STRING)
+    protected ProductStatus status;
 
     public abstract String getProductType();
     public abstract String getDetail();

@@ -3,10 +3,7 @@ package com.example.websitemotorbike.servlet;
 import com.example.websitemotorbike.dao.MotorbikeDB;
 import com.example.websitemotorbike.dao.ProductDB;
 import com.example.websitemotorbike.dao.SparePartDB;
-import com.example.websitemotorbike.model.Motorbike;
-import com.example.websitemotorbike.model.PartOriginType;
-import com.example.websitemotorbike.model.Product;
-import com.example.websitemotorbike.model.SparePart;
+import com.example.websitemotorbike.model.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -43,6 +40,8 @@ public class ProductEditServlet extends HttpServlet {
         String name = request.getParameter("name");
         try {
             BigDecimal price = new BigDecimal(request.getParameter("price"));
+            String productStatusStr = request.getParameter("status");
+            ProductStatus productStatus = ProductStatus.valueOf(productStatusStr);
 
             if (productType.equals("Motorbike")){
                 String brand = request.getParameter("brand");
@@ -66,6 +65,7 @@ public class ProductEditServlet extends HttpServlet {
                 motorbike.setChassisNumber(chassisNumber);
                 motorbike.setEngineNumber(engineNumber);
                 motorbike.setOdometerAtIntake(odometerAtIntake);
+                motorbike.setStatus(productStatus);
 
                 MotorbikeDB.update(motorbike);
             }
@@ -80,11 +80,12 @@ public class ProductEditServlet extends HttpServlet {
                 sparePart.setPrice(price);
                 sparePart.setPartType(partType);
                 sparePart.setPartOrigin(partOrigin);
+                sparePart.setStatus(productStatus);
 
                 SparePartDB.update(sparePart);
             }
         }
-        catch(NumberFormatException e){
+        catch(IllegalArgumentException e){
             Product product = ProductDB.selectById(productId);
             request.setAttribute("product", product);
             request.setAttribute("error", "Không đúng định dạng");
