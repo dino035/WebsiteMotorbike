@@ -30,47 +30,54 @@ public class ProductAddServlet extends HttpServlet {
 
         String productType = request.getParameter("product");
         String name = request.getParameter("name");
-        BigDecimal price = new BigDecimal(request.getParameter("price"));
 
-        if (productType.equals("Motorbike")){
-            String brand = request.getParameter("brand");
-            String model = request.getParameter("model");
-            int registrationYear = Integer.parseInt(request.getParameter("registrationYear"));
-            int ownerCount = Integer.parseInt(request.getParameter("ownerCount"));
-            String accidentHistory = request.getParameter("accidentHistory");
-            String chassisNumber = request.getParameter("chassisNumber");
-            String engineNumber = request.getParameter("engineNumber");
-            int odometerAtIntake = Integer.parseInt(request.getParameter("odometerAtIntake"));
+        try {
+            BigDecimal price = new BigDecimal(request.getParameter("price"));
 
-            Motorbike motorbike = new Motorbike();
-            motorbike.setName(name);
-            motorbike.setPrice(price);
-            motorbike.setBrand(brand);
-            motorbike.setModel(model);
-            motorbike.setRegistrationYear(registrationYear);
-            motorbike.setOwnerCount(ownerCount);
-            motorbike.setAccidentHistory(accidentHistory);
-            motorbike.setChassisNumber(chassisNumber);
-            motorbike.setEngineNumber(engineNumber);
-            motorbike.setOdometerAtIntake(odometerAtIntake);
+            if (productType.equals("Motorbike")){
+                String brand = request.getParameter("brand");
+                String model = request.getParameter("model");
+                int registrationYear = Integer.parseInt(request.getParameter("registrationYear"));
+                int ownerCount = Integer.parseInt(request.getParameter("ownerCount"));
+                String accidentHistory = request.getParameter("accidentHistory");
+                String chassisNumber = request.getParameter("chassisNumber");
+                String engineNumber = request.getParameter("engineNumber");
+                int odometerAtIntake = Integer.parseInt(request.getParameter("odometerAtIntake"));
 
-            MotorbikeDB.insert(motorbike);
+                Motorbike motorbike = new Motorbike();
+                motorbike.setName(name);
+                motorbike.setPrice(price);
+                motorbike.setBrand(brand);
+                motorbike.setModel(model);
+                motorbike.setRegistrationYear(registrationYear);
+                motorbike.setOwnerCount(ownerCount);
+                motorbike.setAccidentHistory(accidentHistory);
+                motorbike.setChassisNumber(chassisNumber);
+                motorbike.setEngineNumber(engineNumber);
+                motorbike.setOdometerAtIntake(odometerAtIntake);
+
+                MotorbikeDB.insert(motorbike);
+            }
+
+            else if(productType.equals("SparePart")){
+                String partType = request.getParameter("partType");
+                String partOriginStr = request.getParameter("partOrigin");
+                PartOriginType partOrigin = PartOriginType.valueOf(partOriginStr);
+
+                SparePart sparePart = new SparePart();
+                sparePart.setName(name);
+                sparePart.setPrice(price);
+                sparePart.setPartType(partType);
+                sparePart.setPartOrigin(partOrigin);
+
+                SparePartDB.insert(sparePart);
+            }
         }
-
-        else if(productType.equals("SparePart")){
-            String partType = request.getParameter("partType");
-            String partOriginStr = request.getParameter("partOrigin");
-            PartOriginType partOrigin = PartOriginType.valueOf(partOriginStr);
-
-            SparePart sparePart = new SparePart();
-            sparePart.setName(name);
-            sparePart.setPrice(price);
-            sparePart.setPartType(partType);
-            sparePart.setPartOrigin(partOrigin);
-
-            SparePartDB.insert(sparePart);
-        }
-
+        catch(NumberFormatException e){
+            request.setAttribute("error", "Không đúng định dạng");
+            request.getRequestDispatcher("/WEB-INF/views/product-form.jsp").forward(request, response);
+            return;
+            }
         response.sendRedirect(request.getContextPath() + "/products");
     }
 }

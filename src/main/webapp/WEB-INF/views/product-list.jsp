@@ -25,7 +25,7 @@
                 <td>${product.productType}</td>
                 <td>${product.detail}</td>
                 <td>
-                    <a href="${pageContext.request.contextPath}/products/delete?id=${product.productId}">Xóa</a>
+                    <a href="${pageContext.request.contextPath}/products/delete?id=${product.productId}" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">Xóa</a>
                 </td>
                 <td>
                     <a href="${pageContext.request.contextPath}/products/edit?id=${product.productId}">Chỉnh sửa</a>

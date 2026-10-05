@@ -8,6 +8,7 @@
 </head>
 <body>
     <h1>Thêm sản phẩm</h1>
+    <p style="color: red;">${error}</p>
 
     <form action = "add" method = "post">
         <select name="product" id="productSelect" onchange="toggleFields()">
@@ -19,7 +20,7 @@
         <input type = "text" name = "name" required><br>
 
         <label>Giá sản phẩm:</label>
-        <input type = "text" name = "price" required><br>
+        <input type = "number" name = "price" min="0" required><br>
 
         <div id="motorbikeFields">
             <label>Hãng xe:</label>
@@ -29,10 +30,10 @@
             <input type = "text" name = "model" required><br>
 
             <label>Năm đăng ký xe:</label>
-            <input type = "number" name = "registrationYear" required><br>
+            <input type = "number" name = "registrationYear" min="0" required><br>
 
             <label>Số đời chủ:</label>
-            <input type = "number" name = "ownerCount" required><br>
+            <input type = "number" name = "ownerCount" min="0" required><br>
 
             <label>Lịch sử tai nạn:</label>
             <input type = "text" name = "accidentHistory" required><br>
@@ -44,7 +45,7 @@
             <input type = "text" name = "engineNumber" required><br>
 
             <label>Số odor:</label>
-            <input type = "number" name = "odometerAtIntake" required><br>
+            <input type = "number" name = "odometerAtIntake" min="0" required><br>
 
         </div>
 
