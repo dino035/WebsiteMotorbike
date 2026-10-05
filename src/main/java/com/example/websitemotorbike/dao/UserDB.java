@@ -45,6 +45,7 @@ public class UserDB {
     }
 
     public static boolean emailExists(String email){
+
         return selectUser(email) != null;
     }
 
