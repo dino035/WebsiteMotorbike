@@ -31,4 +31,4 @@ public class SparePart extends Product {
     public String getTypeCode(){
         return "SparePart";
     }
-}
+    }

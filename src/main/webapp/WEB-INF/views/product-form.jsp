@@ -22,6 +22,12 @@
         <label>Giá sản phẩm:</label>
         <input type = "number" name = "price" min="0" required><br>
 
+        <label>Trạng thái:</label>
+        <select name="status">
+            <option value="AVAILABLE" selected>Có sẵn</option>
+            <option value="SOLD">Hết hàng</option>
+        </select>
+
         <div id="motorbikeFields">
             <label>Hãng xe:</label>
             <input type = "text" name = "brand" required><br>
