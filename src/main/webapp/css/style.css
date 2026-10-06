@@ -55,3 +55,25 @@ form input[type="submit"] {
 form input[type="submit"]:hover {
     background-color: #555;
 }
+
+nav {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 24px;
+    background: #333;
+}
+
+nav a {
+    color: #fff;
+    text-decoration: none;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+nav span {
+    margin-left: auto;
+    color: #ccc;
+}
