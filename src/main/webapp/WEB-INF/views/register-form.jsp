@@ -13,10 +13,10 @@
         <label>Email:</label>
         <input type = "email" name = "email" required><br>
 
-        <label>Password:</label>
+        <label>Mật khẩu:</label>
         <input type = "password" name = "password" required><br>
 
-        <label>Phone:</label>
+        <label>Số điện thoại:</label>
         <input type = "text" name = "phone" required><br>
 
         <input type = "submit" value = "Đăng ký">

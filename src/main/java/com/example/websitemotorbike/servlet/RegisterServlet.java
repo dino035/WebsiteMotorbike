@@ -8,12 +8,19 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
 import java.util.UUID;
 
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/WEB-INF/views/register-form.jsp").forward(request, response);
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -25,15 +32,17 @@ public class RegisterServlet extends HttpServlet {
 
         String accountId = UUID.randomUUID().toString();
 
-
         boolean exists = UserDB.emailExists(email);
         if (exists)
         {
             request.setAttribute("error", "Email đã tồn tại");
-            request.getRequestDispatcher("/register-form.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/views/register-form.jsp").forward(request, response);
         }
         else {
-            User user = new User(accountId, email, password, phone, UserRole.CUSTOMER);
+
+            String passwordHash = BCrypt.hashpw(password, BCrypt.gensalt());
+
+            User user = new User(accountId, email, passwordHash, phone, UserRole.CUSTOMER);
 
             UserDB.insert(user);
 
