@@ -10,7 +10,41 @@
 <body>
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
     <h1>Danh sách sản phẩm</h1>
+
+    <c:if test="${not empty error}">
+    <p style="color:red"><c:out value="${error}"/></p>
+    </c:if>
+
+    <form action="${pageContext.request.contextPath}/products" method="get">
+        <input type="text" name="keyword" placeholder="Tìm theo tên..."
+               value="<c:out value='${param.keyword}'/>">
+
+        <select name="type">
+            <option value="">Tất cả loại</option>
+            <option value="Motorbike" ${param.type == 'Motorbike' ? 'selected' : ''}>Xe máy</option>
+            <option value="SparePart" ${param.type == 'SparePart' ? 'selected' : ''}>Phụ tùng</option>
+        </select>
+
+        <select name="status">
+            <option value="">Tất cả tình trạng</option>
+            <option value="AVAILABLE" ${param.status == 'AVAILABLE' ? 'selected' : ''}>Có sẵn</option>
+            <option value="SOLD" ${param.status == 'SOLD' ? 'selected' : ''}>Hết hàng</option>
+        </select>
+
+        <input type="number" name="minPrice" min="0" placeholder="Giá từ"
+               value="<c:out value='${param.minPrice}'/>">
+        <input type="number" name="maxPrice" min="0" placeholder="Giá đến"
+               value="<c:out value='${param.maxPrice}'/>">
+
+        <button type="submit">Tìm kiếm</button>
+        <a href="${pageContext.request.contextPath}/products">Xóa bộ lọc</a>
+</form>
+
     <table>
+        <c:if test="${empty products}">
+            <p>Không tìm thấy sản phẩm phù hợp.</p>
+        </c:if>
+
         <tr>
             <th>Tên</th>
             <th>Giá</th>
