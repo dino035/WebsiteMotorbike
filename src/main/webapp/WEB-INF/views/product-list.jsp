@@ -22,7 +22,11 @@
         </tr>
         <c:forEach var="product" items="${products}">
             <tr>
-                <td>${product.name}</td>
+                <td>
+                    <a href="${pageContext.request.contextPath}/products/detail?id=${product.productId}">
+                        <c:out value="${product.name}"/>
+                    </a>
+                </td>
                 <td>${product.price}</td>
                 <td>${product.productType}</td>
                 <td>${product.status.label}</td>
