@@ -1,4 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html>
@@ -18,42 +18,42 @@
     <p>Loại sản phẩm: <strong>${product.productType}</strong></p>
 
     <label>Tên sản phẩm:</label>
-    <input type = "text" name = "name" required value="${product.name}"><br>
+    <input type="text" name="name" required value="<c:out value='${empty error ? product.name : param.name}'/>">
 
     <label>Giá sản phẩm:</label>
-    <input type = "number" name = "price" required value="${product.price}" min="0"><br>
+    <input type="number" name="price" min="0" value="<c:out value='${empty error ? product.price : param.price}'/>">
 
     <label>Trạng thái:</label>
     <select name="status">
-        <option value="AVAILABLE" ${product.status == 'AVAILABLE' ? 'selected' : ''}>Có sẵn</option>
-        <option value="SOLD" ${product.status == 'SOLD' ? 'selected' : ''}>Hết hàng</option>
+        <option value="AVAILABLE" ${(empty error ? product.status : param.status) == 'AVAILABLE' ? 'selected' : ''}>Có sẵn</option>
+        <option value="SOLD" ${(empty error ? product.status : param.status) == 'SOLD' ? 'selected' : ''}>Hết hàng</option>
     </select>
 
     <c:if test="${product.typeCode == 'Motorbike'}">
         <div id="motorbikeFields">
             <label>Hãng xe:</label>
-            <input type = "text" name = "brand" required value="${product.brand}"><br>
+            <input type="text" name="brand" value="<c:out value='${empty error ? product.brand : param.brand}'/>" required>
 
             <label>Model:</label>
-            <input type = "text" name = "model" required value="${product.model}"><br>
+            <input type="text" name="model" value="<c:out value='${empty error ? product.model : param.model}'/>" required>
 
             <label>Năm đăng ký xe:</label>
-            <input type = "number" name = "registrationYear" required value="${product.registrationYear}" min="0"><br>
+            <input type="number" name="registrationYear" min="0" value="<c:out value='${empty error ? product.registrationYear : param.registrationYear}'/>">
 
             <label>Số đời chủ:</label>
-            <input type = "number" name = "ownerCount" required value="${product.ownerCount}" min="0"><br>
+            <input type="number" name="ownerCount" min="0" value="<c:out value='${empty error ? product.ownerCount : param.ownerCount}'/>">
 
             <label>Lịch sử tai nạn:</label>
-            <input type = "text" name = "accidentHistory" required value="${product.accidentHistory}"><br>
+            <input type="text" name="accidentHistory" value="<c:out value='${empty error ? product.accidentHistory : param.accidentHistory}'/>" required>
 
             <label>Số khung:</label>
-            <input type = "text" name = "chassisNumber" required value="${product.chassisNumber}"><br>
+            <input type="text" name="chassisNumber" value="<c:out value='${empty error ? product.chassisNumber : param.chassisNumber}'/>" required>
 
             <label>Số máy:</label>
-            <input type = "text" name = "engineNumber" required value="${product.engineNumber}"><br>
+            <input type="text" name="engineNumber" value="<c:out value='${empty error ? product.engineNumber : param.engineNumber}'/>" required>
 
             <label>Số odor:</label>
-            <input type = "number" name = "odometerAtIntake" required value="${product.odometerAtIntake}" min="0"><br>
+            <input type="number" name="odometerAtIntake" min="0" value="<c:out value='${empty error ? product.odometerAtIntake : param.odometerAtIntake}'/>">
 
         </div>
     </c:if>
@@ -61,12 +61,12 @@
     <c:if test="${product.typeCode == 'SparePart'}">
         <div id="sparePartFields">
             <label>Loại phụ tùng:</label>
-            <input type="text" name = "partType" required value="${product.partType}"><br>
+            <input type="text" name="partType" value="<c:out value='${empty error ? product.partType : param.partType}'/>" required>
 
             <label>Nguồn gốc:</label>
             <select name="partOrigin">
-                <option value="GENUINE" ${product.partOrigin == 'GENUINE' ? 'selected' : ''}>Phụ tùng chính hãng</option>
-                <option value="AFTERMARKET" ${product.partOrigin == 'AFTERMARKET' ? 'selected' : ''}>Phụ tùng bên thứ 3</option>
+                <option value="GENUINE" ${(empty error ? product.partOrigin : param.partOrigin) == 'GENUINE' ? 'selected' : ''}>Phụ tùng chính hãng</option>
+                <option value="AFTERMARKET" ${(empty error ? product.partOrigin : param.partOrigin) == 'AFTERMARKET' ? 'selected' : ''}>Phụ tùng bên thứ 3</option>
             </select>
 
         </div>
