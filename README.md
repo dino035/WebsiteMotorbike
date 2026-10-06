@@ -17,6 +17,7 @@ Tài liệu này là **hợp đồng làm việc chung** giữa hai thành viên
 | ORM | JPA, hiện thực bằng **EclipseLink** (theo yêu cầu giảng viên, không dùng JDBC thuần) |
 | CSDL | PostgreSQL |
 | Tiện ích | Lombok (`@Getter`, `@Setter`) |
+| Băm mật khẩu | jBCrypt (`org.mindrot:jbcrypt`) |
 | IDE | IntelliJ IDEA |
 
 Đặc tả lớp (class diagram) đã chốt với giảng viên là nguồn chuẩn cho tên lớp, tên thuộc tính và quan hệ. Không tự đổi tên thuộc tính khác với đặc tả. Muốn đổi thì báo bên kia và cập nhật đặc tả.
@@ -32,9 +33,9 @@ Chức năng: đăng ký, đăng nhập, phân quyền, giỏ hàng, đặt hàn
 
 **Đã bàn giao sẵn từ Nhóm 2:** `User`, `UserRole`, `UserDB`, `RegisterServlet` (đăng ký), `register-form.jsp` và `register-success.jsp`. Từ nay các file này thuộc Nhóm 1, Nhóm 2 không sửa nữa. Nhóm 1 làm tiếp đăng nhập, đăng xuất, phân quyền và giỏ hàng trở đi.
 
-Hai việc cần xử lý trong phần đã bàn giao (xem checklist mục 9):
-- Băm mật khẩu (ví dụ BCrypt) trước khi lưu vào `passwordHash`, hiện đang lưu nguyên văn.
-- Chuyển `register-form.jsp` vào `WEB-INF/views` và thêm `doGet` cho `/register`.
+Phần đăng ký đã được hoàn thiện trước khi bàn giao:
+- Mật khẩu được băm bằng **BCrypt** (thư viện jBCrypt) trước khi lưu vào `passwordHash`. Khi làm đăng nhập, so sánh bằng `BCrypt.checkpw(matKhauNhap, user.getPasswordHash())`, **không** so sánh chuỗi trực tiếp và **không** lưu mật khẩu gốc ở đâu cả.
+- `register-form.jsp` nằm trong `WEB-INF/views`; mở trang đăng ký qua `GET /register`, gửi form bằng `POST /register`.
 
 ### Nhóm 2: Sản phẩm & Quản trị
 
@@ -124,15 +125,18 @@ Nhóm 1 đặt tên tương tự: `UserDB`, `OrderDB`, `/login`, `/cart`, `/orde
 
 1. **Kiểm tra dữ liệu ở server.** Kiểm tra ở trình duyệt (`required`, `type="number"`) chỉ để thân thiện, người dùng vẫn bỏ qua được.
 2. Đọc tham số, ép kiểu, tạo đối tượng và gọi DAO trong **một khối `try`**.
-3. `catch (IllegalArgumentException e)` để bắt lỗi định dạng (`NumberFormatException` và `Enum.valueOf` sai đều là lớp con của nó). Trong `catch`: `setAttribute("error", ...)`, `forward` về form, rồi **`return`**.
-4. Dùng `forward` khi báo lỗi (để giữ request attribute), dùng `redirect` sau khi ghi thành công (để F5 không gửi lại form).
-5. Sửa dữ liệu thì **tải lại entity đã có** bằng `selectById`, gọi setter rồi `update`. Không `new` một đối tượng id rỗng rồi `merge`, vì sẽ thêm dòng mới thay vì sửa.
-6. Tên tham số `request.getParameter("...")` phải trùng thuộc tính `name="..."` trong HTML.
-7. Id không tồn tại thì chuyển về trang danh sách, không hiện trang trống.
+3. Chuỗi bắt buộc kiểm tra bằng `Validator.requireText(giaTri, "Tên trường")` (trong `util/Validator.java`), đặt **trước** các lệnh ép kiểu số. Hàm này ném `IllegalArgumentException` với thông báo tiếng Việt. Ô số và enum đã được bảo vệ sẵn vì `parseInt`/`BigDecimal`/`valueOf` ném lỗi khi chuỗi rỗng hoặc sai.
+4. Bắt lỗi bằng hai khối `catch`, **đúng thứ tự này**: `catch (NumberFormatException e)` trước (thông báo "phải là số hợp lệ"), rồi `catch (IllegalArgumentException e)` (hiện `e.getMessage()`). Đảo thứ tự sẽ lỗi biên dịch vì `NumberFormatException` là lớp con. Trong mỗi `catch`: `setAttribute("error", ...)`, `forward` về form, rồi **`return`**.
+5. Dùng `forward` khi báo lỗi (để giữ request attribute và tham số đã gửi), dùng `redirect` sau khi ghi thành công (để F5 không gửi lại form).
+6. Sửa dữ liệu thì **tải lại entity đã có** bằng `selectById`, gọi setter rồi `update`. Không `new` một đối tượng id rỗng rồi `merge`, vì sẽ thêm dòng mới thay vì sửa. Khi báo lỗi ở trang sửa, nạp lại `product` trước khi `forward`.
+7. Tên tham số `request.getParameter("...")` phải trùng thuộc tính `name="..."` trong HTML.
+8. Id không tồn tại thì chuyển về trang danh sách, không hiện trang trống.
 
 ### 6.3 JSP
 
-- Khai báo taglib: `<%@ taglib uri="jakarta.tags.core" prefix="c" %>`.
+- Khai báo taglib: `<%@ taglib uri="jakarta.tags.core" prefix="c" %>`. Thiếu dòng này thì `<c:out>` bị in nguyên văn vào HTML.
+- **Giữ dữ liệu người dùng đã nhập khi form báo lỗi.** Form thêm mới: `value="<c:out value='${param.ten}'/>"`. Form sửa: `value="<c:out value='${empty error ? product.ten : param.ten}'/>"` (lần đầu mở lấy từ đối tượng, sau khi lỗi lấy từ tham số vừa gửi). `<select>` không có `value`, dùng `${... == 'X' ? 'selected' : ''}`. **Luôn bọc `<c:out>`** vì EL không tự escape (chống XSS). **Không bao giờ điền lại ô mật khẩu.** Không để dấu cách giữa `/>` và dấu `"` đóng vì nó thành một phần của giá trị.
+- Ô `type="number"` chứa chữ sẽ hiện trống sau khi lỗi. Đó là hành vi của trình duyệt, không phải lỗi.
 - Phần chỉ dành cho một loại (xe hoặc phụ tùng) dùng `<c:if>`. `display:none` của CSS **không** ngăn EL chạy trên server, và truy cập thuộc tính không tồn tại sẽ gây lỗi.
 - Thao tác nguy hiểm (xóa) có `onclick="return confirm('...')"`.
 - Chọn sẵn giá trị trong `<select>` bằng toán tử 3 ngôi: `${product.status == 'AVAILABLE' ? 'selected' : ''}`.
@@ -141,7 +145,7 @@ Nhóm 1 đặt tên tương tự: `UserDB`, `OrderDB`, `/login`, `/cart`, `/orde
 
 - Menu dùng chung nằm ở `src/main/webapp/WEB-INF/views/common/header.jsp`. Mọi trang chèn vào bằng `<jsp:include page="/WEB-INF/views/common/header.jsp" />` ngay sau thẻ `<body>`, không chép lại menu vào từng trang.
 - CSS dùng chung ở `src/main/webapp/css/style.css`, nối vào trang bằng `<link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">`.
-- Menu hiển thị khác nhau theo đăng nhập: `currentUser` là `null` thì hiện "Đăng nhập" / "Đăng ký", khác `null` thì hiện tên và "Đăng xuất". Nhóm 1 cung cấp các trang tương ứng; Nhóm 2 chỉ dùng chúng làm liên kết trong menu. Hiện tại: trang đăng ký là `/register-form.jsp` (servlet `/register` chỉ nhận `POST` khi gửi form, không mở trực tiếp bằng liên kết được). **[CẦN CHỐT: URL trang đăng nhập và đường dẫn đăng xuất, Nhóm 1 cho biết khi làm xong; nếu Nhóm 1 thêm `doGet` cho `/register` thì liên kết "Đăng ký" đổi sang `/register`]**
+- Menu hiển thị khác nhau theo đăng nhập: `currentUser` là `null` thì hiện "Đăng nhập" / "Đăng ký", khác `null` thì hiện tên và "Đăng xuất". Nhóm 1 cung cấp các trang tương ứng; Nhóm 2 chỉ dùng chúng làm liên kết trong menu. Liên kết "Đăng ký" trỏ tới `/register`. **[CẦN CHỐT: URL trang đăng nhập và đường dẫn đăng xuất, Nhóm 1 cho biết khi làm xong]**
 - Chỉ Nhóm 2 sửa `style.css`. Nhóm 1 cần kiểu riêng cho trang của mình thì tạo file riêng (ví dụ `css/account.css`) để không xung đột khi merge, hoặc nhắn Nhóm 2 thêm vào `style.css`.
 
 ### 6.4 CSDL
@@ -203,8 +207,8 @@ Copy-Item .\src\main\resources\META-INF\persistence.example.xml .\src\main\resou
 - [x] Cách chia việc: `WarrantyRequest` thuộc Nhóm 1; `ProductReview`, `Notification`, trang chi tiết và tìm kiếm thuộc Nhóm 2 (hai bên đã đồng ý)
 - [x] Tên thuộc tính session `"currentUser"` (hai bên đã đồng ý)
 - [x] Chữ ký phương thức `NotificationDB.insert(Notification)`
-- [ ] Phần đăng ký đã bàn giao: băm mật khẩu (BCrypt) và chuyển `register-form.jsp` vào `WEB-INF/views` kèm `doGet`. **[CẦN CHỐT: Nhóm 1 sửa hay Nhóm 2 sửa trước khi bàn giao hẳn]**
+- [x] Phần đăng ký đã bàn giao: băm mật khẩu BCrypt, `register-form.jsp` trong `WEB-INF/views`, có `doGet` (Nhóm 2 đã sửa xong trước khi bàn giao)
 - [x] Tên CSDL `websitemotorbike_db`, cổng `5432`
 - [x] Tách `persistence.xml` (có `persistence.example.xml`, đã vào `.gitignore`)
-- [x] Header/menu và CSS dùng chung: Nhóm 2 tạo (xem mục 6.3)
+- [ ] Header/menu và CSS dùng chung: Nhóm 2 đang tạo (xem mục 6.3); xong thì đánh dấu và báo Nhóm 1
 - [x] Ngôn ngữ giao diện: tiếng Việt (hai bên đã đồng ý)
