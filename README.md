@@ -15,7 +15,7 @@ Tài liệu này là **hợp đồng làm việc chung** giữa hai thành viên
 | Web server | Tomcat 10.1.x |
 | Giao diện | JSP + JSTL (`jakarta.tags.core`) + EL, **không dùng scriptlet** `<% %>` |
 | ORM | JPA, hiện thực bằng **EclipseLink** (theo yêu cầu giảng viên, không dùng JDBC thuần) |
-| CSDL | PostgreSQL |
+| CSDL | PostgreSQL trên Supabase (dùng chung) |
 | Tiện ích | Lombok (`@Getter`, `@Setter`) |
 | Băm mật khẩu | jBCrypt (`org.mindrot:jbcrypt`) |
 | IDE | IntelliJ IDEA |
@@ -151,7 +151,8 @@ Nhóm 1 đặt tên tương tự: `UserDB`, `OrderDB`, `/login`, `/cart`, `/orde
 ### 6.4 CSDL
 
 - EclipseLink **không tự sửa** bảng đã tồn tại. Thêm cột hoặc đổi kiểu thì chạy `ALTER TABLE` bằng tay, và `UPDATE` giá trị cho các dòng cũ.
-- Lệnh SQL chạy bằng PostgreSQL (pgAdmin 4). Vì mỗi người có CSDL cục bộ riêng, lệnh chạy xong cũng phải **chép vào `docs/migrations.sql`** và commit cùng PR, kèm một dòng chú thích (ngày, mục đích). Nếu không, bên kia không biết cần chạy gì và sẽ gặp lỗi lệch dữ liệu. Ví dụ:
+- Cả hai máy dùng **chung một CSDL trên Supabase** (PostgreSQL, gói Free, vùng Singapore), nên dữ liệu và bảng giống hệt nhau, không cần tự tạo CSDL cục bộ. Cách kết nối xem mục 8.
+- Vì CSDL dùng chung, **sửa entity (thêm/đổi cột) ảnh hưởng cả hai người**. Trước khi push entity có đổi cấu trúc, nhắn bên kia. Chạy `ALTER TABLE` bằng SQL Editor của Supabase (hoặc DBeaver/pgAdmin kết nối vào Supabase), `UPDATE` giá trị cho các dòng cũ, rồi **chép lệnh vào `docs/migrations.sql`** và commit cùng PR, kèm một dòng chú thích (ngày, mục đích). Ví dụ:
 
 ```sql
 -- 2026-10-05: thêm trạng thái sản phẩm
@@ -159,7 +160,8 @@ ALTER TABLE product ADD COLUMN status VARCHAR(100);
 UPDATE product SET status = 'AVAILABLE';
 ```
 
-- Tên CSDL và cổng PostgreSQL **giống nhau** ở cả hai máy: tên CSDL `websitemotorbike_db`, cổng `5432` (đã nằm sẵn trong `persistence.example.xml`). Mỗi người tự tạo CSDL tên đó trong pgAdmin 4 trên máy mình. User và mật khẩu thì mỗi máy dùng của riêng mình, chỉ điền trong `persistence.xml` cục bộ.
+- `schema-generation.database.action` đặt là `create`: bảng chưa có thì tự tạo, bảng đã có thì giữ nguyên dữ liệu. **Không dùng** `drop-and-create-tables` vì sẽ xóa dữ liệu của cả hai người.
+- Dữ liệu thử là dữ liệu chung: đừng xóa hàng loạt. Cần thử nghiệm mạnh tay thì báo bên kia.
 - **Không commit mật khẩu CSDL.** Xem mục 8.
 
 ---
@@ -187,17 +189,29 @@ git checkout -b feature/<tên-mới>
 
 ## 8. Cấu hình và bảo mật
 
-- Repo để **private**. Dù vậy, `persistence.xml` **không nằm trong git**, vì mỗi máy có user/mật khẩu PostgreSQL riêng và file chung sẽ gây xung đột mỗi lần pull/merge. Mật khẩu trao đổi qua tin nhắn riêng.
-- Repo giữ `src/main/resources/META-INF/persistence.example.xml` với giá trị giả (`YOUR_USER`, `YOUR_PASSWORD`). `persistence.xml` nằm trong `.gitignore`.
-- **Thiết lập lần đầu (sau khi clone):** sao chép `persistence.example.xml` thành `persistence.xml` trong cùng thư mục, rồi điền user và mật khẩu thật của máy mình:
+- Repo để **private**. `persistence.xml` **không nằm trong git** vì chứa mật khẩu CSDL. Mật khẩu trao đổi qua tin nhắn riêng, không đăng vào nhóm chat đông người.
+- Repo giữ `src/main/resources/META-INF/persistence.example.xml` với giá trị giả (`YOUR_HOST`, `YOUR_USER`, `YOUR_PASSWORD`). `persistence.xml` nằm trong `.gitignore`.
+- **Thiết lập lần đầu (sau khi clone):** sao chép `persistence.example.xml` thành `persistence.xml` trong cùng thư mục:
 
 ```
 Copy-Item .\src\main\resources\META-INF\persistence.example.xml .\src\main\resources\META-INF\persistence.xml
 ```
 
+  rồi điền thông tin kết nối Supabase (xin qua tin nhắn riêng):
+
+```xml
+<property name="jakarta.persistence.jdbc.url" value="jdbc:postgresql://YOUR_HOST:5432/postgres?sslmode=require"/>
+<property name="jakarta.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+<property name="jakarta.persistence.jdbc.user" value="YOUR_USER"/>
+<property name="jakarta.persistence.jdbc.password" value="YOUR_PASSWORD"/>
+<property name="jakarta.persistence.schema-generation.database.action" value="create"/>
+```
+
+- Dùng **Session pooler** (cổng `5432`, user dạng `postgres.<project-ref>`), không dùng cổng `6543` (Transaction pooler) với JDBC. Phải có `?sslmode=require`.
+- Gói Free của Supabase **tự tạm dừng sau khoảng 7 ngày không hoạt động**. Nếu app báo không kết nối được, vào dashboard Supabase bấm Restore/Resume project rồi chờ vài phút.
 - **Cảnh báo khi pull commit tách file lần đầu:** nếu máy bạn đã có `persistence.xml` từ trước, hãy chép file ra ngoài project trước khi `git pull`, vì git sẽ xóa nó (không còn được theo dõi). Pull xong thì chép lại.
 - Khi sửa `persistence.xml` (thêm thuộc tính, đổi tên CSDL...), **sửa luôn `persistence.example.xml`** và commit để người kia cập nhật theo.
-- Lưu ý: mật khẩu cũ vẫn còn trong lịch sử commit trước khi tách. Với repo private và chỉ hai người truy cập thì chấp nhận được; nếu sau này chuyển repo sang public thì phải đổi mật khẩu PostgreSQL.
+- Lưu ý: mật khẩu PostgreSQL cục bộ cũ vẫn còn trong lịch sử commit trước khi tách (không liên quan đến Supabase). Nếu sau này chuyển repo sang public thì đổi mật khẩu Supabase và kiểm tra lịch sử commit.
 - Phân quyền admin: các trang thêm/sửa/xóa sản phẩm là trang quản trị. Chức năng kiểm tra quyền sẽ làm sau khi có đăng nhập của Nhóm 1.
 
 ---
@@ -208,7 +222,7 @@ Copy-Item .\src\main\resources\META-INF\persistence.example.xml .\src\main\resou
 - [x] Tên thuộc tính session `"currentUser"` (hai bên đã đồng ý)
 - [x] Chữ ký phương thức `NotificationDB.insert(Notification)`
 - [x] Phần đăng ký đã bàn giao: băm mật khẩu BCrypt, `register-form.jsp` trong `WEB-INF/views`, có `doGet` (Nhóm 2 đã sửa xong trước khi bàn giao)
-- [x] Tên CSDL `websitemotorbike_db`, cổng `5432`
+- [x] CSDL dùng chung trên Supabase (thay cho CSDL cục bộ `websitemotorbike_db`), kết nối qua Session pooler
 - [x] Tách `persistence.xml` (có `persistence.example.xml`, đã vào `.gitignore`)
-- [ ] Header/menu và CSS dùng chung: Nhóm 2 đang tạo (xem mục 6.3); xong thì đánh dấu và báo Nhóm 1
+- [x] Header/menu và CSS dùng chung (xem mục 6.3)
 - [x] Ngôn ngữ giao diện: tiếng Việt (hai bên đã đồng ý)

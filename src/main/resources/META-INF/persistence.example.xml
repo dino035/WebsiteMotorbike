@@ -11,13 +11,15 @@
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
 
         <properties>
+            <!-- Sao chép file này thành persistence.xml rồi điền thông tin Supabase (xin qua tin nhắn riêng). Không commit persistence.xml. -->
+            <!-- Dùng Session pooler (cổng 5432), user dạng postgres.<project-ref>. Không dùng cổng 6543. -->
             <property name="jakarta.persistence.jdbc.url"
-                      value="jdbc:postgresql://localhost:5432/websitemotorbike_db"/>
+                      value="jdbc:postgresql://YOUR_HOST:5432/postgres?sslmode=require"/>
             <property name="jakarta.persistence.jdbc.driver"
                       value="org.postgresql.Driver"/>
             <property name="jakarta.persistence.jdbc.user" value="YOUR_USER"/>
             <property name="jakarta.persistence.jdbc.password" value="YOUR_PASSWORD"/>
-            <!-- Sao chép file này thành persistence.xml rồi điền user/mật khẩu thật. Không commit persistence.xml. -->
+            <!-- Giữ "create": chỉ tạo bảng còn thiếu. KHÔNG dùng drop-and-create-tables vì DB dùng chung. -->
             <property name="jakarta.persistence.schema-generation.database.action"
                       value="create"/>
         </properties>
