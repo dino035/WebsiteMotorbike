@@ -29,7 +29,9 @@ public class ProductDB {
         trans.begin();
         try{
             Product product = em.find(Product.class, id);
-            em.remove(product);
+            if (product != null) {
+                em.remove(product);
+            }
             trans.commit();
         }
         catch (Exception e){

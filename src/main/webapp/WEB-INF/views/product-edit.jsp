@@ -10,7 +10,7 @@
 <body>
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
 <h1>Chỉnh sửa sản phẩm</h1>
-<p style="color: red;">${error}</p>
+<p style="color: red;"><c:out value="${error}"/></p>
 
 <form action = "edit" method = "post">
 
@@ -22,7 +22,7 @@
     <input type="text" name="name" required value="<c:out value='${empty error ? product.name : param.name}'/>">
 
     <label>Giá sản phẩm:</label>
-    <input type="number" name="price" min="0" value="<c:out value='${empty error ? product.price : param.price}'/>">
+    <input type="number" name="price" min="0" required value="<c:out value='${empty error ? product.price : param.price}'/>">
 
     <label>Trạng thái:</label>
     <select name="status">
@@ -39,10 +39,10 @@
             <input type="text" name="model" value="<c:out value='${empty error ? product.model : param.model}'/>" required>
 
             <label>Năm đăng ký xe:</label>
-            <input type="number" name="registrationYear" min="0" value="<c:out value='${empty error ? product.registrationYear : param.registrationYear}'/>">
+            <input type="number" name="registrationYear" min="0" required value="<c:out value='${empty error ? product.registrationYear : param.registrationYear}'/>">
 
             <label>Số đời chủ:</label>
-            <input type="number" name="ownerCount" min="0" value="<c:out value='${empty error ? product.ownerCount : param.ownerCount}'/>">
+            <input type="number" name="ownerCount" min="0" required value="<c:out value='${empty error ? product.ownerCount : param.ownerCount}'/>">
 
             <label>Lịch sử tai nạn:</label>
             <input type="text" name="accidentHistory" value="<c:out value='${empty error ? product.accidentHistory : param.accidentHistory}'/>" required>
@@ -53,8 +53,8 @@
             <label>Số máy:</label>
             <input type="text" name="engineNumber" value="<c:out value='${empty error ? product.engineNumber : param.engineNumber}'/>" required>
 
-            <label>Số odor:</label>
-            <input type="number" name="odometerAtIntake" min="0" value="<c:out value='${empty error ? product.odometerAtIntake : param.odometerAtIntake}'/>">
+            <label>Số km đã đi:</label>
+            <input type="number" name="odometerAtIntake" min="0" required value="<c:out value='${empty error ? product.odometerAtIntake : param.odometerAtIntake}'/>">
 
         </div>
     </c:if>
@@ -66,7 +66,7 @@
 
             <label>Nguồn gốc:</label>
             <select name="partOrigin">
-                <option value="GENUINE" ${(empty error ? product.partOrigin : param.partOrigin) == 'GENUINE' ? 'selected' : ''}>Phụ tùng chính hãng</option>
+                <option value="GENUINE" ${(empty error ? product.partOrigin : param.partOrigin) == 'GENUINE' ? 'selected' : ''}>Chính hãng</option>
                 <option value="AFTERMARKET" ${(empty error ? product.partOrigin : param.partOrigin) == 'AFTERMARKET' ? 'selected' : ''}>Phụ tùng bên thứ 3</option>
             </select>
 

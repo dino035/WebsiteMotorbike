@@ -100,7 +100,7 @@ public class ProductEditServlet extends HttpServlet {
         }
         catch (NumberFormatException e) {
             forwardWithError(request, response, productId,
-                    "Giá, năm đăng ký, số đời chủ và số odor phải là số hợp lệ");
+                    "Giá, năm đăng ký, số đời chủ và số km đã đi phải là số hợp lệ");
             return;
         }
         catch (IllegalArgumentException e) {

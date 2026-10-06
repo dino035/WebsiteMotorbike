@@ -16,7 +16,9 @@ public class ProductDeleteServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String productId = request.getParameter("id");
-        ProductDB.delete(productId);
+        if (productId != null && !productId.trim().isEmpty()) {
+            ProductDB.delete(productId.trim());
+        }
 
         response.sendRedirect(request.getContextPath() + "/products");
     }

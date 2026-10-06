@@ -1,0 +1,3 @@
+-- Ghi lại mọi lệnh ALTER/UPDATE đã chạy trên CSDL Supabase dùng chung, theo thứ tự thời gian.
+-- Mỗi lệnh kèm một dòng chú thích: ngày, người chạy, mục đích.
+-- 2026-10-06: schema ban đầu do JPA tạo tự động (schema-generation = create), chưa có lệnh nào cần ghi./// tạo file ở đâu

@@ -11,7 +11,7 @@
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
 
     <h1>Thêm sản phẩm</h1>
-    <p style="color: red;">${error}</p>
+    <p style="color: red;"><c:out value="${error}"/></p>
 
     <form action = "add" method = "post">
         <select name="product" id="productSelect" onchange="toggleFields()">
@@ -57,7 +57,7 @@
             <input type = "text" name = "engineNumber" value="<c:out value='${param.engineNumber}'/>" required><br>
 
 
-            <label>Số odor:</label>
+            <label>Số km đã đi:</label>
             <input type = "number" name = "odometerAtIntake" min="0" value="<c:out value='${param.odometerAtIntake}'/>" required><br>
 
         </div>
@@ -69,7 +69,7 @@
 
             <label>Nguồn gốc:</label>
             <select name="partOrigin">
-                <option value="GENUINE" ${param.partOrigin != 'AFTERMARKET' ? 'selected' : ''}>Phụ tùng chính hãng</option>
+                <option value="GENUINE" ${param.partOrigin != 'AFTERMARKET' ? 'selected' : ''}>Chính hãng</option>
                 <option value="AFTERMARKET" ${param.partOrigin == 'AFTERMARKET' ? 'selected' : ''}>Phụ tùng bên thứ 3</option>
             </select>
         </div>
