@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
     <h1>Danh sách sản phẩm</h1>
     <table>
         <tr>
