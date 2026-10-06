@@ -90,7 +90,7 @@ public class ProductAddServlet extends HttpServlet {
         }
         catch (NumberFormatException e) {
             forwardWithError(request, response,
-                    "Giá, năm đăng ký, số đời chủ và số odor phải là số hợp lệ");
+                    "Giá, năm đăng ký, số đời chủ và số km đã đi phải là số hợp lệ");
             return;
         }
         catch (IllegalArgumentException e) {

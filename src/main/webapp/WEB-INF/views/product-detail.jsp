@@ -27,8 +27,7 @@
 
     <c:if test="${product.typeCode == 'SparePart'}">
         <tr><th>Loại phụ tùng</th><td><c:out value="${product.partType}"/></td></tr>
-        <tr><th>Nguồn gốc</th><td><c:out value="${product.partOrigin}"/></td></tr>
-    </c:if>
+        <tr><th>Nguồn gốc</th><td><c:out value="${product.partOrigin.label}"/></td></tr>    </c:if>
 </table>
 
 <p><a href="${pageContext.request.contextPath}/products">← Quay lại danh sách</a></p>

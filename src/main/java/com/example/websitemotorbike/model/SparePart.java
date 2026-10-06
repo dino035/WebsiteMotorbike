@@ -24,7 +24,8 @@ public class SparePart extends Product {
 
     @Override
     public String getDetail(){
-        return partType + " (" + partOrigin +")";
+        String origin = (partOrigin == null) ? "" : " (" + partOrigin.getLabel() + ")";
+        return partType + origin;
     }
 
     @Override

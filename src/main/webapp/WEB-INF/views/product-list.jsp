@@ -41,9 +41,6 @@
 </form>
 
     <table>
-        <c:if test="${empty products}">
-            <p>Không tìm thấy sản phẩm phù hợp.</p>
-        </c:if>
 
         <tr>
             <th>Tên</th>
@@ -61,10 +58,10 @@
                         <c:out value="${product.name}"/>
                     </a>
                 </td>
-                <td>${product.price}</td>
-                <td>${product.productType}</td>
-                <td>${product.status.label}</td>
-                <td>${product.detail}</td>
+                <td><c:out value="${product.price}"/></td>
+                <td><c:out value="${product.productType}"/></td>
+                <td><c:out value="${product.status.label}"/></td>
+                <td><c:out value="${product.detail}"/></td>
                 <td>
                     <a href="${pageContext.request.contextPath}/products/delete?id=${product.productId}" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">Xóa</a>
                 </td>
@@ -74,5 +71,9 @@
             </tr>
         </c:forEach>
     </table>
+
+    <c:if test="${empty products}">
+        <p>Không tìm thấy sản phẩm phù hợp.</p>
+    </c:if>
 </body>
 </html>
