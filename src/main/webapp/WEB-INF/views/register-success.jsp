@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
     <h1>Đăng ký thành công!</h1>
 
     <p>Thông tin tài khoản vừa tạo:</p>

@@ -21,6 +21,10 @@ public class ProductEditServlet extends HttpServlet {
             throws ServletException, IOException {
 
         String productId = request.getParameter("id");
+        if (productId == null || productId.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/products");
+            return;
+        }
         Product product = ProductDB.selectById(productId);
 
         if (product == null){

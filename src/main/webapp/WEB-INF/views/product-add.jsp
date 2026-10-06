@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
+<jsp:include page="/WEB-INF/views/common/header.jsp" />
+
     <h1>Thêm sản phẩm</h1>
     <p style="color: red;">${error}</p>
 
