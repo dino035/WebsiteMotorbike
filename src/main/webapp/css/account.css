@@ -1,0 +1,40 @@
+/* CSS riêng của Nhóm 1 (tài khoản và giao dịch); không sửa style.css của Nhóm 2 */
+
+.msg-ok {
+    color: #1a7f37;
+}
+
+.msg-error {
+    color: #c00;
+}
+
+.msg-notice {
+    color: #9a6700;
+}
+
+form.inline-form {
+    display: inline;
+    max-width: none;
+}
+
+form.inline-form input[type="number"] {
+    width: 70px;
+    margin-top: 0;
+}
+
+form.inline-form input[type="submit"] {
+    margin-top: 0;
+    padding: 6px 12px;
+}
+
+td.num,
+th.num {
+    text-align: right;
+}
+
+.cart-total {
+    margin-top: 16px;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: right;
+}
