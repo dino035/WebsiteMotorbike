@@ -1,35 +1,53 @@
 package com.example.websitemotorbike.servlet;
 
-
 import com.example.websitemotorbike.dao.ProductDB;
+import com.example.websitemotorbike.dao.ProductReviewDB;
 import com.example.websitemotorbike.model.Product;
+import com.example.websitemotorbike.model.User;
+import com.example.websitemotorbike.util.Flash;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
 @WebServlet("/products/detail")
 public class ProductDetailServlet extends HttpServlet {
+
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse respone)
-        throws ServletException, IOException{
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
         String id = request.getParameter("id");
-        if (id == null || id.trim().isEmpty()){
-            respone.sendRedirect(request.getContextPath() + "/products");
+        if (id == null || id.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/products");
             return;
         }
 
         Product product = ProductDB.selectById(id.trim());
-        if (product == null){
-            respone.sendRedirect(request.getContextPath() + "/products");
+        if (product == null) {
+            response.sendRedirect(request.getContextPath() + "/products");
             return;
         }
 
         request.setAttribute("product", product);
-        request.getRequestDispatcher("/WEB-INF/views/product-detail.jsp").forward(request, respone);
+        request.setAttribute("reviews", ProductReviewDB.selectByProductId(product.getProductId()));
+        request.setAttribute("averageRating", ProductReviewDB.averageRating(product.getProductId()));
+
+        // Trang chi tiết là công khai: chỉ tính quyền đánh giá khi đã đăng nhập
+        HttpSession session = request.getSession(false);
+        User user = session == null ? null : (User) session.getAttribute("currentUser");
+        if (user != null) {
+            boolean reviewed = ProductReviewDB.hasReviewed(user.getAccountId(), product.getProductId());
+            request.setAttribute("alreadyReviewed", reviewed);
+            request.setAttribute("canReview", !reviewed
+                    && ProductReviewDB.hasPurchased(user.getAccountId(), product.getProductId()));
+        }
+
+        Flash.consume(request);
+        request.getRequestDispatcher("/WEB-INF/views/product-detail.jsp").forward(request, response);
     }
 }
