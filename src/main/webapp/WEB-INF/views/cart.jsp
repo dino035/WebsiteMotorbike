@@ -72,6 +72,7 @@
 
             <p class="cart-total">Tổng cộng: <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/></p>
             <p>Xe trong giỏ được tạm giữ cho bạn ${holdMinutes} phút.</p>
+            <p><a href="${pageContext.request.contextPath}/checkout">Tiến hành thanh toán</a></p>
         </c:otherwise>
     </c:choose>
 </body>

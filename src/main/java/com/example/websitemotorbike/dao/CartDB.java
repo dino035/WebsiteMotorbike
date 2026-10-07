@@ -202,8 +202,9 @@ public class CartDB {
         }
     }
 
-    private static long countHeldByOthers(EntityManager em, String productId, String accountId,
-                                          LocalDateTime cutoff) {
+    /** Dùng chung cho OrderDB (cùng package) khi kiểm tra lại xe lúc đặt hàng. */
+    static long countHeldByOthers(EntityManager em, String productId, String accountId,
+                                  LocalDateTime cutoff) {
         TypedQuery<Long> q = em.createQuery(
                 "SELECT COUNT(i) FROM CartItem i WHERE i.productId = :productId "
                         + "AND i.cart.accountId <> :accountId AND i.addedAt > :cutoff",
