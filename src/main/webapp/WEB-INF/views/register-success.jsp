@@ -1,3 +1,4 @@
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
 <html>
@@ -12,14 +13,14 @@
 
     <p>Thông tin tài khoản vừa tạo:</p>
     <label>Email:</label>
-    <span>${user.email}</span><br>
+    <span><c:out value="${user.email}"/></span><br>
 
-    <label>Phone:</label>
-    <span>${user.phone}</span><br>
+    <label>Số điện thoại:</label>
+    <span><c:out value="${user.phone}"/></span><br>
 
     <label>Vai trò:</label>
-    <span>${user.userRole}</span><br>
+    <span><c:out value="${user.userRole}"/></span><br>
 
-    <a href="register-form.jsp">Quay lại trang đăng ký</a>
+    <p><a href="${pageContext.request.contextPath}/login">Đăng nhập ngay</a></p>
 </body>
 </html>

@@ -9,19 +9,21 @@ import jakarta.persistence.TypedQuery;
 
 public class UserDB {
 
-    public static void insert(User user){
+    public static boolean insert(User user){
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction trans = em.getTransaction();
         trans.begin();
         try{
             em.persist(user);
             trans.commit();
+            return true;
         }
         catch (Exception e){
             System.out.println(e);
             if(trans.isActive()){
                 trans.rollback();
             }
+            return false;
         }
         finally {
             em.close();
@@ -29,10 +31,14 @@ public class UserDB {
     }
 
     public static User selectUser(String email){
+        if (email == null) {
+            return null;
+        }
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
-        String qString = "SELECT u FROM User u where u.email = :email";
+        String qString = "SELECT u FROM User u where LOWER(u.email) = :email";
         TypedQuery<User> q = em.createQuery(qString, User.class);
-        q.setParameter("email", email);
+        q.setParameter("email", email.trim().toLowerCase());
+        q.setMaxResults(1);
         try {
             return q.getSingleResult();
         }
