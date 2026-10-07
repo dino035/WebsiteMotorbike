@@ -16,6 +16,7 @@ import com.example.websitemotorbike.model.ProductStatus;
 import com.example.websitemotorbike.util.DBUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.LockModeType;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
@@ -186,6 +187,173 @@ public class OrderDB {
         } finally {
             em.close();
         }
+    }
+
+    // ----------------------------------------------------------------------------------
+    // Dành cho Admin (use case 3.21)
+    // ----------------------------------------------------------------------------------
+
+    /** Mọi đơn hàng, mới nhất trước; status = null thì không lọc theo trạng thái. */
+    public static List<Order> selectAll(OrderStatus status) {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            String jpql = "SELECT o FROM Orders o"
+                    + (status == null ? "" : " WHERE o.status = :status")
+                    + " ORDER BY o.createdAt DESC";
+            TypedQuery<Order> q = em.createQuery(jpql, Order.class);
+            if (status != null) {
+                q.setParameter("status", status);
+            }
+            return q.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public static Order selectById(String orderId) {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            return em.find(Order.class, orderId);
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Admin chuyển trạng thái đơn hàng. Chỉ cho phép các bước hợp lệ (OrderStatus.canMoveTo).
+     * Hoàn thành đơn yêu cầu đã thu tiền; hủy đơn yêu cầu chưa thu tiền và trả các xe trong đơn
+     * về AVAILABLE. Mọi thay đổi nằm trong một giao dịch; sau khi lưu sẽ thông báo cho khách.
+     */
+    public static Order updateStatus(String orderId, OrderStatus newStatus) {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        trans.begin();
+        Order order;
+        try {
+            order = em.find(Order.class, orderId, LockModeType.PESSIMISTIC_WRITE);
+            if (order == null) {
+                throw new IllegalArgumentException("Không tìm thấy đơn hàng");
+            }
+            OrderStatus current = order.getStatus();
+            if (!current.canMoveTo(newStatus)) {
+                throw new IllegalArgumentException("Không thể chuyển đơn từ \"" + current.getLabel()
+                        + "\" sang \"" + newStatus.getLabel() + "\"");
+            }
+
+            Payment payment = findPayment(em, orderId);
+            boolean paid = payment != null && payment.getStatus() == PaymentStatus.PAID;
+
+            if (newStatus == OrderStatus.COMPLETED && !paid) {
+                throw new IllegalArgumentException(
+                        "Hãy xác nhận đã thu tiền trước khi hoàn thành đơn hàng");
+            }
+            if (newStatus == OrderStatus.CANCELLED) {
+                if (paid) {
+                    throw new IllegalArgumentException("Đơn hàng đã thu tiền, không thể hủy");
+                }
+                releaseMotorbikes(em, orderId);
+            }
+
+            order.setStatus(newStatus);
+            trans.commit();
+        } catch (IllegalArgumentException e) {
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw e;
+        } catch (Exception e) {
+            System.out.println(e);
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw new IllegalStateException("Không thể cập nhật đơn hàng, vui lòng thử lại", e);
+        } finally {
+            em.close();
+        }
+
+        notifyCustomer(order, "Đơn hàng #" + order.getShortCode() + " đã chuyển sang trạng thái: "
+                + order.getStatus().getLabel());
+        return order;
+    }
+
+    /** Admin xác nhận đã thu tiền COD: Payment chuyển sang PAID và ghi paidAt. */
+    public static Order confirmPayment(String orderId) {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        trans.begin();
+        Order order;
+        try {
+            order = em.find(Order.class, orderId, LockModeType.PESSIMISTIC_WRITE);
+            if (order == null) {
+                throw new IllegalArgumentException("Không tìm thấy đơn hàng");
+            }
+            if (order.getStatus() == OrderStatus.CANCELLED) {
+                throw new IllegalArgumentException("Đơn hàng đã hủy, không thể xác nhận thu tiền");
+            }
+            Payment payment = findPayment(em, orderId);
+            if (payment == null) {
+                throw new IllegalArgumentException("Đơn hàng chưa có thông tin thanh toán");
+            }
+            if (payment.getMethod() != PaymentMethod.COD) {
+                throw new IllegalArgumentException("Chỉ xác nhận thu tiền thủ công cho đơn COD");
+            }
+            if (payment.getStatus() == PaymentStatus.PAID) {
+                throw new IllegalArgumentException("Đơn hàng này đã được xác nhận thu tiền");
+            }
+            payment.setStatus(PaymentStatus.PAID);
+            payment.setPaidAt(LocalDateTime.now());
+            trans.commit();
+        } catch (IllegalArgumentException e) {
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw e;
+        } catch (Exception e) {
+            System.out.println(e);
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw new IllegalStateException("Không thể cập nhật đơn hàng, vui lòng thử lại", e);
+        } finally {
+            em.close();
+        }
+
+        notifyCustomer(order, "Đã xác nhận thu tiền cho đơn hàng #" + order.getShortCode());
+        return order;
+    }
+
+    private static Payment findPayment(EntityManager em, String orderId) {
+        TypedQuery<Payment> q = em.createQuery(
+                "SELECT p FROM Payment p WHERE p.order.orderId = :orderId", Payment.class);
+        q.setParameter("orderId", orderId);
+        q.setMaxResults(1);
+        try {
+            return q.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    /** Khi hủy đơn: các xe đã bị đặt sang SOLD được trả về AVAILABLE (ngoại lệ 2.1 của use case 3.21). */
+    private static void releaseMotorbikes(EntityManager em, String orderId) {
+        TypedQuery<OrderItem> q = em.createQuery(
+                "SELECT i FROM OrderItem i WHERE i.order.orderId = :orderId", OrderItem.class);
+        q.setParameter("orderId", orderId);
+        for (OrderItem item : q.getResultList()) {
+            Product product = lockAndLoad(em, item.getProductId());
+            if (product instanceof Motorbike && product.getStatus() == ProductStatus.SOLD) {
+                product.setStatus(ProductStatus.AVAILABLE);
+            }
+        }
+    }
+
+    /** Tạo thông báo cho khách qua DAO của Nhóm 2; lỗi thông báo không làm hỏng thao tác chính. */
+    private static void notifyCustomer(Order order, String content) {
+        Notification notification = new Notification();
+        notification.setAccountId(order.getAccountId());
+        notification.setType(NotificationType.ORDER_STATUS_CHANGED);
+        notification.setContent(content);
+        NotificationDB.insert(notification);
     }
 
     /**

@@ -50,6 +50,19 @@ public class UserDB {
         }
     }
 
+    public static User selectByAccountId(String accountId){
+        if (accountId == null) {
+            return null;
+        }
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            return em.find(User.class, accountId);
+        }
+        finally {
+            em.close();
+        }
+    }
+
     public static boolean emailExists(String email){
 
         return selectUser(email) != null;
