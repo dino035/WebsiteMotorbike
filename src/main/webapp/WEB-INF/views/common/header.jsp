@@ -14,6 +14,9 @@
 
     <c:if test="${not empty sessionScope.currentUser}">
         <span><c:out value="${sessionScope.currentUser.email}"/></span>
+        <a href="${pageContext.request.contextPath}/cart">Giỏ hàng</a>
+        <a href="${pageContext.request.contextPath}/orders">Đơn hàng</a>
+        <a href="${pageContext.request.contextPath}/notifications">Thông báo</a>
         <a href="${pageContext.request.contextPath}/logout">Đăng xuất</a>
     </c:if>
 </nav>

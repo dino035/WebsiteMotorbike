@@ -1,6 +1,6 @@
 -- Ghi lại mọi lệnh ALTER/UPDATE đã chạy trên CSDL Supabase dùng chung, theo thứ tự thời gian.
 -- Mỗi lệnh kèm một dòng chú thích: ngày, người chạy, mục đích.
--- 2026-10-06: schema ban đầu do JPA tạo tự động (schema-generation = create), chưa có lệnh nào cần ghi./// tạo file ở đâu
+-- 2026-10-06: schema ban đầu do JPA tạo tự động (schema-generation = create), chưa có lệnh nào cần ghi.
 -- 2026-10-07: feature/cart them hai bang moi shoppingcart va cartitem (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu).
 -- 2026-10-07: feature/order them 3 bang moi orders, orderitem, payment (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu). Dat hang chuyen xe sang status SOLD trong bang product.
 -- 2026-10-07: feature/admin-orders khong them bang hay cot moi; Admin doi trang thai don hang, xac nhan thu tien COD (payment.status -> PAID), huy don tra xe ve AVAILABLE trong bang product.

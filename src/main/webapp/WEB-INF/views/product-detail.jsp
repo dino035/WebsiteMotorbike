@@ -12,6 +12,25 @@
 <h1><c:out value="${product.name}"/></h1>
 
 <table>
+    <c:if test="${product.status == 'AVAILABLE'}">
+        <c:choose>
+            <c:when test="${not empty sessionScope.currentUser}">
+                <form method="post" action="${pageContext.request.contextPath}/cart/add">
+                    <input type="hidden" name="productId" value="<c:out value='${product.productId}'/>">
+                    <c:if test="${product.typeCode == 'SparePart'}">
+                        <label>Số lượng:
+                            <input type="number" name="quantity" value="1" min="1" max="99" required>
+                        </label>
+                    </c:if>
+                    <button type="submit">Thêm vào giỏ</button>
+                </form>
+            </c:when>
+            <c:otherwise>
+                <p><a href="${pageContext.request.contextPath}/login">Đăng nhập để mua hàng</a></p>
+            </c:otherwise>
+        </c:choose>
+    </c:if>
+
     <tr><th>Loại</th><td><c:out value="${product.productType}"/></td></tr>
     <tr><th>Giá</th><td><c:out value="${product.price}"/></td></tr>
     <tr><th>Tình trạng</th><td><c:out value="${product.status.label}"/></td></tr>
