@@ -16,7 +16,7 @@ import java.io.IOException;
  * Bắt buộc đăng nhập cho các trang của khách hàng (giỏ hàng, và sau này là đơn hàng).
  * Chưa đăng nhập thì chuyển về /login. Thêm URL mới vào urlPatterns khi cần.
  */
-@WebFilter(urlPatterns = {"/cart", "/cart/*", "/checkout", "/orders", "/orders/*"})
+@WebFilter(urlPatterns = {"/cart", "/cart/*", "/checkout", "/orders", "/orders/*", "/notifications", "/notifications/*"})
 public class LoginRequiredFilter implements Filter {
 
     @Override

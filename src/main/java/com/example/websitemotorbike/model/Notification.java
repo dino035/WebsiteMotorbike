@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Getter
@@ -31,5 +32,12 @@ public class Notification {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }
+    }
+
+    public String getCreatedAtDisplay() {
+        if (createdAt == null) {
+            return "";
+        }
+        return createdAt.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
     }
 }
