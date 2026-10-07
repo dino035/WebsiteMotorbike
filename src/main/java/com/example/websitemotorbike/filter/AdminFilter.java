@@ -19,7 +19,7 @@ import java.io.IOException;
  * đã đăng nhập nhưng không phải ADMIN thì trả về 403.
  * Thêm URL quản trị mới vào urlPatterns bên dưới.
  */
-@WebFilter(urlPatterns = {"/products/add", "/products/edit", "/products/delete"})
+@WebFilter(urlPatterns = {"/products/add", "/products/edit", "/products/delete", "/admin/*"})
 public class AdminFilter implements Filter {
 
     @Override
