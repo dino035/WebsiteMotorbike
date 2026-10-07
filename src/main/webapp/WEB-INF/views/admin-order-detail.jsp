@@ -70,7 +70,7 @@
             <input type="hidden" name="id" value="<c:out value='${order.orderId}'/>">
             <input type="hidden" name="status" value="${next}">
             <input type="submit" value="Chuyển sang: ${next.label}"
-                   ${next.name() == 'CANCELLED' ? "onclick=\"return confirm('Hủy đơn hàng này? Các xe trong đơn sẽ được mở bán lại.')\"" : ''}>
+                   ${next.name() == 'CANCELLED' ? "onclick=\"return confirm('Hủy đơn hàng này? Xe máy trong đơn (nếu có) sẽ được mở bán lại.')\"" : ''}>
         </form>
     </c:forEach>
     <c:if test="${empty order.status.nextStatuses}">
