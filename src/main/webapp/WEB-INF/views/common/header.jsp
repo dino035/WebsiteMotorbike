@@ -5,6 +5,7 @@
 
     <c:if test="${sessionScope.currentUser.userRole == 'ADMIN'}">
         <a href="${pageContext.request.contextPath}/products/add">Thêm sản phẩm</a>
+        <a href="${pageContext.request.contextPath}/admin/orders">Quản lý đơn hàng</a>
     </c:if>
 
     <c:if test="${empty sessionScope.currentUser}">

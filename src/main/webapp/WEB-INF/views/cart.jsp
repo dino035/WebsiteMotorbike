@@ -71,7 +71,15 @@
             </table>
 
             <p class="cart-total">Tổng cộng: <fmt:formatNumber value="${total}" type="number" groupingUsed="true"/></p>
-            <p>Xe trong giỏ được tạm giữ cho bạn ${holdMinutes} phút.</p>
+            <c:set var="hasMotorbike" value="false"/>
+            <c:forEach var="line" items="${lines}">
+                <c:if test="${line.motorbike}">
+                    <c:set var="hasMotorbike" value="true"/>
+                </c:if>
+            </c:forEach>
+            <c:if test="${hasMotorbike}">
+                <p>Xe trong giỏ được tạm giữ cho bạn <c:out value="${holdMinutes}"/> phút.</p>
+            </c:if>
             <p><a href="${pageContext.request.contextPath}/checkout">Tiến hành thanh toán</a></p>
         </c:otherwise>
     </c:choose>

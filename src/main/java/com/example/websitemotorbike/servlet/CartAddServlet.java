@@ -50,7 +50,8 @@ public class CartAddServlet extends HttpServlet {
                     unique ? 1 : quantity, unique, CartDB.HOLD_MINUTES);
 
             if (result == CartDB.AddResult.HELD_BY_OTHER) {
-                throw new IllegalArgumentException("Xe này không còn khả dụng");
+                throw new IllegalArgumentException("Xe này đang được khách khác giữ trong giỏ hàng, vui lòng quay lại sau "
+                        + CartDB.HOLD_MINUTES + " phút");
             }
             Flash.message(request, "Đã thêm \"" + product.getName() + "\" vào giỏ hàng");
         } catch (NumberFormatException e) {
