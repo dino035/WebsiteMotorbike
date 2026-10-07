@@ -1,0 +1,210 @@
+package com.example.websitemotorbike.dao;
+
+import com.example.websitemotorbike.model.CartItem;
+import com.example.websitemotorbike.model.DeliveryMethod;
+import com.example.websitemotorbike.model.Motorbike;
+import com.example.websitemotorbike.model.Notification;
+import com.example.websitemotorbike.model.NotificationType;
+import com.example.websitemotorbike.model.Order;
+import com.example.websitemotorbike.model.OrderItem;
+import com.example.websitemotorbike.model.OrderStatus;
+import com.example.websitemotorbike.model.Payment;
+import com.example.websitemotorbike.model.PaymentMethod;
+import com.example.websitemotorbike.model.PaymentStatus;
+import com.example.websitemotorbike.model.Product;
+import com.example.websitemotorbike.model.ProductStatus;
+import com.example.websitemotorbike.util.DBUtil;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TypedQuery;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+
+public class OrderDB {
+
+    /**
+     * Đặt hàng từ giỏ của accountId trong MỘT giao dịch: khóa từng dòng sản phẩm, kiểm tra lại
+     * còn bán được không, tạo Order + OrderItem + Payment, chuyển xe sang SOLD, rồi xóa các dòng giỏ.
+     *
+     * @throws IllegalArgumentException giỏ trống hoặc có sản phẩm không còn khả dụng (đã rollback)
+     * @throws IllegalStateException    lỗi CSDL (đã rollback)
+     */
+    public static Order placeOrder(String accountId, DeliveryMethod deliveryMethod,
+                                   String receiverName, String receiverPhone, String shippingAddress,
+                                   PaymentMethod paymentMethod, boolean returnPolicyAccepted) {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        EntityTransaction trans = em.getTransaction();
+        trans.begin();
+        Order order;
+        try {
+            TypedQuery<CartItem> q = em.createQuery(
+                    "SELECT i FROM CartItem i WHERE i.cart.accountId = :accountId ORDER BY i.addedAt",
+                    CartItem.class);
+            q.setParameter("accountId", accountId);
+            List<CartItem> cartItems = q.getResultList();
+            if (cartItems.isEmpty()) {
+                throw new IllegalArgumentException("Giỏ hàng của bạn đang trống");
+            }
+
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime cutoff = now.minusMinutes(CartDB.HOLD_MINUTES);
+
+            order = new Order();
+            order.setAccountId(accountId);
+            order.setStatus(OrderStatus.PENDING);
+            order.setDeliveryMethod(deliveryMethod);
+            order.setReceiverName(receiverName);
+            order.setReceiverPhone(receiverPhone);
+            order.setShippingAddress(shippingAddress);
+            order.setReturnPolicyAccepted(returnPolicyAccepted);
+            order.setCreatedAt(now);
+            order.setTotalAmount(BigDecimal.ZERO);
+            em.persist(order);
+
+            BigDecimal total = BigDecimal.ZERO;
+            for (CartItem item : cartItems) {
+                Product product = lockAndLoad(em, item.getProductId());
+
+                if (product == null || product.getStatus() != ProductStatus.AVAILABLE) {
+                    throw unavailable(product);
+                }
+                if (product instanceof Motorbike) {
+                    if (item.getAddedAt().isBefore(cutoff)
+                            && CartDB.countHeldByOthers(em, item.getProductId(), accountId, cutoff) > 0) {
+                        throw unavailable(product);
+                    }
+                    product.setStatus(ProductStatus.SOLD);
+                }
+
+                OrderItem orderItem = new OrderItem();
+                orderItem.setOrder(order);
+                orderItem.setProductId(product.getProductId());
+                orderItem.setProductName(product.getName());
+                orderItem.setUnitPrice(product.getPrice() == null ? BigDecimal.ZERO : product.getPrice());
+                orderItem.setQuantity(item.getQuantity());
+                em.persist(orderItem);
+
+                total = total.add(orderItem.getLineTotal());
+                em.remove(item);
+            }
+            order.setTotalAmount(total);
+
+            Payment payment = new Payment();
+            payment.setOrder(order);
+            payment.setMethod(paymentMethod);
+            payment.setStatus(PaymentStatus.PENDING);
+            payment.setAmount(total);
+            payment.setCreatedAt(now);
+            em.persist(payment);
+
+            trans.commit();
+        } catch (IllegalArgumentException e) {
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw e;
+        } catch (Exception e) {
+            System.out.println(e);
+            if (trans.isActive()) {
+                trans.rollback();
+            }
+            throw new IllegalStateException("Không thể đặt hàng, vui lòng thử lại", e);
+        } finally {
+            em.close();
+        }
+
+        // Tạo thông báo qua DAO của Nhóm 2 (README mục 3, quy tắc 7); lỗi ở đây không ảnh hưởng đơn hàng
+        Notification notification = new Notification();
+        notification.setAccountId(accountId);
+        notification.setType(NotificationType.ORDER_PLACED);
+        notification.setContent("Đơn hàng #" + order.getShortCode() + " đã được đặt thành công");
+        NotificationDB.insert(notification);
+
+        return order;
+    }
+
+    public static List<Order> selectByAccountId(String accountId) {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            TypedQuery<Order> q = em.createQuery(
+                    "SELECT o FROM Orders o WHERE o.accountId = :accountId ORDER BY o.createdAt DESC",
+                    Order.class);
+            q.setParameter("accountId", accountId);
+            return q.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /** Chỉ trả đơn nếu thuộc về accountId (chống xem đơn của người khác). */
+    public static Order selectOwned(String accountId, String orderId) {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            TypedQuery<Order> q = em.createQuery(
+                    "SELECT o FROM Orders o WHERE o.orderId = :orderId AND o.accountId = :accountId",
+                    Order.class);
+            q.setParameter("orderId", orderId);
+            q.setParameter("accountId", accountId);
+            try {
+                return q.getSingleResult();
+            } catch (NoResultException e) {
+                return null;
+            }
+        } finally {
+            em.close();
+        }
+    }
+
+    public static List<OrderItem> selectItems(String orderId) {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            TypedQuery<OrderItem> q = em.createQuery(
+                    "SELECT i FROM OrderItem i WHERE i.order.orderId = :orderId ORDER BY i.productName",
+                    OrderItem.class);
+            q.setParameter("orderId", orderId);
+            return q.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public static Payment selectPayment(String orderId) {
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            TypedQuery<Payment> q = em.createQuery(
+                    "SELECT p FROM Payment p WHERE p.order.orderId = :orderId", Payment.class);
+            q.setParameter("orderId", orderId);
+            q.setMaxResults(1);
+            try {
+                return q.getSingleResult();
+            } catch (NoResultException e) {
+                return null;
+            }
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Khóa dòng sản phẩm (SELECT ... FOR UPDATE) để hai đơn không cùng bán một chiếc xe,
+     * rồi đọc lại trạng thái mới nhất từ CSDL.
+     */
+    private static Product lockAndLoad(EntityManager em, String productId) {
+        em.createNativeQuery("SELECT productid FROM product WHERE productid = ?1 FOR UPDATE")
+                .setParameter(1, productId)
+                .getResultList();
+        Product product = em.find(Product.class, productId);
+        if (product != null) {
+            em.refresh(product);
+        }
+        return product;
+    }
+
+    private static IllegalArgumentException unavailable(Product product) {
+        String name = product == null ? "Một sản phẩm" : "\"" + product.getName() + "\"";
+        return new IllegalArgumentException(name + " không còn khả dụng, vui lòng kiểm tra lại giỏ hàng");
+    }
+}
