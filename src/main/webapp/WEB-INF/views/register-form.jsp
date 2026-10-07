@@ -11,9 +11,9 @@
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
     <h1>Đăng ký tài khoản</h1>
 
-    <p style="color: red;">${error}</p>
+    <p style="color: red;"><c:out value="${error}"/></p>
 
-    <form action = "register" method = "post">
+    <form action="${pageContext.request.contextPath}/register" method="post">
         <label>Email:</label>
         <input type="email" name="email" required value="<c:out value='${param.email}'/>">
 
