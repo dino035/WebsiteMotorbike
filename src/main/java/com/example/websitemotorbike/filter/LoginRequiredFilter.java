@@ -13,10 +13,11 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Bắt buộc đăng nhập cho các trang của khách hàng (giỏ hàng, và sau này là đơn hàng).
+ * Bắt buộc đăng nhập cho các trang của khách hàng (giỏ hàng, đơn hàng, thông báo, đánh giá).
  * Chưa đăng nhập thì chuyển về /login. Thêm URL mới vào urlPatterns khi cần.
  */
-@WebFilter(urlPatterns = {"/cart", "/cart/*", "/checkout", "/orders", "/orders/*", "/notifications", "/notifications/*"})
+@WebFilter(urlPatterns = {"/cart", "/cart/*", "/checkout", "/orders", "/orders/*",
+        "/notifications", "/notifications/*", "/reviews", "/reviews/*"})
 public class LoginRequiredFilter implements Filter {
 
     @Override
