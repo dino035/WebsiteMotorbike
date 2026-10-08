@@ -63,6 +63,26 @@ public class UserDB {
         }
     }
 
+    /** Danh sách khách hàng (không gồm Admin), lọc theo từ khóa trong email nếu có; theo thứ tự email. */
+    public static java.util.List<User> selectCustomers(String keyword){
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+            String jpql = "SELECT u FROM User u WHERE u.userRole = :role"
+                    + (hasKeyword ? " AND LOWER(u.email) LIKE :keyword" : "")
+                    + " ORDER BY u.email";
+            TypedQuery<User> q = em.createQuery(jpql, User.class);
+            q.setParameter("role", com.example.websitemotorbike.model.UserRole.CUSTOMER);
+            if (hasKeyword) {
+                q.setParameter("keyword", "%" + keyword.trim().toLowerCase() + "%");
+            }
+            return q.getResultList();
+        }
+        finally {
+            em.close();
+        }
+    }
+
     /** Danh sách tài khoản theo vai trò (dùng để gửi thông báo cho tất cả Admin). */
     public static java.util.List<User> selectByRole(com.example.websitemotorbike.model.UserRole role){
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
