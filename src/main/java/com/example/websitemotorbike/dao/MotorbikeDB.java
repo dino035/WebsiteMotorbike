@@ -6,6 +6,9 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
+import com.example.websitemotorbike.model.VehiclePhoto;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MotorbikeDB {
     public static void insert(Motorbike motorbike){
@@ -13,7 +16,17 @@ public class MotorbikeDB {
         EntityTransaction trans = em.getTransaction();
         trans.begin();
         try{
+            // Tách ảnh ra, ghi xe trước để dòng motorbike có mặt khi ghi vehiclephoto
+            List<VehiclePhoto> photos = new ArrayList<>(motorbike.getPhotos());
+            motorbike.getPhotos().clear();
+
             em.persist(motorbike);
+            em.flush();
+
+            for (VehiclePhoto photo : photos) {
+                motorbike.addPhoto(photo);
+                em.persist(photo);
+            }
             trans.commit();
         }
         catch (Exception e){
@@ -21,6 +34,7 @@ public class MotorbikeDB {
             if(trans.isActive()){
                 trans.rollback();
             }
+            throw new IllegalStateException("Không thể lưu xe, vui lòng thử lại", e);
         }
         finally {
             em.close();

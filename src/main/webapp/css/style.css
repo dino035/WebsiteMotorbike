@@ -77,3 +77,6 @@ nav span {
     margin-left: auto;
     color: #ccc;
 }
+
+.photo-gallery { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.photo-gallery img { height: 180px; border-radius: 4px; object-fit: cover; }

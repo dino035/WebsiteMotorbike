@@ -13,7 +13,7 @@
     <h1>Thêm sản phẩm</h1>
     <p style="color: red;"><c:out value="${error}"/></p>
 
-    <form action = "add" method = "post">
+    <form action="add" method="post" enctype="multipart/form-data">
         <select name="product" id="productSelect" onchange="toggleFields()">
             <option value="Motorbike" ${param.product != 'SparePart' ? 'selected' : ''}>Xe cũ</option>
             <option value="SparePart" ${param.product == 'SparePart' ? 'selected' : ''}>Phụ tùng</option>
@@ -59,6 +59,9 @@
 
             <label>Số km đã đi:</label>
             <input type = "number" name = "odometerAtIntake" min="0" value="<c:out value='${param.odometerAtIntake}'/>" required><br>
+
+            <label>Ảnh xe (tối đa 10 ảnh, mỗi ảnh ≤ 5MB):</label>
+            <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required><br>
 
         </div>
 

@@ -15,8 +15,15 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import com.example.websitemotorbike.util.Validator;
+import com.example.websitemotorbike.model.VehiclePhoto;
+import com.example.websitemotorbike.util.PhotoStorage;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.Part;
+import java.util.ArrayList;
+import java.util.List;
 
 @WebServlet("/products/add")
+@MultipartConfig(maxFileSize = 5 * 1024 * 1024, maxRequestSize = 50 * 1024 * 1024)
 public class ProductAddServlet extends HttpServlet {
 
     @Override
@@ -69,7 +76,29 @@ public class ProductAddServlet extends HttpServlet {
                 motorbike.setOdometerAtIntake(odometerAtIntake);
                 motorbike.setStatus(productStatus);
 
-                MotorbikeDB.insert(motorbike);
+                List<Part> photoParts = readPhotoParts(request);
+                for (Part p : photoParts) {
+                    PhotoStorage.validate(p);
+                }
+
+                List<String> uploaded = new ArrayList<>();
+                try {
+                    for (Part p : photoParts) {
+                        String path = PhotoStorage.upload(p);
+                        uploaded.add(path);
+
+                        VehiclePhoto photo = new VehiclePhoto();
+                        photo.setStoragePath(path);
+                        photo.setImageUrl(PhotoStorage.publicUrl(path));
+                        motorbike.addPhoto(photo);
+                    }
+                    MotorbikeDB.insert(motorbike);
+                } catch (IOException | RuntimeException e) {
+                    System.out.println(e);
+                    deleteQuietly(uploaded);
+                    forwardWithError(request, response, "Không thể lưu xe và ảnh, vui lòng thử lại");
+                    return;
+                }
             }
             else if (productType.equals("SparePart")) {
                 String partType = request.getParameter("partType");
@@ -105,5 +134,36 @@ public class ProductAddServlet extends HttpServlet {
             throws ServletException, IOException {
         request.setAttribute("error", message);
         request.getRequestDispatcher("/WEB-INF/views/product-add.jsp").forward(request, response);
+    }
+
+    private List<Part> readPhotoParts(HttpServletRequest request)
+            throws ServletException, IOException {
+        List<Part> result = new ArrayList<>();
+        try {
+            for (Part p : request.getParts()) {
+                if ("photos".equals(p.getName()) && p.getSize() > 0) {
+                    result.add(p);
+                }
+            }
+        } catch (IllegalStateException e) {
+            throw new IllegalArgumentException("Ảnh quá lớn, mỗi ảnh tối đa 5MB");
+        }
+        if (result.isEmpty()) {
+            throw new IllegalArgumentException("Xe cần ít nhất 1 ảnh");
+        }
+        if (result.size() > 10) {
+            throw new IllegalArgumentException("Tối đa 10 ảnh cho mỗi xe");
+        }
+        return result;
+    }
+
+    private void deleteQuietly(List<String> storagePaths) {
+        for (String path : storagePaths) {
+            try {
+                PhotoStorage.delete(path);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+        }
     }
 }
