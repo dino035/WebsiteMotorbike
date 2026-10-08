@@ -42,11 +42,29 @@
 
     <h2>Thông tin nhận hàng</h2>
     <form action="${pageContext.request.contextPath}/checkout" method="post">
+        <c:if test="${not empty addresses}">
+            <label>Chọn địa chỉ đã lưu:</label>
+            <select id="savedAddress" onchange="fillAddress(this)">
+                <option value="">-- Nhập địa chỉ khác --</option>
+                <c:forEach var="a" items="${addresses}">
+                    <option value="<c:out value='${a.addressId}'/>"
+                            data-name="<c:out value='${a.receiverName}'/>"
+                            data-phone="<c:out value='${a.receiverPhone}'/>"
+                            data-line="<c:out value='${a.addressLine}'/>">
+                        <c:out value="${a.receiverName}"/> - <c:out value="${a.addressLine}"/><c:if test="${a.defaultAddress}"> (mặc định)</c:if>
+                    </option>
+                </c:forEach>
+            </select>
+        </c:if>
+        <p><a href="${pageContext.request.contextPath}/addresses">Quản lý sổ địa chỉ</a></p>
+
         <label>Họ tên người nhận:</label>
-        <input type="text" name="receiverName" required maxlength="100" value="<c:out value='${param.receiverName}'/>">
+        <input type="text" name="receiverName" required maxlength="100"
+               value="<c:out value='${empty param.receiverName ? (not empty defaultAddress ? defaultAddress.receiverName : "") : param.receiverName}'/>">
 
         <label>Số điện thoại:</label>
-        <input type="text" name="receiverPhone" required value="<c:out value='${empty param.receiverPhone ? defaultPhone : param.receiverPhone}'/>">
+        <input type="text" name="receiverPhone" required
+               value="<c:out value='${empty param.receiverPhone ? (not empty defaultAddress ? defaultAddress.receiverPhone : defaultPhone) : param.receiverPhone}'/>">
 
         <label>Hình thức nhận hàng:</label>
         <c:forEach var="m" items="${deliveryMethods}">
@@ -61,7 +79,11 @@
         </c:forEach>
 
         <label>Địa chỉ giao hàng (bắt buộc khi chọn giao tận nơi):</label>
-        <textarea name="shippingAddress" rows="3" maxlength="500" style="width:100%;box-sizing:border-box;"><c:out value="${param.shippingAddress}"/></textarea>
+        <textarea name="shippingAddress" rows="3" maxlength="500" style="width:100%;box-sizing:border-box;"><c:out value="${empty param.shippingAddress ? (not empty defaultAddress ? defaultAddress.addressLine : '') : param.shippingAddress}"/></textarea>
+        <div>
+            <input type="checkbox" name="saveAddress" id="saveAddress" ${not empty param.saveAddress ? 'checked' : ''}>
+            <label for="saveAddress" style="display:inline;font-weight:normal;">Lưu địa chỉ này vào sổ địa chỉ (khi giao hàng tận nơi)</label>
+        </div>
 
         <c:if test="${hasSparePart}">
             <label>Ngày hẹn lắp đặt (bắt buộc khi chọn lắp đặt tại cửa hàng):</label>
@@ -93,5 +115,18 @@
 
         <input type="submit" value="Đặt hàng">
     </form>
+
+    <script>
+        // Chọn địa chỉ đã lưu thì điền sẵn họ tên, số điện thoại và địa chỉ (người dùng vẫn sửa được)
+        function fillAddress(select) {
+            var option = select.options[select.selectedIndex];
+            if (!option.value) {
+                return;
+            }
+            document.getElementsByName('receiverName')[0].value = option.getAttribute('data-name');
+            document.getElementsByName('receiverPhone')[0].value = option.getAttribute('data-phone');
+            document.getElementsByName('shippingAddress')[0].value = option.getAttribute('data-line');
+        }
+    </script>
 </body>
 </html>

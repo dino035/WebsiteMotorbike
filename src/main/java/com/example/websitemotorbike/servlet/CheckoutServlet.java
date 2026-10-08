@@ -1,6 +1,8 @@
 package com.example.websitemotorbike.servlet;
 
+import com.example.websitemotorbike.dao.AddressDB;
 import com.example.websitemotorbike.dao.OrderDB;
+import com.example.websitemotorbike.model.Address;
 import com.example.websitemotorbike.model.CartLine;
 import com.example.websitemotorbike.model.DeliveryMethod;
 import com.example.websitemotorbike.model.Order;
@@ -8,8 +10,8 @@ import com.example.websitemotorbike.model.PaymentMethod;
 import com.example.websitemotorbike.model.User;
 import com.example.websitemotorbike.util.CartSummary;
 import com.example.websitemotorbike.util.Flash;
+import com.example.websitemotorbike.util.InputRules;
 import com.example.websitemotorbike.util.InstallationPolicy;
-import com.example.websitemotorbike.util.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -18,13 +20,12 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.regex.Pattern;
+import java.util.List;
 
 @WebServlet("/checkout")
 public class CheckoutServlet extends HttpServlet {
 
     private static final String CHECKOUT_VIEW = "/WEB-INF/views/checkout.jsp";
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9+ ().-]{8,15}$");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -52,21 +53,11 @@ public class CheckoutServlet extends HttpServlet {
             String receiverPhone = request.getParameter("receiverPhone");
             String shippingAddress = request.getParameter("shippingAddress");
 
-            Validator.requireText(receiverName, "Họ tên người nhận");
-            Validator.requireText(receiverPhone, "Số điện thoại");
-            if (receiverName.trim().length() > 100) {
-                throw new IllegalArgumentException("Họ tên người nhận quá dài (tối đa 100 ký tự)");
-            }
-            if (!PHONE_PATTERN.matcher(receiverPhone.trim()).matches()) {
-                throw new IllegalArgumentException("Số điện thoại không hợp lệ");
-            }
+            InputRules.validateReceiver(receiverName, receiverPhone);
 
             DeliveryMethod deliveryMethod = parseDeliveryMethod(request.getParameter("deliveryMethod"));
             if (deliveryMethod == DeliveryMethod.DELIVERY) {
-                Validator.requireText(shippingAddress, "Địa chỉ giao hàng");
-                if (shippingAddress.trim().length() > 500) {
-                    throw new IllegalArgumentException("Địa chỉ giao hàng quá dài (tối đa 500 ký tự)");
-                }
+                InputRules.validateAddress(shippingAddress);
             }
 
             PaymentMethod paymentMethod = parsePaymentMethod(request.getParameter("paymentMethod"));
@@ -90,6 +81,15 @@ public class CheckoutServlet extends HttpServlet {
             Order order = OrderDB.placeOrder(user.getAccountId(), deliveryMethod,
                     receiverName.trim(), receiverPhone.trim(), address, paymentMethod, true, installDate);
 
+            // Tùy chọn: lưu địa chỉ giao hàng vào sổ địa chỉ (bỏ qua nếu đã có hoặc sổ đã đầy; không ảnh hưởng đơn)
+            if (deliveryMethod == DeliveryMethod.DELIVERY && request.getParameter("saveAddress") != null) {
+                try {
+                    AddressDB.createIfAbsent(user.getAccountId(), receiverName.trim(), receiverPhone.trim(), address);
+                } catch (IllegalArgumentException | IllegalStateException e) {
+                    // đơn đã đặt thành công, việc lưu địa chỉ chỉ là phụ
+                }
+            }
+
             Flash.message(request, "Đặt hàng thành công! Mã đơn hàng: " + order.getShortCode());
             response.sendRedirect(request.getContextPath() + "/orders/detail?id=" + order.getOrderId());
         } catch (IllegalArgumentException e) {
@@ -107,6 +107,11 @@ public class CheckoutServlet extends HttpServlet {
         request.setAttribute("total", summary.getTotal());
         request.setAttribute("notices", summary.getNotices());
         request.setAttribute("defaultPhone", user.getPhone());
+        // Sổ địa chỉ: danh sách để chọn, và địa chỉ mặc định (đứng đầu danh sách) để điền sẵn
+        List<Address> addresses = AddressDB.selectByAccountId(user.getAccountId());
+        request.setAttribute("addresses", addresses);
+        request.setAttribute("defaultAddress",
+                !addresses.isEmpty() && addresses.get(0).isDefaultAddress() ? addresses.get(0) : null);
         request.setAttribute("deliveryMethods", DeliveryMethod.values());
         // Chỉ đơn có phụ tùng mới được chọn lắp đặt tại cửa hàng
         boolean hasSparePart = false;
