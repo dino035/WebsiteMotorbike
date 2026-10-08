@@ -41,3 +41,5 @@ build/
 .DS_Store
 
 src/main/resources/META-INF/persistence.xml
+# Cấu hình SMTP gửi email (chứa mật khẩu), mỗi máy một file riêng; xem mail.example.properties
+src/main/resources/mail.properties

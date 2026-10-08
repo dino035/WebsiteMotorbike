@@ -11,6 +11,9 @@
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
     <h1>Đăng nhập</h1>
 
+    <c:if test="${not empty flashMessage}">
+        <p class="msg-ok"><c:out value="${flashMessage}"/></p>
+    </c:if>
     <p style="color: red;"><c:out value="${error}"/><c:out value="${flashError}"/></p>
 
     <form action="${pageContext.request.contextPath}/login" method="post">
@@ -23,6 +26,7 @@
         <input type="submit" value="Đăng nhập">
     </form>
 
+    <p><a href="${pageContext.request.contextPath}/forgot-password">Quên mật khẩu?</a></p>
     <p>Chưa có tài khoản? <a href="${pageContext.request.contextPath}/register">Đăng ký</a></p>
 </body>
 </html>
