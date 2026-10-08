@@ -7,7 +7,7 @@ public class InputRules {
 
     public static final int MAX_NAME = 100;
     public static final int MAX_ADDRESS = 500;
-    private static final Pattern PHONE_PATTERN = Pattern.compile("^[0-9+ ().-]{8,15}$");
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^(0|\\+84)[0-9]{9}$");
 
     /** Họ tên và số điện thoại người nhận: không trống, độ dài và định dạng hợp lệ. */
     public static void validateReceiver(String name, String phone) {
@@ -16,7 +16,8 @@ public class InputRules {
         if (name.trim().length() > MAX_NAME) {
             throw new IllegalArgumentException("Họ tên người nhận quá dài (tối đa " + MAX_NAME + " ký tự)");
         }
-        if (!PHONE_PATTERN.matcher(phone.trim()).matches()) {
+        String normalized = phone.trim().replaceAll("[ .()-]", "");
+        if (!PHONE_PATTERN.matcher(normalized).matches()) {
             throw new IllegalArgumentException("Số điện thoại không hợp lệ");
         }
     }
