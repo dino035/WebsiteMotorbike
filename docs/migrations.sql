@@ -9,3 +9,4 @@
 -- 2026-10-08: feature/installation them bang moi installationrequest (JPA tu tao khi chay lan dau). DeliveryMethod them gia tri INSTALL (cot deliverymethod luu chuoi nen khong can ALTER). Phi cong lap dat duoc cong vao orders.totalamount.
 -- 2026-10-08: feature/account-management them bang moi accountlock (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu; khong them cot vao bang users). Co dong trong accountlock = tai khoan bi khoa.
 -- 2026-10-08: feature/reset-password them bang moi passwordresettoken (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu; khong doi bang users). Them thu vien angus-mail vao pom.xml va cau hinh email mail.properties (khong commit, xem mail.example.properties).
+-- 2026-10-08: feature/address them bang moi address (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu). Don hang van chup lai ho ten, so dien thoai, dia chi nen khong tham chieu Address.
