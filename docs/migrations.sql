@@ -6,3 +6,4 @@
 -- 2026-10-07: feature/admin-orders khong them bang hay cot moi; Admin doi trang thai don hang, xac nhan thu tien COD (payment.status -> PAID), huy don tra xe ve AVAILABLE trong bang product.
 -- 2026-10-08: feature/product-review them bang moi productreview (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu).
 -- 2026-10-08: feature/warranty them bang moi warrantyrequest (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu).
+-- 2026-10-08: feature/installation them bang moi installationrequest (JPA tu tao khi chay lan dau). DeliveryMethod them gia tri INSTALL (cot deliverymethod luu chuoi nen khong can ALTER). Phi cong lap dat duoc cong vao orders.totalamount.

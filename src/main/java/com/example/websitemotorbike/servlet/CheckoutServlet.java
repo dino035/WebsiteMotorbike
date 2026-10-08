@@ -1,12 +1,14 @@
 package com.example.websitemotorbike.servlet;
 
 import com.example.websitemotorbike.dao.OrderDB;
+import com.example.websitemotorbike.model.CartLine;
 import com.example.websitemotorbike.model.DeliveryMethod;
 import com.example.websitemotorbike.model.Order;
 import com.example.websitemotorbike.model.PaymentMethod;
 import com.example.websitemotorbike.model.User;
 import com.example.websitemotorbike.util.CartSummary;
 import com.example.websitemotorbike.util.Flash;
+import com.example.websitemotorbike.util.InstallationPolicy;
 import com.example.websitemotorbike.util.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.regex.Pattern;
 
 @WebServlet("/checkout")
@@ -76,9 +79,16 @@ public class CheckoutServlet extends HttpServlet {
                 throw new IllegalArgumentException("Vui lòng xác nhận chính sách đổi trả để tiếp tục");
             }
 
+            // Lắp đặt tại cửa hàng: phải chọn ngày hẹn hợp lệ (ngày kín lịch được kiểm tra khi đặt hàng)
+            LocalDate installDate = null;
+            if (deliveryMethod == DeliveryMethod.INSTALL) {
+                installDate = InstallationPolicy.parse(request.getParameter("installDate"));
+                InstallationPolicy.validateDate(installDate, LocalDate.now());
+            }
+
             String address = deliveryMethod == DeliveryMethod.DELIVERY ? shippingAddress.trim() : null;
             Order order = OrderDB.placeOrder(user.getAccountId(), deliveryMethod,
-                    receiverName.trim(), receiverPhone.trim(), address, paymentMethod, true);
+                    receiverName.trim(), receiverPhone.trim(), address, paymentMethod, true, installDate);
 
             Flash.message(request, "Đặt hàng thành công! Mã đơn hàng: " + order.getShortCode());
             response.sendRedirect(request.getContextPath() + "/orders/detail?id=" + order.getOrderId());
@@ -98,6 +108,18 @@ public class CheckoutServlet extends HttpServlet {
         request.setAttribute("notices", summary.getNotices());
         request.setAttribute("defaultPhone", user.getPhone());
         request.setAttribute("deliveryMethods", DeliveryMethod.values());
+        // Chỉ đơn có phụ tùng mới được chọn lắp đặt tại cửa hàng
+        boolean hasSparePart = false;
+        for (CartLine line : summary.getLines()) {
+            if (!line.isMotorbike()) {
+                hasSparePart = true;
+            }
+        }
+        request.setAttribute("hasSparePart", hasSparePart);
+        request.setAttribute("laborFee", InstallationPolicy.LABOR_FEE);
+        request.setAttribute("maxPerDay", InstallationPolicy.MAX_PER_DAY);
+        request.setAttribute("minInstallDate", LocalDate.now().plusDays(1).toString());
+        request.setAttribute("maxInstallDate", LocalDate.now().plusDays(InstallationPolicy.MAX_DAYS_AHEAD).toString());
         request.setAttribute("paymentMethods", PaymentMethod.values());
         request.getRequestDispatcher(CHECKOUT_VIEW).forward(request, response);
     }
