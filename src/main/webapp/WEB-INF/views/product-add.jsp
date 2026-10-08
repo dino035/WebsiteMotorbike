@@ -13,7 +13,7 @@
     <h1>Thêm sản phẩm</h1>
     <p style="color: red;"><c:out value="${error}"/></p>
 
-    <form action="add" method="post" enctype="multipart/form-data">
+    <form action="add" method="post" enctype="multipart/form-data" onsubmit="return checkPhotos(this)">
         <select name="product" id="productSelect" onchange="toggleFields()">
             <option value="Motorbike" ${param.product != 'SparePart' ? 'selected' : ''}>Xe cũ</option>
             <option value="SparePart" ${param.product == 'SparePart' ? 'selected' : ''}>Phụ tùng</option>
@@ -61,8 +61,7 @@
             <input type = "number" name = "odometerAtIntake" min="0" value="<c:out value='${param.odometerAtIntake}'/>" required><br>
 
             <label>Ảnh xe (tối đa 10 ảnh, mỗi ảnh ≤ 5MB):</label>
-            <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required><br>
-
+            <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required onchange="checkPhotoInput(this)"><br>
         </div>
 
         <div id="sparePartFields" style="display: none;">
@@ -80,31 +79,59 @@
         <input type = "submit" value = "Thêm">
     </form>
 
-    <script>
-        function toggleFields() {
-            var productType = document.getElementById("productSelect").value;
+<script>
+    function toggleFields() {
+        var productType = document.getElementById("productSelect").value;
 
-            var motorbikeDiv = document.getElementById("motorbikeFields");
-            var sparePartDiv = document.getElementById("sparePartFields");
+        var motorbikeDiv = document.getElementById("motorbikeFields");
+        var sparePartDiv = document.getElementById("sparePartFields");
 
-            var motorbikeInputs = motorbikeDiv.querySelectorAll("input");
-            var sparePartInputs = sparePartDiv.querySelectorAll("input, select");
+        var motorbikeInputs = motorbikeDiv.querySelectorAll("input");
+        var sparePartInputs = sparePartDiv.querySelectorAll("input, select");
 
-            if (productType === "Motorbike") {
-                motorbikeDiv.style.display = "block";
-                sparePartDiv.style.display = "none";
+        if (productType === "Motorbike") {
+            motorbikeDiv.style.display = "block";
+            sparePartDiv.style.display = "none";
 
-                motorbikeInputs.forEach(function(input) { input.required = true; });
-                sparePartInputs.forEach(function(input) { input.required = false; });
-            } else {
-                motorbikeDiv.style.display = "none";
-                sparePartDiv.style.display = "block";
+            motorbikeInputs.forEach(function(input) { input.required = true; });
+            sparePartInputs.forEach(function(input) { input.required = false; });
+        } else {
+            motorbikeDiv.style.display = "none";
+            sparePartDiv.style.display = "block";
 
-                motorbikeInputs.forEach(function(input) { input.required = false; });
-                sparePartInputs.forEach(function(input) { input.required = true; });
+            motorbikeInputs.forEach(function(input) { input.required = false; });
+            sparePartInputs.forEach(function(input) { input.required = true; });
+        }
+    }
+    function checkPhotoInput(input) {
+        var files = input.files;
+        if (files.length > 10) {
+            alert("Tối đa 10 ảnh cho mỗi xe");
+            input.value = "";
+            return false;
+        }
+        var allowed = ["image/jpeg", "image/png", "image/webp"];
+        for (var i = 0; i < files.length; i++) {
+            if (allowed.indexOf(files[i].type) === -1) {
+                alert("Ảnh \"" + files[i].name + "\" không đúng định dạng, chỉ nhận JPG, PNG hoặc WebP");
+                input.value = "";
+                return false;
+            }
+            if (files[i].size > 5 * 1024 * 1024) {
+                alert("Ảnh \"" + files[i].name + "\" lớn hơn 5MB, vui lòng chọn ảnh khác");
+                input.value = "";
+                return false;
             }
         }
-        toggleFields();
-    </script>
+        return true;
+    }
+
+    function checkPhotos(form) {
+        var input = form.querySelector('input[type="file"]');
+        return !input || checkPhotoInput(input);
+    }
+
+    toggleFields();
+</script>
 </body>
 </html>

@@ -37,6 +37,13 @@ public class ProductAddServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        try {
+            request.getParts();
+        } catch (IllegalStateException e) {
+            forwardWithError(request, response, "Ảnh quá lớn, mỗi ảnh tối đa 5MB");
+            return;
+        }
+
         String productType = request.getParameter("product");
         String name = request.getParameter("name");
 
