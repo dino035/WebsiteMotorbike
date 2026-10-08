@@ -11,3 +11,12 @@
 -- 2026-10-08: feature/reset-password them bang moi passwordresettoken (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu; khong doi bang users). Them thu vien angus-mail vao pom.xml va cau hinh email mail.properties (khong commit, xem mail.example.properties).
 -- 2026-10-08: feature/address them bang moi address (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu). Don hang van chup lai ho ten, so dien thoai, dia chi nen khong tham chieu Address.
 -- 2026-10-08: feature/vnpay them bang moi onlinepayment (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu). Moi lan tra tien VNPay la mot dong; Payment van la nguon su that ve da thanh toan hay chua. Can file src/main/resources/vnpay.properties tren moi may (xem vnpay.example.properties), khong commit.
+-- 2026-10-08: feature/vehicle-photo them bang moi vehiclephoto, tao thu cong tren Supabase (khong de JPA tu tao) de co khoa ngoai ON DELETE CASCADE toi motorbike(productid) va bat Row Level Security. Anh luu tren Supabase Storage (bucket vehicle-photos), cot imageurl la link cong khai. Can 3 bien moi truong tren moi may: SUPABASE_URL, SUPABASE_BUCKET, SUPABASE_KEY (khong commit).
+CREATE TABLE IF NOT EXISTS vehiclephoto (
+                                            photoid      VARCHAR(255) PRIMARY KEY,
+    imageurl     VARCHAR(500),
+    caption      VARCHAR(255),
+    storagepath  VARCHAR(255),
+    motorbike_id VARCHAR(255) NOT NULL REFERENCES motorbike(productid) ON DELETE CASCADE
+    );
+ALTER TABLE vehiclephoto ENABLE ROW LEVEL SECURITY;

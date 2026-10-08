@@ -12,7 +12,7 @@
 <h1>Chỉnh sửa sản phẩm</h1>
 <p style="color: red;"><c:out value="${error}"/></p>
 
-<form action = "edit" method = "post">
+<form action="edit" method="post" enctype="multipart/form-data">
 
     <input type="hidden" name="id" value="${product.productId}">
     <input type="hidden" name="product" value="${product.typeCode}">
@@ -71,6 +71,22 @@
             </select>
 
         </div>
+    </c:if>
+
+    <c:if test="${product.typeCode == 'Motorbike'}">
+        <label>Ảnh hiện có (tick để xóa):</label>
+        <div class="photo-gallery">
+            <c:forEach var="photo" items="${photos}">
+                <div>
+                    <img src="<c:out value='${photo.imageUrl}'/>" alt="">
+                    <br>
+                    <input type="checkbox" name="removePhoto" value="<c:out value='${photo.photoId}'/>"> Xóa
+                </div>
+            </c:forEach>
+        </div>
+
+        <label>Thêm ảnh mới (mỗi xe tối đa 10 ảnh, mỗi ảnh ≤ 5MB):</label>
+        <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple><br>
     </c:if>
 
             <input type = "submit" value = "Cập nhật">

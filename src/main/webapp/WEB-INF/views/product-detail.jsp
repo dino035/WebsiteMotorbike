@@ -12,6 +12,17 @@
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
 <h1><c:out value="${product.name}"/></h1>
 
+<c:if test="${not empty photos}">
+    <div class="photo-gallery">
+        <c:forEach var="photo" items="${photos}">
+            <a href="<c:out value='${photo.imageUrl}'/>" target="_blank">
+                <img src="<c:out value='${photo.imageUrl}'/>"
+                     alt="<c:out value='${product.name}'/>">
+            </a>
+        </c:forEach>
+    </div>
+</c:if>
+
 <table>
     <tr><th>Loại</th><td><c:out value="${product.productType}"/></td></tr>
     <tr><th>Giá</th><td><c:out value="${product.price}"/></td></tr>
