@@ -10,10 +10,6 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.servlet.http.HttpServletRequest;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
 /**
@@ -28,20 +24,7 @@ public class Mailer {
     private static final Properties CONFIG = loadConfig();
 
     private static Properties loadConfig() {
-        Properties props = new Properties();
-        try (InputStream in = Mailer.class.getClassLoader().getResourceAsStream("mail.properties")) {
-            if (in != null) {
-                String text = new String(in.readAllBytes(), StandardCharsets.UTF_8);
-                // Notepad và PowerShell hay thêm ký tự BOM ở đầu tệp UTF-8, làm hỏng khóa đầu tiên nếu không bỏ đi
-                if (text.startsWith("﻿")) {
-                    text = text.substring(1);
-                }
-                props.load(new StringReader(text));
-            }
-        } catch (IOException e) {
-            System.out.println("Không đọc được mail.properties: " + e);
-        }
-        return props;
+        return ConfigFile.load("mail.properties");
     }
 
     private static String get(String key) {
