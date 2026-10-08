@@ -17,7 +17,7 @@ import java.io.IOException;
  * Chưa đăng nhập thì chuyển về /login. Thêm URL mới vào urlPatterns khi cần.
  */
 @WebFilter(urlPatterns = {"/cart", "/cart/*", "/checkout", "/orders", "/orders/*",
-        "/notifications", "/notifications/*", "/reviews", "/reviews/*"})
+        "/notifications", "/notifications/*", "/reviews", "/reviews/*", "/warranty", "/warranty/*"})
 public class LoginRequiredFilter implements Filter {
 
     @Override

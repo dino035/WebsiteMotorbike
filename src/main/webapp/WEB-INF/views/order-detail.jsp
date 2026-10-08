@@ -50,6 +50,10 @@
     </table>
     <p class="cart-total">Tổng cộng: <fmt:formatNumber value="${order.totalAmount}" type="number" groupingUsed="true"/></p>
 
+    <c:if test="${order.status.name() == 'COMPLETED'}">
+        <p><a href="${pageContext.request.contextPath}/warranty">Gửi yêu cầu bảo hành cho sản phẩm trong đơn này</a></p>
+    </c:if>
+
     <p><a href="${pageContext.request.contextPath}/orders">← Danh sách đơn hàng</a></p>
 </body>
 </html>
