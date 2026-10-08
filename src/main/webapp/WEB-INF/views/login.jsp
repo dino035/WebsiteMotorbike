@@ -11,7 +11,7 @@
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
     <h1>Đăng nhập</h1>
 
-    <p style="color: red;"><c:out value="${error}"/></p>
+    <p style="color: red;"><c:out value="${error}"/><c:out value="${flashError}"/></p>
 
     <form action="${pageContext.request.contextPath}/login" method="post">
         <label>Email:</label>

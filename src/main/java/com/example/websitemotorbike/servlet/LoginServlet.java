@@ -1,7 +1,10 @@
 package com.example.websitemotorbike.servlet;
 
+import com.example.websitemotorbike.dao.AccountLockDB;
 import com.example.websitemotorbike.dao.UserDB;
+import com.example.websitemotorbike.filter.AccountLockFilter;
 import com.example.websitemotorbike.model.User;
+import com.example.websitemotorbike.util.Flash;
 import com.example.websitemotorbike.util.Validator;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -27,6 +30,7 @@ public class LoginServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/products");
             return;
         }
+        Flash.consume(request);   // thông báo "tài khoản bị khóa" khi bị đá ra từ AccountLockFilter
         request.getRequestDispatcher(LOGIN_VIEW).forward(request, response);
     }
 
@@ -50,6 +54,13 @@ public class LoginServlet extends HttpServlet {
 
         if (user == null || !passwordMatches(password, user.getPasswordHash())) {
             request.setAttribute("error", "Email hoặc mật khẩu không chính xác. Vui lòng nhập lại");
+            request.getRequestDispatcher(LOGIN_VIEW).forward(request, response);
+            return;
+        }
+
+        // Tài khoản bị Admin khóa thì không cho đăng nhập (SRS 3.2: tài khoản phải đang hoạt động)
+        if (AccountLockDB.isLocked(user.getAccountId())) {
+            request.setAttribute("error", AccountLockFilter.LOCKED_MESSAGE);
             request.getRequestDispatcher(LOGIN_VIEW).forward(request, response);
             return;
         }
