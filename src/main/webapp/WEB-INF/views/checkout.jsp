@@ -98,9 +98,10 @@
         <c:forEach var="pm" items="${paymentMethods}">
             <div>
                 <input type="radio" name="paymentMethod" id="pm-${pm}" value="${pm}"
-                       ${pm.name() == 'VNPAY' ? 'disabled' : 'checked'}>
+                       ${(pm.name() == 'VNPAY' and not vnpayEnabled) ? 'disabled' : ''}
+                       ${(empty param.paymentMethod ? 'COD' : param.paymentMethod) == pm.name() ? 'checked' : ''}>
                 <label for="pm-${pm}" style="display:inline;font-weight:normal;">
-                    <c:out value="${pm.label}"/><c:if test="${pm.name() == 'VNPAY'}"> (chưa hỗ trợ)</c:if>
+                    <c:out value="${pm.label}"/><c:if test="${pm.name() == 'VNPAY' and not vnpayEnabled}"> (chưa cấu hình)</c:if>
                 </label>
             </div>
         </c:forEach>

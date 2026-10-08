@@ -16,6 +16,9 @@
     <c:if test="${not empty flashMessage}">
         <p class="msg-ok"><c:out value="${flashMessage}"/></p>
     </c:if>
+    <c:if test="${not empty flashError}">
+        <p class="msg-error"><c:out value="${flashError}"/></p>
+    </c:if>
 
     <table>
         <tr><th>Ngày đặt</th><td><c:out value="${order.createdAtText}"/></td></tr>
@@ -56,6 +59,43 @@
         <p style="text-align:right;">Phí công lắp đặt: <fmt:formatNumber value="${installation.laborFee}" type="number" groupingUsed="true"/></p>
     </c:if>
     <p class="cart-total">Tổng cộng: <fmt:formatNumber value="${order.totalAmount}" type="number" groupingUsed="true"/></p>
+
+    <%-- Thanh toán VNPay chưa xong: cho thanh toán (lại) hoặc đổi sang COD (SRS 3.10) --%>
+    <c:if test="${not empty payment and payment.method.name() == 'VNPAY' and payment.status.name() != 'PAID' and order.status.name() != 'CANCELLED'}">
+        <h2>Thanh toán VNPay</h2>
+        <c:choose>
+            <c:when test="${payment.status.name() == 'FAILED'}">
+                <p class="msg-error">Lần thanh toán gần nhất không thành công. Bạn có thể thanh toán lại hoặc chuyển sang thanh toán khi nhận hàng.</p>
+            </c:when>
+            <c:otherwise>
+                <p class="msg-notice">Đơn hàng chưa được thanh toán.</p>
+            </c:otherwise>
+        </c:choose>
+        <c:if test="${vnpayEnabled}">
+            <form class="inline-form" action="${pageContext.request.contextPath}/vnpay/pay" method="post">
+                <input type="hidden" name="id" value="<c:out value='${order.orderId}'/>">
+                <input type="submit" value="Thanh toán qua VNPay">
+            </form>
+        </c:if>
+        <form class="inline-form" action="${pageContext.request.contextPath}/orders/pay-cod" method="post">
+            <input type="hidden" name="id" value="<c:out value='${order.orderId}'/>">
+            <input type="submit" value="Chuyển sang thanh toán khi nhận hàng (COD)">
+        </form>
+    </c:if>
+
+    <c:if test="${not empty attempts}">
+        <h2>Lịch sử thanh toán VNPay</h2>
+        <table>
+            <tr><th>Thời điểm</th><th>Kết quả</th><th>Mã giao dịch VNPay</th></tr>
+            <c:forEach var="a" items="${attempts}">
+                <tr>
+                    <td><c:out value="${a.createdAtText}"/></td>
+                    <td><c:out value="${a.status.label}"/></td>
+                    <td><c:out value="${a.transactionNo}"/></td>
+                </tr>
+            </c:forEach>
+        </table>
+    </c:if>
 
     <c:if test="${order.status.name() == 'COMPLETED'}">
         <p><a href="${pageContext.request.contextPath}/warranty">Gửi yêu cầu bảo hành cho sản phẩm trong đơn này</a></p>

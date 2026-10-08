@@ -1,10 +1,12 @@
 package com.example.websitemotorbike.servlet;
 
 import com.example.websitemotorbike.dao.AddressDB;
+import com.example.websitemotorbike.dao.OnlinePaymentDB;
 import com.example.websitemotorbike.dao.OrderDB;
 import com.example.websitemotorbike.model.Address;
 import com.example.websitemotorbike.model.CartLine;
 import com.example.websitemotorbike.model.DeliveryMethod;
+import com.example.websitemotorbike.model.OnlinePayment;
 import com.example.websitemotorbike.model.Order;
 import com.example.websitemotorbike.model.PaymentMethod;
 import com.example.websitemotorbike.model.User;
@@ -12,6 +14,8 @@ import com.example.websitemotorbike.util.CartSummary;
 import com.example.websitemotorbike.util.Flash;
 import com.example.websitemotorbike.util.InputRules;
 import com.example.websitemotorbike.util.InstallationPolicy;
+import com.example.websitemotorbike.util.VNPayConfig;
+import com.example.websitemotorbike.util.VNPayUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -61,9 +65,9 @@ public class CheckoutServlet extends HttpServlet {
             }
 
             PaymentMethod paymentMethod = parsePaymentMethod(request.getParameter("paymentMethod"));
-            if (paymentMethod != PaymentMethod.COD) {
+            if (paymentMethod == PaymentMethod.VNPAY && !VNPayConfig.isConfigured()) {
                 throw new IllegalArgumentException(
-                        "Thanh toán VNPay chưa được hỗ trợ, vui lòng chọn thanh toán khi nhận hàng (COD)");
+                        "Hệ thống chưa cấu hình VNPay, vui lòng chọn thanh toán khi nhận hàng (COD)");
             }
 
             if (request.getParameter("acceptPolicy") == null) {
@@ -91,7 +95,21 @@ public class CheckoutServlet extends HttpServlet {
             }
 
             Flash.message(request, "Đặt hàng thành công! Mã đơn hàng: " + order.getShortCode());
-            response.sendRedirect(request.getContextPath() + "/orders/detail?id=" + order.getOrderId());
+            String detailUrl = request.getContextPath() + "/orders/detail?id=" + order.getOrderId();
+
+            if (paymentMethod == PaymentMethod.VNPAY) {
+                // Đơn đã được giữ chỗ; chuyển khách sang cổng VNPay để trả tiền. Nếu không bắt đầu được thì khách
+                // vẫn có đơn và bấm "Thanh toán lại" hoặc đổi sang COD ở trang chi tiết.
+                try {
+                    OnlinePayment attempt = OnlinePaymentDB.startAttempt(user.getAccountId(), order.getOrderId());
+                    response.sendRedirect(VNPayUtil.buildPaymentUrl(attempt, order.getShortCode(),
+                            VNPayUtil.clientIp(request)));
+                    return;
+                } catch (IllegalArgumentException | IllegalStateException e) {
+                    Flash.error(request, e.getMessage());
+                }
+            }
+            response.sendRedirect(detailUrl);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", e.getMessage());
             showForm(request, response, CartSummary.load(user.getAccountId()), user);
@@ -126,6 +144,7 @@ public class CheckoutServlet extends HttpServlet {
         request.setAttribute("minInstallDate", LocalDate.now().plusDays(1).toString());
         request.setAttribute("maxInstallDate", LocalDate.now().plusDays(InstallationPolicy.MAX_DAYS_AHEAD).toString());
         request.setAttribute("paymentMethods", PaymentMethod.values());
+        request.setAttribute("vnpayEnabled", VNPayConfig.isConfigured());
         request.getRequestDispatcher(CHECKOUT_VIEW).forward(request, response);
     }
 

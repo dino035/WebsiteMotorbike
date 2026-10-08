@@ -67,6 +67,21 @@
     <p class="cart-total">Tổng cộng: <fmt:formatNumber value="${order.totalAmount}" type="number" groupingUsed="true"/></p>
 
     <h2>Xử lý đơn hàng</h2>
+    <c:if test="${not empty attempts}">
+        <h2>Lịch sử thanh toán VNPay</h2>
+        <table>
+            <tr><th>Thời điểm</th><th>Kết quả</th><th>Mã giao dịch VNPay</th><th>Ngân hàng</th></tr>
+            <c:forEach var="a" items="${attempts}">
+                <tr>
+                    <td><c:out value="${a.createdAtText}"/></td>
+                    <td><c:out value="${a.status.label}"/></td>
+                    <td><c:out value="${a.transactionNo}"/></td>
+                    <td><c:out value="${a.bankCode}"/></td>
+                </tr>
+            </c:forEach>
+        </table>
+    </c:if>
+
     <c:if test="${not empty payment and payment.method.name() == 'COD' and payment.status.name() == 'PENDING' and order.status.name() != 'CANCELLED'}">
         <form class="inline-form" action="${pageContext.request.contextPath}/admin/orders/payment" method="post">
             <input type="hidden" name="id" value="<c:out value='${order.orderId}'/>">
