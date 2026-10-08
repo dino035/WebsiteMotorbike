@@ -12,8 +12,7 @@
 <h1>Chỉnh sửa sản phẩm</h1>
 <p style="color: red;"><c:out value="${error}"/></p>
 
-<form action="edit" method="post" enctype="multipart/form-data">
-
+<form action="edit?id=<c:out value='${product.productId}'/>" method="post" enctype="multipart/form-data" onsubmit="return checkPhotos(this)">
     <input type="hidden" name="id" value="${product.productId}">
     <input type="hidden" name="product" value="${product.typeCode}">
     <p>Loại sản phẩm: <strong>${product.productType}</strong></p>
@@ -86,10 +85,39 @@
         </div>
 
         <label>Thêm ảnh mới (mỗi xe tối đa 10 ảnh, mỗi ảnh ≤ 5MB):</label>
-        <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple><br>
+        <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple onchange="checkPhotoInput(this)"><br>
     </c:if>
 
             <input type = "submit" value = "Cập nhật">
 </form>
+<script>
+    function checkPhotoInput(input) {
+        var files = input.files;
+        if (files.length > 10) {
+            alert("Tối đa 10 ảnh cho mỗi xe");
+            input.value = "";
+            return false;
+        }
+        var allowed = ["image/jpeg", "image/png", "image/webp"];
+        for (var i = 0; i < files.length; i++) {
+            if (allowed.indexOf(files[i].type) === -1) {
+                alert("Ảnh \"" + files[i].name + "\" không đúng định dạng, chỉ nhận JPG, PNG hoặc WebP");
+                input.value = "";
+                return false;
+            }
+            if (files[i].size > 5 * 1024 * 1024) {
+                alert("Ảnh \"" + files[i].name + "\" lớn hơn 5MB, vui lòng chọn ảnh khác");
+                input.value = "";
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function checkPhotos(form) {
+        var input = form.querySelector('input[type="file"]');
+        return !input || checkPhotoInput(input);
+    }
+</script>
 </body>
 </html>
