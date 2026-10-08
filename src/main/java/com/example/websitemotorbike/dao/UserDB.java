@@ -63,6 +63,19 @@ public class UserDB {
         }
     }
 
+    /** Danh sách tài khoản theo vai trò (dùng để gửi thông báo cho tất cả Admin). */
+    public static java.util.List<User> selectByRole(com.example.websitemotorbike.model.UserRole role){
+        EntityManager em = DBUtil.getEmFactory().createEntityManager();
+        try {
+            TypedQuery<User> q = em.createQuery("SELECT u FROM User u WHERE u.userRole = :role", User.class);
+            q.setParameter("role", role);
+            return q.getResultList();
+        }
+        finally {
+            em.close();
+        }
+    }
+
     public static boolean emailExists(String email){
 
         return selectUser(email) != null;
