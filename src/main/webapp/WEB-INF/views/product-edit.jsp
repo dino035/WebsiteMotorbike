@@ -72,7 +72,7 @@
         </div>
     </c:if>
 
-    <c:if test="${product.typeCode == 'Motorbike'}">
+    <c:if test="${product.typeCode == 'Motorbike' or product.typeCode == 'SparePart'}">
         <label>Ảnh hiện có (tick để xóa):</label>
         <div class="photo-gallery">
             <c:forEach var="photo" items="${photos}">
@@ -84,7 +84,7 @@
             </c:forEach>
         </div>
 
-        <label>Thêm ảnh mới (mỗi xe tối đa 10 ảnh, mỗi ảnh ≤ 5MB):</label>
+        <label>Thêm ảnh mới (tối đa 10 ảnh, mỗi ảnh ≤ 5MB):</label>
         <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple onchange="checkPhotoInput(this)"><br>
     </c:if>
 
@@ -94,7 +94,7 @@
     function checkPhotoInput(input) {
         var files = input.files;
         if (files.length > 10) {
-            alert("Tối đa 10 ảnh cho mỗi xe");
+            alert("Tối đa 10 ảnh");
             input.value = "";
             return false;
         }

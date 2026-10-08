@@ -41,10 +41,15 @@ public class PhotoStorage {
         }
     }
 
-    /** Upload lên Supabase, trả về storagePath (vd: motorbikes/abc.jpg). */
+    /** Giữ nguyên cho xe: thư mục motorbikes/. */
     public static String upload(Part part) throws IOException {
+        return upload(part, "motorbikes");
+    }
+
+    /** Upload lên Supabase vào thư mục folder, trả về storagePath (vd: spareparts/abc.jpg). */
+    public static String upload(Part part, String folder) throws IOException {
         validate(part);
-        String storagePath = "motorbikes/" + UUID.randomUUID() + ALLOWED.get(part.getContentType());
+        String storagePath = folder + "/" + UUID.randomUUID() + ALLOWED.get(part.getContentType());
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(env("SUPABASE_URL") + "/storage/v1/object/"

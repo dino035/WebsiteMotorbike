@@ -1,6 +1,8 @@
 package com.example.websitemotorbike.servlet;
 
 import com.example.websitemotorbike.dao.ProductDB;
+import com.example.websitemotorbike.dao.SparePartPhotoDB;
+import com.example.websitemotorbike.model.SparePartPhoto;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -9,6 +11,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.example.websitemotorbike.dao.VehiclePhotoDB;
 import com.example.websitemotorbike.model.VehiclePhoto;
 import com.example.websitemotorbike.util.PhotoStorage;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import java.io.IOException;
@@ -23,16 +27,23 @@ public class ProductDeleteServlet extends HttpServlet {
         if (productId != null && !productId.trim().isEmpty()) {
             String id = productId.trim();
 
-            // Lấy danh sách ảnh TRƯỚC khi xóa, vì sau khi xóa xe thì không còn dòng nào để đọc
-            List<VehiclePhoto> photos = VehiclePhotoDB.selectByMotorbikeId(id);
+            // Lấy đường dẫn ảnh TRƯỚC khi xóa, vì sau khi xóa sản phẩm thì không còn dòng nào để đọc.
+            // Id chỉ khớp với một loại nên một trong hai danh sách luôn rỗng.
+            List<String> paths = new ArrayList<>();
+            for (VehiclePhoto photo : VehiclePhotoDB.selectByMotorbikeId(id)) {
+                paths.add(photo.getStoragePath());
+            }
+            for (SparePartPhoto photo : SparePartPhotoDB.selectBySparePartId(id)) {
+                paths.add(photo.getStoragePath());
+            }
 
             ProductDB.delete(id);
 
-            // ProductDB.delete nuốt lỗi, nên kiểm tra xe đã mất thật chưa rồi mới xóa file
+            // ProductDB.delete nuốt lỗi, nên kiểm tra sản phẩm đã mất thật chưa rồi mới xóa file
             if (ProductDB.selectById(id) == null) {
-                for (VehiclePhoto photo : photos) {
+                for (String path : paths) {
                     try {
-                        PhotoStorage.delete(photo.getStoragePath());
+                        PhotoStorage.delete(path);
                     } catch (IOException e) {
                         System.out.println(e);
                     }

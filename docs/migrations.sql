@@ -20,3 +20,14 @@ CREATE TABLE IF NOT EXISTS vehiclephoto (
     motorbike_id VARCHAR(255) NOT NULL REFERENCES motorbike(productid) ON DELETE CASCADE
     );
 ALTER TABLE vehiclephoto ENABLE ROW LEVEL SECURITY;
+
+-- 2026-10-08: feature/sparepart-photo them bang moi sparepartphoto, tao thu cong tren Supabase (khong de JPA tu tao) de co khoa ngoai ON DELETE CASCADE toi sparepart(productid) va bat Row Level Security. Dung chung bucket vehicle-photos (thu muc spareparts/), cot imageurl la link cong khai.
+CREATE TABLE IF NOT EXISTS sparepartphoto (
+                                              photoid      VARCHAR(255) PRIMARY KEY,
+    imageurl     VARCHAR(500),
+    caption      VARCHAR(255),
+    storagepath  VARCHAR(255),
+    sparepart_id VARCHAR(255) NOT NULL REFERENCES sparepart(productid) ON DELETE CASCADE
+    );
+ALTER TABLE sparepartphoto ENABLE ROW LEVEL SECURITY;
+
