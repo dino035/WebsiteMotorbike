@@ -37,6 +37,11 @@
             <tr><th>Thanh toán</th>
                 <td><c:out value="${payment.method.label}"/> - <c:out value="${payment.status.label}"/></td></tr>
         </c:if>
+        <c:if test="${not empty installation}">
+            <tr><th>Lịch lắp đặt tại cửa hàng</th>
+                <td>Ngày <c:out value="${installation.scheduledDateText}"/> - <c:out value="${installation.status.label}"/>
+                    (<a href="${pageContext.request.contextPath}/admin/installations">xem lịch lắp đặt</a>)</td></tr>
+        </c:if>
     </table>
 
     <h2>Sản phẩm</h2>
@@ -56,6 +61,9 @@
             </tr>
         </c:forEach>
     </table>
+    <c:if test="${not empty installation}">
+        <p style="text-align:right;">Phí công lắp đặt: <fmt:formatNumber value="${installation.laborFee}" type="number" groupingUsed="true"/></p>
+    </c:if>
     <p class="cart-total">Tổng cộng: <fmt:formatNumber value="${order.totalAmount}" type="number" groupingUsed="true"/></p>
 
     <h2>Xử lý đơn hàng</h2>

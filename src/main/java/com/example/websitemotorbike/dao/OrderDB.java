@@ -2,6 +2,8 @@ package com.example.websitemotorbike.dao;
 
 import com.example.websitemotorbike.model.CartItem;
 import com.example.websitemotorbike.model.DeliveryMethod;
+import com.example.websitemotorbike.model.InstallationRequest;
+import com.example.websitemotorbike.model.InstallationStatus;
 import com.example.websitemotorbike.model.Motorbike;
 import com.example.websitemotorbike.model.Notification;
 import com.example.websitemotorbike.model.NotificationType;
@@ -14,6 +16,7 @@ import com.example.websitemotorbike.model.PaymentStatus;
 import com.example.websitemotorbike.model.Product;
 import com.example.websitemotorbike.model.ProductStatus;
 import com.example.websitemotorbike.util.DBUtil;
+import com.example.websitemotorbike.util.InstallationPolicy;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
@@ -21,6 +24,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,12 +34,17 @@ public class OrderDB {
      * Đặt hàng từ giỏ của accountId trong MỘT giao dịch: khóa từng dòng sản phẩm, kiểm tra lại
      * còn bán được không, tạo Order + OrderItem + Payment, chuyển xe sang SOLD, rồi xóa các dòng giỏ.
      *
-     * @throws IllegalArgumentException giỏ trống hoặc có sản phẩm không còn khả dụng (đã rollback)
+     * Hình thức INSTALL (lắp đặt tại cửa hàng): đơn phải có phụ tùng, ngày hẹn còn lịch trống;
+     * phí công được cộng vào tổng đơn và tạo InstallationRequest trong cùng giao dịch (SRS 3.11).
+     *
+     * @param installDate ngày hẹn lắp đặt, chỉ dùng khi deliveryMethod là INSTALL (các trường hợp khác để null)
+     * @throws IllegalArgumentException giỏ trống, sản phẩm không còn khả dụng hoặc ngày kín lịch (đã rollback)
      * @throws IllegalStateException    lỗi CSDL (đã rollback)
      */
     public static Order placeOrder(String accountId, DeliveryMethod deliveryMethod,
                                    String receiverName, String receiverPhone, String shippingAddress,
-                                   PaymentMethod paymentMethod, boolean returnPolicyAccepted) {
+                                   PaymentMethod paymentMethod, boolean returnPolicyAccepted,
+                                   LocalDate installDate) {
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
         EntityTransaction trans = em.getTransaction();
         trans.begin();
@@ -66,6 +75,7 @@ public class OrderDB {
             em.persist(order);
 
             BigDecimal total = BigDecimal.ZERO;
+            boolean hasSparePart = false;
             for (CartItem item : cartItems) {
                 Product product = lockAndLoad(em, item.getProductId());
 
@@ -78,6 +88,8 @@ public class OrderDB {
                         throw unavailable(product);
                     }
                     product.setStatus(ProductStatus.SOLD);
+                } else {
+                    hasSparePart = true;
                 }
 
                 OrderItem orderItem = new OrderItem();
@@ -90,6 +102,32 @@ public class OrderDB {
 
                 total = total.add(orderItem.getLineTotal());
                 em.remove(item);
+            }
+            if (deliveryMethod == DeliveryMethod.INSTALL) {
+                if (!hasSparePart) {
+                    throw new IllegalArgumentException(
+                            "Lắp đặt tại cửa hàng chỉ áp dụng cho đơn hàng có phụ tùng");
+                }
+                if (installDate == null) {
+                    throw new IllegalArgumentException("Vui lòng chọn ngày hẹn lắp đặt");
+                }
+                InstallationPolicy.validateDate(installDate, LocalDate.now());
+
+                // Khóa theo ngày rồi đếm, để hai khách cùng đặt một ngày không vượt số lượt tối đa
+                InstallationDB.lockDay(em, installDate);
+                if (InstallationDB.countActiveOnDate(em, installDate) >= InstallationPolicy.MAX_PER_DAY) {
+                    throw new IllegalArgumentException("Ngày này đã kín lịch, vui lòng chọn ngày khác");
+                }
+
+                total = total.add(InstallationPolicy.LABOR_FEE);   // cộng phí công vào tổng đơn
+                InstallationRequest installation = new InstallationRequest();
+                installation.setAccountId(accountId);
+                installation.setOrder(order);
+                installation.setScheduledDate(installDate);
+                installation.setLaborFee(InstallationPolicy.LABOR_FEE);
+                installation.setStatus(InstallationStatus.SCHEDULED);
+                installation.setCreatedAt(now);
+                em.persist(installation);
             }
             order.setTotalAmount(total);
 
@@ -252,6 +290,7 @@ public class OrderDB {
                     throw new IllegalArgumentException("Đơn hàng đã thu tiền, không thể hủy");
                 }
                 releaseMotorbikes(em, orderId);
+                InstallationDB.cancelForOrder(em, orderId);   // hủy lịch lắp đặt, trả chỗ trống
             }
 
             order.setStatus(newStatus);

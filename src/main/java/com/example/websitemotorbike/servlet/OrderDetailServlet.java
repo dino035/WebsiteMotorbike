@@ -1,5 +1,6 @@
 package com.example.websitemotorbike.servlet;
 
+import com.example.websitemotorbike.dao.InstallationDB;
 import com.example.websitemotorbike.dao.OrderDB;
 import com.example.websitemotorbike.model.Order;
 import com.example.websitemotorbike.model.User;
@@ -34,6 +35,7 @@ public class OrderDetailServlet extends HttpServlet {
         request.setAttribute("order", order);
         request.setAttribute("items", OrderDB.selectItems(order.getOrderId()));
         request.setAttribute("payment", OrderDB.selectPayment(order.getOrderId()));
+        request.setAttribute("installation", InstallationDB.selectByOrderId(order.getOrderId()));
         request.getRequestDispatcher("/WEB-INF/views/order-detail.jsp").forward(request, response);
     }
 }

@@ -50,15 +50,27 @@
 
         <label>Hình thức nhận hàng:</label>
         <c:forEach var="m" items="${deliveryMethods}">
-            <div>
-                <input type="radio" name="deliveryMethod" id="dm-${m}" value="${m}"
-                       ${(empty param.deliveryMethod ? 'DELIVERY' : param.deliveryMethod) == m.name() ? 'checked' : ''}>
-                <label for="dm-${m}" style="display:inline;font-weight:normal;"><c:out value="${m.label}"/></label>
-            </div>
+            <%-- Lắp đặt tại cửa hàng chỉ hiện khi đơn có ít nhất một phụ tùng --%>
+            <c:if test="${m.name() != 'INSTALL' or hasSparePart}">
+                <div>
+                    <input type="radio" name="deliveryMethod" id="dm-${m}" value="${m}"
+                           ${(empty param.deliveryMethod ? 'DELIVERY' : param.deliveryMethod) == m.name() ? 'checked' : ''}>
+                    <label for="dm-${m}" style="display:inline;font-weight:normal;"><c:out value="${m.label}"/></label>
+                </div>
+            </c:if>
         </c:forEach>
 
         <label>Địa chỉ giao hàng (bắt buộc khi chọn giao tận nơi):</label>
         <textarea name="shippingAddress" rows="3" maxlength="500" style="width:100%;box-sizing:border-box;"><c:out value="${param.shippingAddress}"/></textarea>
+
+        <c:if test="${hasSparePart}">
+            <label>Ngày hẹn lắp đặt (bắt buộc khi chọn lắp đặt tại cửa hàng):</label>
+            <input type="date" name="installDate" min="${minInstallDate}" max="${maxInstallDate}"
+                   value="<c:out value='${param.installDate}'/>">
+            <p class="msg-notice">Lắp đặt tại cửa hàng có thêm phí công
+                <fmt:formatNumber value="${laborFee}" type="number" groupingUsed="true"/> (cộng vào tổng đơn),
+                tối đa ${maxPerDay} lượt mỗi ngày.</p>
+        </c:if>
 
         <label>Phương thức thanh toán:</label>
         <c:forEach var="pm" items="${paymentMethods}">
