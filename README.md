@@ -210,10 +210,10 @@ git checkout -b feature/<tên-mới>
 
 Ảnh xe được upload lên Supabase Storage, DB chỉ lưu link công khai (`vehiclephoto.imageurl`).
 
-1. Tạo bucket tên `vehicle-photos`, bật **Public bucket**, giới hạn 5MB và MIME `image/jpeg, image/png, image/webp`.
+1. Tạo bucket tên `photos`, bật **Public bucket**, giới hạn 5MB và MIME `image/jpeg, image/png, image/webp`.
 2. Đặt 3 biến môi trường trong cấu hình chạy Tomcat (không commit):
   - `SUPABASE_URL`: Project URL, dạng `https://<ref>.supabase.co`
-  - `SUPABASE_BUCKET`: `vehicle-photos`
+  - `SUPABASE_BUCKET`: `photos`
   - `SUPABASE_KEY`: khóa `service_role` hoặc Secret key (xin nhóm trưởng qua chat riêng)
 3. Bảng `vehiclephoto` đã được tạo thủ công, xem `migrations.sql`. Mỗi xe cần 1–10 ảnh.
 ```

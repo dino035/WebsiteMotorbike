@@ -25,7 +25,7 @@
 
 <table>
     <tr><th>Loại</th><td><c:out value="${product.productType}"/></td></tr>
-    <tr><th>Giá</th><td><c:out value="${product.price}"/></td></tr>
+    <tr><th>Giá</th><td><fmt:formatNumber value="${product.price}" type="number" groupingUsed="true"/></td></tr>
     <tr><th>Tình trạng</th><td><c:out value="${product.status.label}"/></td></tr>
 
     <c:if test="${product.typeCode == 'Motorbike'}">

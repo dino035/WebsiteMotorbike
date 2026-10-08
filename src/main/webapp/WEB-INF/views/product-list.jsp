@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib uri="jakarta.tags.core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -58,7 +59,7 @@
                         <c:out value="${product.name}"/>
                     </a>
                 </td>
-                <td><c:out value="${product.price}"/></td>
+                <td><fmt:formatNumber value="${product.price}" type="number" groupingUsed="true"/></td>
                 <td><c:out value="${product.productType}"/></td>
                 <td><c:out value="${product.status.label}"/></td>
                 <td><c:out value="${product.detail}"/></td>

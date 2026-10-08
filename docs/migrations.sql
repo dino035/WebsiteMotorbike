@@ -31,3 +31,7 @@ CREATE TABLE IF NOT EXISTS sparepartphoto (
     );
 ALTER TABLE sparepartphoto ENABLE ROW LEVEL SECURITY;
 
+-- 2026-10-09: doi bucket anh tu vehicle-photos sang photos (dung chung cho xe va phu tung, thu muc motorbikes/ va spareparts/). Tao bucket photos tren Supabase (Public, 5MB, image/jpeg, image/png, image/webp), doi bien moi truong SUPABASE_BUCKET=photos, roi cap nhat link anh cu:
+UPDATE vehiclephoto SET imageurl = REPLACE(imageurl, 'vehicle-photos', 'photos');
+UPDATE sparepartphoto SET imageurl = REPLACE(imageurl, 'vehicle-photos', 'photos');
+
