@@ -1,8 +1,6 @@
 package com.example.websitemotorbike.servlet;
 
-import com.example.websitemotorbike.dao.MotorbikeDB;
-import com.example.websitemotorbike.dao.ProductDB;
-import com.example.websitemotorbike.dao.SparePartDB;
+import com.example.websitemotorbike.dao.*;
 import com.example.websitemotorbike.model.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -13,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import com.example.websitemotorbike.util.Validator;
-import com.example.websitemotorbike.dao.VehiclePhotoDB;
 import com.example.websitemotorbike.util.PhotoStorage;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
@@ -163,7 +160,56 @@ public class ProductEditServlet extends HttpServlet {
                 sparePart.setPartOrigin(partOrigin);
                 sparePart.setStatus(productStatus);
 
-                SparePartDB.update(sparePart);
+                List<SparePartPhoto> existing = SparePartPhotoDB.selectBySparePartId(productId);
+
+                // Chỉ nhận id ảnh thuộc phụ tùng này: id lạ gửi lên sẽ bị bỏ qua
+                List<String> removeIds = new ArrayList<>();
+                List<String> removedPaths = new ArrayList<>();
+                String[] checked = request.getParameterValues("removePhoto");
+                if (checked != null) {
+                    Set<String> checkedSet = new HashSet<>(Arrays.asList(checked));
+                    for (SparePartPhoto p : existing) {
+                        if (checkedSet.contains(p.getPhotoId())) {
+                            removeIds.add(p.getPhotoId());
+                            removedPaths.add(p.getStoragePath());
+                        }
+                    }
+                }
+
+                List<Part> newParts = readNewPhotoParts(request);
+                int total = existing.size() - removeIds.size() + newParts.size();
+                if (total < 1) {
+                    throw new IllegalArgumentException("Cần ít nhất 1 ảnh");
+                }
+                if (total > 10) {
+                    throw new IllegalArgumentException("Tối đa 10 ảnh");
+                }
+                for (Part p : newParts) {
+                    PhotoStorage.validate(p);
+                }
+
+                List<String> uploaded = new ArrayList<>();
+                List<SparePartPhoto> toAdd = new ArrayList<>();
+                try {
+                    for (Part p : newParts) {
+                        String path = PhotoStorage.upload(p, "spareparts");
+                        uploaded.add(path);
+
+                        SparePartPhoto photo = new SparePartPhoto();
+                        photo.setStoragePath(path);
+                        photo.setImageUrl(PhotoStorage.publicUrl(path));
+                        toAdd.add(photo);
+                    }
+                    SparePartDB.update(sparePart);
+                    SparePartPhotoDB.applyChanges(productId, toAdd, removeIds);
+                } catch (IOException | RuntimeException e) {
+                    System.out.println(e);
+                    deleteQuietly(uploaded);
+                    forwardWithError(request, response, productId, "Không thể lưu thay đổi, vui lòng thử lại");
+                    return;
+                }
+                // DB đã đổi xong mới xóa file cũ trên Supabase
+                deleteQuietly(removedPaths);
             }
         }
         catch (NumberFormatException e) {
@@ -189,8 +235,13 @@ public class ProductEditServlet extends HttpServlet {
     }
 
     private void setPhotos(HttpServletRequest request, Product product) {
-        if (product != null && "Motorbike".equals(product.getTypeCode())) {
+        if (product == null) {
+            return;
+        }
+        if ("Motorbike".equals(product.getTypeCode())) {
             request.setAttribute("photos", VehiclePhotoDB.selectByMotorbikeId(product.getProductId()));
+        } else if ("SparePart".equals(product.getTypeCode())) {
+            request.setAttribute("photos", SparePartPhotoDB.selectBySparePartId(product.getProductId()));
         }
     }
 

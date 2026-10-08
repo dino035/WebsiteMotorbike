@@ -59,9 +59,6 @@
 
             <label>Số km đã đi:</label>
             <input type = "number" name = "odometerAtIntake" min="0" value="<c:out value='${param.odometerAtIntake}'/>" required><br>
-
-            <label>Ảnh xe (tối đa 10 ảnh, mỗi ảnh ≤ 5MB):</label>
-            <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required onchange="checkPhotoInput(this)"><br>
         </div>
 
         <div id="sparePartFields" style="display: none;">
@@ -75,6 +72,9 @@
                 <option value="AFTERMARKET" ${param.partOrigin == 'AFTERMARKET' ? 'selected' : ''}>Phụ tùng bên thứ 3</option>
             </select>
         </div>
+
+        <label>Ảnh sản phẩm (tối đa 10 ảnh, mỗi ảnh ≤ 5MB):</label>
+        <input type="file" name="photos" accept="image/jpeg,image/png,image/webp" multiple required onchange="checkPhotoInput(this)"><br>
 
         <input type = "submit" value = "Thêm">
     </form>
@@ -106,7 +106,7 @@
     function checkPhotoInput(input) {
         var files = input.files;
         if (files.length > 10) {
-            alert("Tối đa 10 ảnh cho mỗi xe");
+            alert("Tối đa 10 ảnh");
             input.value = "";
             return false;
         }

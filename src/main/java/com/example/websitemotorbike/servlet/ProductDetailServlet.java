@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import com.example.websitemotorbike.dao.VehiclePhotoDB;
+import com.example.websitemotorbike.dao.SparePartPhotoDB;;
 
 @WebServlet("/products/detail")
 public class ProductDetailServlet extends HttpServlet {
@@ -37,7 +38,10 @@ public class ProductDetailServlet extends HttpServlet {
         request.setAttribute("product", product);
         if ("Motorbike".equals(product.getTypeCode())) {
             request.setAttribute("photos", VehiclePhotoDB.selectByMotorbikeId(product.getProductId()));
+        } else if ("SparePart".equals(product.getTypeCode())) {
+            request.setAttribute("photos", SparePartPhotoDB.selectBySparePartId(product.getProductId()));
         }
+        request.setAttribute("reviews", ProductReviewDB.selectByProductId(product.getProductId()));
         request.setAttribute("reviews", ProductReviewDB.selectByProductId(product.getProductId()));
         request.setAttribute("averageRating", ProductReviewDB.averageRating(product.getProductId()));
 

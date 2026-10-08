@@ -1,10 +1,11 @@
 package com.example.websitemotorbike.model;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -16,6 +17,19 @@ public class SparePart extends Product {
 
     @Enumerated(EnumType.STRING)
     private PartOriginType partOrigin;
+
+    @OneToMany(mappedBy = "sparePart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SparePartPhoto> photos = new ArrayList<>();
+
+    public void addPhoto(SparePartPhoto photo) {
+        photos.add(photo);
+        photo.setSparePart(this);
+    }
+
+    public void removePhoto(SparePartPhoto photo) {
+        photos.remove(photo);
+        photo.setSparePart(null);
+    }
 
     @Override
     public String getProductType(){
@@ -32,4 +46,5 @@ public class SparePart extends Product {
     public String getTypeCode(){
         return "SparePart";
     }
-    }
+}
+

@@ -2,10 +2,7 @@ package com.example.websitemotorbike.servlet;
 
 import com.example.websitemotorbike.dao.MotorbikeDB;
 import com.example.websitemotorbike.dao.SparePartDB;
-import com.example.websitemotorbike.model.Motorbike;
-import com.example.websitemotorbike.model.PartOriginType;
-import com.example.websitemotorbike.model.ProductStatus;
-import com.example.websitemotorbike.model.SparePart;
+import com.example.websitemotorbike.model.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -15,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import com.example.websitemotorbike.util.Validator;
-import com.example.websitemotorbike.model.VehiclePhoto;
 import com.example.websitemotorbike.util.PhotoStorage;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
@@ -121,7 +117,29 @@ public class ProductAddServlet extends HttpServlet {
                 sparePart.setPartOrigin(partOrigin);
                 sparePart.setStatus(productStatus);
 
-                SparePartDB.insert(sparePart);
+                List<Part> photoParts = readPhotoParts(request);
+                for (Part p : photoParts) {
+                    PhotoStorage.validate(p);
+                }
+
+                List<String> uploaded = new ArrayList<>();
+                try {
+                    for (Part p : photoParts) {
+                        String path = PhotoStorage.upload(p, "spareparts");
+                        uploaded.add(path);
+
+                        SparePartPhoto photo = new SparePartPhoto();
+                        photo.setStoragePath(path);
+                        photo.setImageUrl(PhotoStorage.publicUrl(path));
+                        sparePart.addPhoto(photo);
+                    }
+                    SparePartDB.insert(sparePart);
+                } catch (IOException | RuntimeException e) {
+                    System.out.println(e);
+                    deleteQuietly(uploaded);
+                    forwardWithError(request, response, "Không thể lưu phụ tùng và ảnh, vui lòng thử lại");
+                    return;
+                }
             }
         }
         catch (NumberFormatException e) {
@@ -156,10 +174,10 @@ public class ProductAddServlet extends HttpServlet {
             throw new IllegalArgumentException("Ảnh quá lớn, mỗi ảnh tối đa 5MB");
         }
         if (result.isEmpty()) {
-            throw new IllegalArgumentException("Xe cần ít nhất 1 ảnh");
+            throw new IllegalArgumentException("Cần ít nhất 1 ảnh");
         }
         if (result.size() > 10) {
-            throw new IllegalArgumentException("Tối đa 10 ảnh cho mỗi xe");
+            throw new IllegalArgumentException("Tối đa 10 ảnh");
         }
         return result;
     }
