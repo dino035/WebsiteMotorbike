@@ -59,7 +59,36 @@
 
             <label>Số km đã đi:</label>
             <input type = "number" name = "odometerAtIntake" min="0" value="<c:out value='${param.odometerAtIntake}'/>" required><br>
+
+            <h3>Đánh giá tình trạng xe</h3>
+            <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
+                <jsp:param name="field" value="engineRating"/>
+                <jsp:param name="label" value="Động cơ"/>
+                <jsp:param name="selected" value="${param.engineRating}"/>
+            </jsp:include>
+            <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
+                <jsp:param name="field" value="brakeRating"/>
+                <jsp:param name="label" value="Phanh"/>
+                <jsp:param name="selected" value="${param.brakeRating}"/>
+            </jsp:include>
+            <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
+                <jsp:param name="field" value="tireRating"/>
+                <jsp:param name="label" value="Lốp"/>
+                <jsp:param name="selected" value="${param.tireRating}"/>
+            </jsp:include>
+            <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
+                <jsp:param name="field" value="chainRating"/>
+                <jsp:param name="label" value="Xích (sên)"/>
+                <jsp:param name="selected" value="${param.chainRating}"/>
+            </jsp:include>
+            <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
+                <jsp:param name="field" value="electricalRating"/>
+                <jsp:param name="label" value="Hệ thống điện"/>
+                <jsp:param name="selected" value="${param.electricalRating}"/>
+            </jsp:include>
+
         </div>
+
 
         <div id="sparePartFields" style="display: none;">
             <label>Loại phụ tùng:</label>
@@ -86,7 +115,7 @@
         var motorbikeDiv = document.getElementById("motorbikeFields");
         var sparePartDiv = document.getElementById("sparePartFields");
 
-        var motorbikeInputs = motorbikeDiv.querySelectorAll("input");
+        var motorbikeInputs = motorbikeDiv.querySelectorAll("input, select");
         var sparePartInputs = sparePartDiv.querySelectorAll("input, select");
 
         if (productType === "Motorbike") {
@@ -103,6 +132,7 @@
             sparePartInputs.forEach(function(input) { input.required = true; });
         }
     }
+
     function checkPhotoInput(input) {
         var files = input.files;
         if (files.length > 10) {

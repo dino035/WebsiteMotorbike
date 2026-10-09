@@ -55,6 +55,37 @@
             <label>Số km đã đi:</label>
             <input type="number" name="odometerAtIntake" min="0" required value="<c:out value='${empty error ? product.odometerAtIntake : param.odometerAtIntake}'/>">
 
+            <h3>Đánh giá tình trạng xe</h3>
+            <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
+                <jsp:param name="field" value="engineRating"/>
+                <jsp:param name="label" value="Động cơ"/>
+                <jsp:param name="selected" value="${empty error ? product.conditionAssessment.engineRating : param.engineRating}"/>
+            </jsp:include>
+
+            <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
+                <jsp:param name="field" value="brakeRating"/>
+                <jsp:param name="label" value="Phanh"/>
+                <jsp:param name="selected" value="${empty error ? product.conditionAssessment.brakeRating : param.brakeRating}"/>
+            </jsp:include>
+
+            <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
+                <jsp:param name="field" value="tireRating"/>
+                <jsp:param name="label" value="Lốp"/>
+                <jsp:param name="selected" value="${empty error ? product.conditionAssessment.tireRating : param.tireRating}"/>
+            </jsp:include>
+
+            <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
+                <jsp:param name="field" value="chainRating"/>
+                <jsp:param name="label" value="Xích (sên)"/>
+                <jsp:param name="selected" value="${empty error ? product.conditionAssessment.chainRating : param.chainRating}"/>
+            </jsp:include>
+
+            <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
+                <jsp:param name="field" value="electricalRating"/>
+                <jsp:param name="label" value="Hệ thống điện"/>
+                <jsp:param name="selected" value="${empty error ? product.conditionAssessment.electricalRating : param.electricalRating}"/>
+            </jsp:include>
+
         </div>
     </c:if>
 

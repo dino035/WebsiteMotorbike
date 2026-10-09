@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import com.example.websitemotorbike.util.ConditionInput;
 
 @WebServlet("/products/edit")
 @MultipartConfig(maxFileSize = 5 * 1024 * 1024, maxRequestSize = 50 * 1024 * 1024)
@@ -94,6 +95,13 @@ public class ProductEditServlet extends HttpServlet {
                 motorbike.setEngineNumber(engineNumber);
                 motorbike.setOdometerAtIntake(odometerAtIntake);
                 motorbike.setStatus(productStatus);
+
+                VehicleConditionAssessment assessment = motorbike.getConditionAssessment();
+                if (assessment == null) {   // xe cũ chưa có đánh giá: tạo mới khi sửa
+                    assessment = new VehicleConditionAssessment();
+                    motorbike.setConditionAssessment(assessment);
+                }
+                ConditionInput.readInto(request, assessment);
 
                 List<VehiclePhoto> existing = VehiclePhotoDB.selectByMotorbikeId(productId);
 

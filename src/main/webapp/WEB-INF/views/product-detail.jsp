@@ -43,6 +43,36 @@
     </c:if>
 </table>
 
+<c:if test="${product.typeCode == 'Motorbike'}">
+    <h2>Đánh giá tình trạng xe</h2>
+    <c:choose>
+        <c:when test="${not empty product.conditionAssessment}">
+            <c:set var="assessment" value="${product.conditionAssessment}"/>
+            <table>
+                <tr><th>Động cơ</th><td><c:out value="${assessment.engineRating.label}"/></td></tr>
+                <tr><th>Phanh</th><td><c:out value="${assessment.brakeRating.label}"/></td></tr>
+                <tr><th>Lốp</th><td><c:out value="${assessment.tireRating.label}"/></td></tr>
+                <tr><th>Xích (sên)</th><td><c:out value="${assessment.chainRating.label}"/></td></tr>
+                <tr><th>Hệ thống điện</th><td><c:out value="${assessment.electricalRating.label}"/></td></tr>
+                <tr><th>Điểm tình trạng</th>
+                    <td><fmt:formatNumber value="${assessment.adjustmentCoefficient}" minFractionDigits="1" maxFractionDigits="1"/>/10</td></tr>
+            </table>
+            <p><strong><c:out value="${assessment.verdict}"/></strong></p>
+            <c:if test="${not empty assessment.repairAdvice}">
+                <p>Hạng mục cần lưu ý:</p>
+                <ul>
+                    <c:forEach var="tip" items="${assessment.repairAdvice}">
+                        <li><c:out value="${tip}"/></li>
+                    </c:forEach>
+                </ul>
+            </c:if>
+        </c:when>
+        <c:otherwise>
+            <p>Chưa có đánh giá tình trạng.</p>
+        </c:otherwise>
+    </c:choose>
+</c:if>
+
 <%-- Thêm vào giỏ: chỉ khi còn hàng --%>
 <c:if test="${product.status == 'AVAILABLE'}">
     <c:choose>
