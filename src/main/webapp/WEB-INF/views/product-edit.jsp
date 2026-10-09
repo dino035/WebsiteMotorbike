@@ -76,7 +76,7 @@
 
             <jsp:include page="/WEB-INF/views/common/rating-select.jsp">
                 <jsp:param name="field" value="chainRating"/>
-                <jsp:param name="label" value="Xích (sên)"/>
+                <jsp:param name="label" value="Truyền động (xích/dây curoa)"/>
                 <jsp:param name="selected" value="${empty error ? product.conditionAssessment.chainRating : param.chainRating}"/>
             </jsp:include>
 

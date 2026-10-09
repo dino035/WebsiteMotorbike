@@ -11,7 +11,7 @@ public class ConditionInput {
         assessment.setEngineRating(read(request, "engineRating", "động cơ"));
         assessment.setBrakeRating(read(request, "brakeRating", "phanh"));
         assessment.setTireRating(read(request, "tireRating", "lốp"));
-        assessment.setChainRating(read(request, "chainRating", "xích (sên)"));
+        assessment.setChainRating(read(request, "chainRating", "truyền động"));
         assessment.setElectricalRating(read(request, "electricalRating", "hệ thống điện"));
         assessment.recalculateCoefficient();
     }

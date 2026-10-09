@@ -71,7 +71,7 @@ public class VehicleConditionAssessment {
         addAdvice(advice, "Động cơ", engineRating);
         addAdvice(advice, "Phanh", brakeRating);
         addAdvice(advice, "Lốp", tireRating);
-        addAdvice(advice, "Xích (sên)", chainRating);
+        addAdvice(advice, "Truyền động", chainRating);
         addAdvice(advice, "Hệ thống điện", electricalRating);
         return advice;
     }

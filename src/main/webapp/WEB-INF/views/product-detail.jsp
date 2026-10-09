@@ -52,7 +52,7 @@
                 <tr><th>Động cơ</th><td><c:out value="${assessment.engineRating.label}"/></td></tr>
                 <tr><th>Phanh</th><td><c:out value="${assessment.brakeRating.label}"/></td></tr>
                 <tr><th>Lốp</th><td><c:out value="${assessment.tireRating.label}"/></td></tr>
-                <tr><th>Xích (sên)</th><td><c:out value="${assessment.chainRating.label}"/></td></tr>
+                <tr><th>Truyền động (xích/dây curoa)</th><td><c:out value="${assessment.chainRating.label}"/></td></tr>
                 <tr><th>Hệ thống điện</th><td><c:out value="${assessment.electricalRating.label}"/></td></tr>
                 <tr><th>Điểm tình trạng</th>
                     <td><fmt:formatNumber value="${assessment.adjustmentCoefficient}" minFractionDigits="1" maxFractionDigits="1"/>/10</td></tr>
