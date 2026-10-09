@@ -4,6 +4,7 @@
 <fmt:setLocale value="vi_VN" scope="request"/>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <nav>
+    <a class="brand" href="${ctx}/products">MOTORBIKE<span>.</span>SHOP</a>
     <a href="${ctx}/products">Sản phẩm</a>
 
     <%-- Admin: các trang quản trị --%>

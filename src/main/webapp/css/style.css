@@ -574,3 +574,17 @@ td form input[type="checkbox"] {
     font-size: 0.85em;
     margin-top: 4px;
 }
+
+/* Tên cửa hàng màu đỏ */
+nav a.brand {
+    color: var(--accent);
+}
+
+nav a.brand:hover {
+    color: var(--accent-dark);
+    border-bottom-color: transparent;
+}
+
+nav a.brand span {
+    color: var(--ink);
+}
