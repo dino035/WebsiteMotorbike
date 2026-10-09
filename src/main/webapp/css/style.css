@@ -1,82 +1,576 @@
-table {
-    border-collapse: collapse;
-    width: 100%;
+/* style.css - giao diện chung (Nhóm 2). account.css của Nhóm 1 nạp sau và chỉ ghi đè vài lớp nhỏ.
+   Phong cách: nền trắng, chữ đậm in hoa, nút đen bo tròn, điểm nhấn đỏ. */
+
+:root {
+    --ink: #111111;
+    --muted: #6b6f76;
+    --line: #e4e5e7;
+    --soft: #f3f3f4;
+    --accent: #a8262d;
+    --accent-dark: #86191f;
+    --gutter: max(24px, calc((100% - 1200px) / 2));
 }
 
-th, td {
-    border: 1px solid #333;
-    padding: 8px;
-    text-align: left;
-}
-
-th {
-    background-color: #f2f2f2;
+* {
+    box-sizing: border-box;
 }
 
 body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    color: #222;
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    margin: 0;
+    padding: 0 0 60px;
+    background: #fff;
+    color: var(--ink);
 }
 
+/* Mọi khối trong trang (trừ menu) canh theo cột nội dung 1200px */
+body > *:not(nav):not(script) {
+    margin-left: var(--gutter);
+    margin-right: var(--gutter);
+}
+
+h1 {
+    display: table;
+    font-size: 2.4em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin-top: 40px;
+    margin-bottom: 26px;
+}
+
+h1::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 4px;
+    background: var(--accent);
+    margin-top: 12px;
+}
+
+h2 {
+    font-size: 1.35em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-top: 34px;
+    margin-bottom: 12px;
+}
+
+a {
+    color: var(--ink);
+    text-decoration-color: #b5b8bd;
+    text-underline-offset: 3px;
+}
+
+a:hover {
+    color: var(--accent);
+}
+
+img {
+    max-width: 100%;
+}
+
+/* ---------- Thanh menu ---------- */
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 4px 22px;
+    padding: 0 32px;
+    min-height: 68px;
+    white-space: nowrap;
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+}
+
+nav .brand {
+    font-size: 1.35em;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    margin-right: 14px;
+}
+
+nav .brand span {
+    color: var(--accent);
+}
+
+nav a {
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.85em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 24px 0 21px;
+    border-bottom: 3px solid transparent;
+}
+
+nav a:hover {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+}
+
+nav a.brand {
+    padding: 0;
+    border-bottom: none;
+    font-size: 1.35em;
+    font-weight: 800;
+}
+
+nav > span {
+    margin-left: auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--muted);
+    font-size: 0.85em;
+}
+
+/* ---------- Bảng ---------- */
+table {
+    border-collapse: collapse;
+    width: auto;
+    min-width: 0;
+    background: #fff;
+    margin-top: 14px;
+    margin-bottom: 14px;
+}
+
+body > table {
+    width: calc(100% - 2 * var(--gutter));
+}
+
+th,
+td {
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 14px 14px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    font-size: 0.78em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    border-bottom: 2px solid var(--ink);
+}
+
+tbody tr:hover td {
+    background: var(--soft);
+}
+
+/* Bảng thông tin (nhãn bên trái, giá trị bên phải): bỏ đường kẻ, rê chuột sáng cả dòng */
+tr:has(> th + td) > th,
+tr:has(> th + td) > td {
+    border: none;
+    padding: 14px 18px;
+    transition: background 0.12s;
+}
+
+tr:has(> th + td) > th {
+    width: 1%;
+    min-width: 200px;
+    white-space: nowrap;
+    color: var(--ink);
+    font-size: 0.82em;
+}
+
+tr:has(> th + td):hover > th,
+tr:has(> th + td):hover > td {
+    background: var(--soft);
+}
+
+/* ---------- Form ---------- */
 form {
-    max-width: 400px;
+    max-width: 520px;
 }
 
 form label {
     display: block;
-    margin-top: 12px;
-    font-weight: bold;
+    margin-top: 16px;
+    font-weight: 600;
+    font-size: 0.9em;
 }
 
 form input[type="text"],
 form input[type="email"],
 form input[type="password"],
 form input[type="number"],
-form select {
+form input[type="date"],
+form input[type="url"],
+form select,
+form textarea {
     width: 100%;
-    padding: 8px;
-    margin-top: 4px;
-    box-sizing: border-box;
-    border: 1px solid #ccc;
+    padding: 11px 14px;
+    margin-top: 5px;
+    border: 1px solid #cfd2d6;
     border-radius: 4px;
+    background: #fff;
+    font: inherit;
 }
 
-form input[type="submit"] {
-    margin-top: 16px;
-    padding: 10px 20px;
-    background-color: #333;
+form input:focus,
+form select:focus,
+form textarea:focus {
+    outline: none;
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.1);
+}
+
+/* ---------- Nút (đen, bo tròn) ---------- */
+form input[type="submit"],
+button,
+.btn {
+    margin-top: 18px;
+    padding: 11px 28px;
+    background: var(--ink);
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+form input[type="submit"]:hover,
+button:hover,
+.btn:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+form[action*="delete"] input[type="submit"],
+form[action*="remove"] input[type="submit"] {
+    background: #fff;
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+form[action*="delete"] input[type="submit"]:hover,
+form[action*="remove"] input[type="submit"]:hover {
+    background: var(--accent);
+    color: #fff;
+}
+
+td form,
+td form.inline-form {
+    max-width: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+}
+
+td form input[type="text"],
+td form input[type="number"],
+td form select {
+    flex: 1 1 200px;
+    max-width: 280px;
+    width: auto;
+    margin-top: 0;
+    padding: 9px 14px;
+    border-radius: 999px;
+    background: var(--soft);
+    border-color: transparent;
+}
+
+td form input[type="text"]:focus,
+td form select:focus {
+    background: #fff;
+    border-color: var(--ink);
+}
+
+td form label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 0;
+    font-weight: 400;
+    font-size: 0.9em;
     cursor: pointer;
 }
 
-form input[type="submit"]:hover {
-    background-color: #555;
+td form input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--ink);
 }
 
-nav {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    padding: 12px 24px;
-    background: #333;
+/* Cảnh báo trong ô: một khối nhỏ, chiếm riêng một hàng */
+td form .msg-notice,
+td form .msg-error,
+td form .msg-ok {
+    flex-basis: 100%;
+    margin: 0;
+    padding: 8px 14px;
+    border-left: none;
+    border-radius: 10px;
+    font-size: 0.88em;
 }
 
-nav a {
+td form.inline-form input[type="submit"] {
+    margin: 0;
+    padding: 8px 22px;
+}
+
+/* Nút Khóa: viền đỏ (hành động rủi ro). Nút Mở khóa: nút đen bình thường */
+form[action$="/lock"] input[type="submit"] {
+    background: #fff;
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+
+form[action$="/lock"] input[type="submit"]:hover {
+    background: var(--accent);
     color: #fff;
+}
+
+td form input[type="submit"],
+td button {
+    margin-top: 0;
+    padding: 6px 16px;
+    font-size: 0.88em;
+}
+
+/* Nút chọn tệp (Choose Files) */
+input[type="file"] {
+    margin-top: 6px;
+    font: inherit;
+    color: var(--muted);
+}
+
+input[type="file"]::file-selector-button {
+    margin-right: 14px;
+    padding: 9px 22px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+input[type="file"]::file-selector-button:hover {
+    background: var(--accent);
+}
+
+/* ---------- Thông báo ---------- */
+.msg-ok,
+.msg-error,
+.msg-notice {
+    padding: 12px 16px;
+    border-left: 4px solid;
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+.msg-ok {
+    color: #1a7f37;
+    background: #ecf8ef;
+    border-left-color: #1a7f37;
+}
+
+.msg-error {
+    color: #b42318;
+    background: #fdeeee;
+    border-left-color: #b42318;
+}
+
+.msg-notice {
+    color: #9a6700;
+    background: #fff7e0;
+    border-left-color: #9a6700;
+}
+
+/* ---------- Nhãn trạng thái (dùng ở đợt sau) ---------- */
+.badge {
+    display: inline-block;
+    white-space: nowrap;
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 0.8em;
+    font-weight: 700;
+    background: var(--soft);
+    color: var(--ink);
+}
+
+.badge-ok {
+    background: #e3f5e8;
+    color: #1a7f37;
+}
+
+.badge-sold {
+    background: #ececee;
+    color: var(--muted);
+}
+
+.badge-wait {
+    background: #fff3d6;
+    color: #9a6700;
+}
+
+.badge-new {
+    background: transparent;
+    color: var(--accent);
+    padding: 0;
+}
+
+/* ---------- Lưới thẻ sản phẩm (dùng ở đợt sau) ---------- */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.product-card {
+    background: var(--soft);
+    display: flex;
+    flex-direction: column;
     text-decoration: none;
+    color: var(--ink);
+    transition: transform 0.15s, box-shadow 0.15s;
 }
 
-nav a:hover {
-    text-decoration: underline;
+.product-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.12);
+    color: var(--ink);
 }
 
-nav span {
-    margin-left: auto;
-    color: #ccc;
+.product-card .thumb {
+    aspect-ratio: 4 / 3;
+    width: 100%;
+    object-fit: cover;
+    background: #e8e8ea;
 }
 
-.photo-gallery { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
-.photo-gallery img { height: 180px; border-radius: 4px; object-fit: cover; }
+.product-card .info {
+    padding: 16px 18px 20px;
+}
+
+.product-card .name {
+    font-size: 1.05em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.product-card .price {
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 1.1em;
+}
+
+/* ---------- Thư viện ảnh ---------- */
+.photo-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+    margin-bottom: 14px;
+}
+
+.photo-gallery img {
+    height: 200px;
+    object-fit: cover;
+    background: var(--soft);
+}
+
+/* ---------- Màn hình vừa ---------- */
+@media (max-width: 1250px) {
+    nav {
+        flex-wrap: wrap;
+        white-space: normal;
+    }
+}
+
+/* ---------- Màn hình nhỏ ---------- */
+@media (max-width: 700px) {
+    :root {
+        --gutter: 14px;
+    }
+
+    nav {
+        flex-wrap: wrap;
+        white-space: normal;
+        gap: 0 16px;
+    }
+
+    nav a {
+        padding: 12px 0 10px;
+    }
+
+    nav > span {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    h1 {
+        font-size: 1.7em;
+    }
+
+    body > table {
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+/* Căn ô tích giữa dòng chữ */
+td form label,
+td form .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
+}
+
+td form input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    flex: 0 0 auto;
+    vertical-align: middle;
+    position: relative;
+    top: 0;
+}
+
+td form .check {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1;
+}
+
+td form input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.badge-danger {
+    background: #fdeeee;
+    color: #b42318;
+}
+
+.sub {
+    color: var(--muted);
+    font-size: 0.85em;
+    margin-top: 4px;
+}
