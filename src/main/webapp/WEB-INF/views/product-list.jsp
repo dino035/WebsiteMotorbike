@@ -12,8 +12,12 @@
 <jsp:include page="/WEB-INF/views/common/header.jsp" />
     <h1>Danh sách sản phẩm</h1>
 
-    <c:if test="${not empty error}">
-    <p style="color:red"><c:out value="${error}"/></p>
+    <c:if test="${not empty flashMessage}">
+        <p class="msg-ok" style="color: #15803d;"><c:out value="${flashMessage}"/></p>
+    </c:if>
+
+    <c:if test="${not empty flashError}">
+        <p class="msg-error" style="color: #dc2626;"><c:out value="${flashError}"/></p>
     </c:if>
 
     <form action="${pageContext.request.contextPath}/products" method="get">
@@ -41,37 +45,45 @@
         <a href="${pageContext.request.contextPath}/products">Xóa bộ lọc</a>
 </form>
 
-    <table>
-
-        <tr>
-            <th>Tên</th>
-            <th>Giá</th>
-            <th>Loại</th>
-            <th>Tình trạng</th>
-            <th>Chi tiết</th>
+<c:set var="isAdmin" value="${sessionScope.currentUser.userRole == 'ADMIN'}"/>
+<table>
+    <tr>
+        <th>Tên</th>
+        <th>Giá</th>
+        <th>Loại</th>
+        <th>Tình trạng</th>
+        <th>Chi tiết</th>
+        <c:if test="${isAdmin}">
             <th>Xóa</th>
             <th>Chỉnh sửa</th>
-        </tr>
-        <c:forEach var="product" items="${products}">
-            <tr>
+        </c:if>
+    </tr>
+    <c:forEach var="product" items="${products}">
+        <tr>
+            <td>
+                <a href="${pageContext.request.contextPath}/products/detail?id=${product.productId}">
+                    <c:out value="${product.name}"/>
+                </a>
+            </td>
+            <td><fmt:formatNumber value="${product.price}" type="number" groupingUsed="true"/></td>
+            <td><c:out value="${product.productType}"/></td>
+            <td><c:out value="${product.status.label}"/></td>
+            <td><c:out value="${product.detail}"/></td>
+            <c:if test="${isAdmin}">
                 <td>
-                    <a href="${pageContext.request.contextPath}/products/detail?id=${product.productId}">
-                        <c:out value="${product.name}"/>
-                    </a>
-                </td>
-                <td><fmt:formatNumber value="${product.price}" type="number" groupingUsed="true"/></td>
-                <td><c:out value="${product.productType}"/></td>
-                <td><c:out value="${product.status.label}"/></td>
-                <td><c:out value="${product.detail}"/></td>
-                <td>
-                    <a href="${pageContext.request.contextPath}/products/delete?id=${product.productId}" onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">Xóa</a>
+                    <form method="post" action="${pageContext.request.contextPath}/products/delete"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
+                        <input type="hidden" name="id" value="<c:out value='${product.productId}'/>">
+                        <button type="submit">Xóa</button>
+                    </form>
                 </td>
                 <td>
                     <a href="${pageContext.request.contextPath}/products/edit?id=${product.productId}">Chỉnh sửa</a>
                 </td>
-            </tr>
-        </c:forEach>
-    </table>
+            </c:if>
+        </tr>
+    </c:forEach>
+</table>
 
     <c:if test="${empty products}">
         <p>Không tìm thấy sản phẩm phù hợp.</p>

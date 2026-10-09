@@ -97,6 +97,7 @@ public class MotorbikeDB {
             System.out.println(e);
             if(trans.isActive()){
                 trans.rollback();
+                throw new IllegalStateException("Không thể xóa xe, vui lòng thử lại", e);
             }
         }
         finally {

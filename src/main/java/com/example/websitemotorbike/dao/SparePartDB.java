@@ -70,6 +70,7 @@ public class SparePartDB {
             System.out.println(e);
             if(trans.isActive()){
                 trans.rollback();
+                throw new IllegalStateException("Không thể cập nhật phụ tùng, vui lòng thử lại", e);
             }
         }
         finally {
@@ -89,6 +90,7 @@ public class SparePartDB {
             System.out.println(e);
             if(trans.isActive()){
                 trans.rollback();
+                throw new IllegalStateException("Không thể xóa phụ tùng, vui lòng thử lại", e);
             }
         }
         finally {
