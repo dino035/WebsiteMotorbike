@@ -46,11 +46,11 @@ public class ProductAddServlet extends HttpServlet {
 
         try {
             Validator.requireText(name, "Tên sản phẩm");
-            BigDecimal price = new BigDecimal(request.getParameter("price"));
-            String productStatusStr = request.getParameter("status");
-            ProductStatus productStatus = ProductStatus.valueOf(productStatusStr);
+            BigDecimal price = Validator.requireDecimal(request.getParameter("price"), "Giá sản phẩm");
+            ProductStatus productStatus = Validator.requireEnum(
+                    request.getParameter("status"), "Trạng thái", ProductStatus.class);
 
-            if (productType.equals("Motorbike")) {
+            if ("Motorbike".equals(productType)) {
                 String brand = request.getParameter("brand");
                 String model = request.getParameter("model");
                 String accidentHistory = request.getParameter("accidentHistory");
@@ -108,12 +108,12 @@ public class ProductAddServlet extends HttpServlet {
                     return;
                 }
             }
-            else if (productType.equals("SparePart")) {
+            else if ("SparePart".equals(productType)) {
                 String partType = request.getParameter("partType");
                 Validator.requireText(partType, "Loại phụ tùng");
 
-                String partOriginStr = request.getParameter("partOrigin");
-                PartOriginType partOrigin = PartOriginType.valueOf(partOriginStr);
+                PartOriginType partOrigin = Validator.requireEnum(
+                        request.getParameter("partOrigin"), "Nguồn gốc", PartOriginType.class);
 
                 SparePart sparePart = new SparePart();
                 sparePart.setName(name);
@@ -145,6 +145,10 @@ public class ProductAddServlet extends HttpServlet {
                     forwardWithError(request, response, "Không thể lưu phụ tùng và ảnh, vui lòng thử lại");
                     return;
                 }
+            }
+
+            else {
+                throw new IllegalArgumentException("Loại sản phẩm không hợp lệ");
             }
         }
         catch (NumberFormatException e) {

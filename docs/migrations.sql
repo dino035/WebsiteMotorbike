@@ -47,3 +47,7 @@ CREATE TABLE IF NOT EXISTS vehicleconditionassessment (
     motorbike_id          VARCHAR(255) NOT NULL UNIQUE REFERENCES motorbike(productid) ON DELETE CASCADE
     );
 ALTER TABLE vehicleconditionassessment ENABLE ROW LEVEL SECURITY;
+
+-- 2026-10-09: fix/hardening bat Row Level Security cho moi bang trong schema public (DO block lap qua pg_tables), ung dung ket noi bang vai postgres nen khong bi anh huong. Bang JPA tao moi sau nay can chay lai khoi nay.
+-- 2026-10-09: fix/hardening them UNIQUE (accountid, productid) cho productreview.
+ALTER TABLE productreview ADD CONSTRAINT uq_productreview_account_product UNIQUE (accountid, productid);

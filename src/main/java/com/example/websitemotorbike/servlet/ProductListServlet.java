@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import com.example.websitemotorbike.util.Flash;
 
 @WebServlet("/products")
 public class ProductListServlet extends HttpServlet {
@@ -57,6 +58,7 @@ public class ProductListServlet extends HttpServlet {
             products = ProductDB.selectAll();
         }
 
+        Flash.consume(request);
         request.setAttribute("products", products);
         request.getRequestDispatcher("/WEB-INF/views/product-list.jsp").forward(request, response);
     }

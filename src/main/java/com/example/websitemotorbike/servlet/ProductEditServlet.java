@@ -56,16 +56,22 @@ public class ProductEditServlet extends HttpServlet {
             return;
         }
 
-        String productType = request.getParameter("product");
         String productId = request.getParameter("id");
+        Product current = (productId == null) ? null : ProductDB.selectById(productId);
+        if (current == null) {
+            response.sendRedirect(request.getContextPath() + "/products");
+            return;
+        }
+        // Loại sản phẩm lấy từ DB, không tin giá trị gửi lên từ form
+        String productType = current.getTypeCode();
         String name = request.getParameter("name");
         try {
             Validator.requireText(name, "Tên sản phẩm");
-            BigDecimal price = new BigDecimal(request.getParameter("price"));
-            String productStatusStr = request.getParameter("status");
-            ProductStatus productStatus = ProductStatus.valueOf(productStatusStr);
+            BigDecimal price = Validator.requireDecimal(request.getParameter("price"), "Giá sản phẩm");
+            ProductStatus productStatus = Validator.requireEnum(
+                    request.getParameter("status"), "Trạng thái", ProductStatus.class);
 
-            if (productType.equals("Motorbike")) {
+            if ("Motorbike".equals(productType)) {
                 String brand = request.getParameter("brand");
                 String model = request.getParameter("model");
                 String accidentHistory = request.getParameter("accidentHistory");
@@ -82,7 +88,7 @@ public class ProductEditServlet extends HttpServlet {
                 int ownerCount = Integer.parseInt(request.getParameter("ownerCount"));
                 int odometerAtIntake = Integer.parseInt(request.getParameter("odometerAtIntake"));
 
-                Motorbike motorbike = (Motorbike) ProductDB.selectById(productId);
+                Motorbike motorbike = (Motorbike) current;
 
                 motorbike.setName(name);
                 motorbike.setPrice(price);
@@ -158,10 +164,11 @@ public class ProductEditServlet extends HttpServlet {
                 String partType = request.getParameter("partType");
                 Validator.requireText(partType, "Loại phụ tùng");
 
-                String partOriginStr = request.getParameter("partOrigin");
-                PartOriginType partOrigin = PartOriginType.valueOf(partOriginStr);
+                PartOriginType partOrigin = Validator.requireEnum(
+                        request.getParameter("partOrigin"), "Nguồn gốc", PartOriginType.class);
 
-                SparePart sparePart = (SparePart) ProductDB.selectById(productId);
+                SparePart sparePart = (SparePart) current;
+
                 sparePart.setName(name);
                 sparePart.setPrice(price);
                 sparePart.setPartType(partType);
@@ -235,7 +242,12 @@ public class ProductEditServlet extends HttpServlet {
     private void forwardWithError(HttpServletRequest request, HttpServletResponse response,
                                   String productId, String message)
             throws ServletException, IOException {
-        Product product = ProductDB.selectById(productId);
+        Product product = (productId == null) ? null : ProductDB.selectById(productId);
+        if (product == null) {
+            response.sendRedirect(request.getContextPath() + "/products");
+            return;
+        }
+
         request.setAttribute("product", product);
         setPhotos(request, product);
         request.setAttribute("error", message);

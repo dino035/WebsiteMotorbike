@@ -25,22 +25,31 @@ public class ProductDB {
 
     public static void delete(String id){
         EntityManager em = DBUtil.getEmFactory().createEntityManager();
-        EntityTransaction trans = em.getTransaction();
-        trans.begin();
-        try{
-            Product product = em.find(Product.class, id);
-            if (product != null) {
-                em.remove(product);
+        try {
+            Long used = em.createQuery(
+                            "SELECT COUNT(i) FROM OrderItem i WHERE i.productId = :id", Long.class)
+                    .setParameter("id", id)
+                    .getSingleResult();
+            if (used > 0) {
+                throw new IllegalStateException(
+                        "Sản phẩm đã có trong đơn hàng nên không thể xóa. Hãy chuyển trạng thái sang Hết hàng.");
             }
-            trans.commit();
-        }
-        catch (Exception e){
-            System.out.println(e);
-            if(trans.isActive()){
-                trans.rollback();
+
+            EntityTransaction trans = em.getTransaction();
+            trans.begin();
+            try {
+                Product product = em.find(Product.class, id);
+                if (product != null) {
+                    em.remove(product);
+                }
+                trans.commit();
+            } catch (Exception e) {
+                if (trans.isActive()) {
+                    trans.rollback();
+                }
+                throw new IllegalStateException("Không thể xóa sản phẩm, vui lòng thử lại", e);
             }
-        }
-        finally {
+        } finally {
             em.close();
         }
     }
