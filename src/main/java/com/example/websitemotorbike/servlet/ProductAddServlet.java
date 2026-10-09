@@ -17,6 +17,7 @@ import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
 import java.util.ArrayList;
 import java.util.List;
+import com.example.websitemotorbike.util.ConditionInput;
 
 @WebServlet("/products/add")
 @MultipartConfig(maxFileSize = 5 * 1024 * 1024, maxRequestSize = 50 * 1024 * 1024)
@@ -78,6 +79,10 @@ public class ProductAddServlet extends HttpServlet {
                 motorbike.setEngineNumber(engineNumber);
                 motorbike.setOdometerAtIntake(odometerAtIntake);
                 motorbike.setStatus(productStatus);
+
+                VehicleConditionAssessment assessment = new VehicleConditionAssessment();
+                ConditionInput.readInto(request, assessment);
+                motorbike.setConditionAssessment(assessment);
 
                 List<Part> photoParts = readPhotoParts(request);
                 for (Part p : photoParts) {

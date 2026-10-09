@@ -7,6 +7,8 @@ import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TypedQuery;
 import com.example.websitemotorbike.model.VehiclePhoto;
+import com.example.websitemotorbike.model.VehicleConditionAssessment;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +21,8 @@ public class MotorbikeDB {
             // Tách ảnh ra, ghi xe trước để dòng motorbike có mặt khi ghi vehiclephoto
             List<VehiclePhoto> photos = new ArrayList<>(motorbike.getPhotos());
             motorbike.getPhotos().clear();
+            VehicleConditionAssessment assessment = motorbike.getConditionAssessment();
+            motorbike.setConditionAssessment(null);
 
             em.persist(motorbike);
             em.flush();
@@ -26,6 +30,10 @@ public class MotorbikeDB {
             for (VehiclePhoto photo : photos) {
                 motorbike.addPhoto(photo);
                 em.persist(photo);
+            }
+            if (assessment != null) {
+                motorbike.setConditionAssessment(assessment);
+                em.persist(assessment);
             }
             trans.commit();
         }
@@ -70,6 +78,7 @@ public class MotorbikeDB {
             if(trans.isActive()){
                 trans.rollback();
             }
+            throw new IllegalStateException("Không thể cập nhật xe, vui lòng thử lại", e);
         }
         finally {
             em.close();

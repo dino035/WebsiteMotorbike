@@ -25,6 +25,16 @@ public class Motorbike extends Product {
     @OneToMany(mappedBy = "motorbike", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VehiclePhoto> photos = new ArrayList<>();
 
+    @OneToOne(mappedBy = "motorbike", cascade = CascadeType.ALL, orphanRemoval = true)
+    private VehicleConditionAssessment conditionAssessment;
+
+    public void setConditionAssessment(VehicleConditionAssessment assessment) {
+        this.conditionAssessment = assessment;
+        if (assessment != null) {
+            assessment.setMotorbike(this);
+        }
+    }
+
     public void addPhoto(VehiclePhoto photo) {
         photos.add(photo);
         photo.setMotorbike(this);

@@ -35,3 +35,15 @@ ALTER TABLE sparepartphoto ENABLE ROW LEVEL SECURITY;
 UPDATE vehiclephoto SET imageurl = REPLACE(imageurl, 'vehicle-photos', 'photos');
 UPDATE sparepartphoto SET imageurl = REPLACE(imageurl, 'vehicle-photos', 'photos');
 
+-- 2026-10-09: feature/vehicle-condition them bang moi vehicleconditionassessment, tao thu cong tren Supabase (khong de JPA tu tao) de co khoa ngoai ON DELETE CASCADE toi motorbike(productid), UNIQUE motorbike_id (quan he 1-1) va bat Row Level Security. Xe cu chua co dong nao: vao Sua xe de bo sung.
+CREATE TABLE IF NOT EXISTS vehicleconditionassessment (
+                                                          assessmentid          VARCHAR(255) PRIMARY KEY,
+    enginerating          VARCHAR(255) NOT NULL,
+    brakerating           VARCHAR(255) NOT NULL,
+    tirerating            VARCHAR(255) NOT NULL,
+    chainrating           VARCHAR(255) NOT NULL,
+    electricalrating      VARCHAR(255) NOT NULL,
+    adjustmentcoefficient DOUBLE PRECISION NOT NULL,
+    motorbike_id          VARCHAR(255) NOT NULL UNIQUE REFERENCES motorbike(productid) ON DELETE CASCADE
+    );
+ALTER TABLE vehicleconditionassessment ENABLE ROW LEVEL SECURITY;
