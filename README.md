@@ -28,7 +28,7 @@ Tài liệu này là **hợp đồng làm việc chung** giữa hai thành viên
 
 ### Nhóm 1: Account & Giao dịch
 
-Entity: `User`, `Address`, `ShoppingCart`, `CartItem`, `Order`, `OrderItem`, `InstallationRequest`, `Payment`, `WarrantyRequest`.
+Entity: `User`, `Address`, `ShoppingCart`, `CartItem`, `Order`, `OrderItem`, `InstallationRequest`, `Payment`, `WarrantyRequest`. Entity làm thêm theo SRS: `AccountLock` (khóa tài khoản), `PasswordResetToken` (quên mật khẩu), `OnlinePayment` (các lần thanh toán VNPay), `VehicleProfile` (hồ sơ xe của khách, use case 3.15).
 Chức năng: đăng ký, đăng nhập, phân quyền, giỏ hàng, đặt hàng, thanh toán, yêu cầu bảo hành.
 
 **Đã bàn giao sẵn từ Nhóm 2:** `User`, `UserRole`, `UserDB`, `RegisterServlet` (đăng ký), `register-form.jsp` và `register-success.jsp`. Từ nay các file này thuộc Nhóm 1, Nhóm 2 không sửa nữa. Nhóm 1 làm tiếp đăng nhập, đăng xuất, phân quyền và giỏ hàng trở đi.
