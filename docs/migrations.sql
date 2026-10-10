@@ -52,3 +52,4 @@ ALTER TABLE vehicleconditionassessment ENABLE ROW LEVEL SECURITY;
 -- 2026-10-09: fix/hardening them UNIQUE (accountid, productid) cho productreview.
 ALTER TABLE productreview ADD CONSTRAINT uq_productreview_account_product UNIQUE (accountid, productid);
 -- 2026-10-10: feature/sales-report khong doi CSDL (chi doc bang orders, orderitem, product) - 3.24 bao cao doanh thu cho Admin.
+-- 2026-10-10: feature/compare khong doi CSDL (chi doc xe, anh xe, danh gia tinh trang cua Nhom 2) - 3.8 so sanh xe.
