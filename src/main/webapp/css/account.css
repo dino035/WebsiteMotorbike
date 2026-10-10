@@ -38,3 +38,30 @@ th.num {
     font-weight: bold;
     text-align: right;
 }
+
+/* So sánh xe (compare.jsp) */
+.compare-wrap {
+    overflow-x: auto;
+}
+
+table.compare th.row-label {
+    white-space: nowrap;
+}
+
+table.compare td img {
+    max-width: 160px;
+    max-height: 110px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+table.compare td.best {
+    font-weight: bold;
+    background: #e6f4ea;
+}
+
+.compare-picker label {
+    display: block;
+    font-weight: normal;
+    margin: 4px 0;
+}
