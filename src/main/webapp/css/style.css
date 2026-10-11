@@ -267,10 +267,19 @@ form[action*="remove"] input[type="submit"]:hover {
 td form,
 td form.inline-form {
     max-width: none;
-    display: flex;
+    display: inline-flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 10px 12px;
+    margin: 4px 10px 4px 0;
+    vertical-align: middle;
+}
+
+/* Link "Sửa" cùng hàng với các nút */
+td > a {
+    display: inline-block;
+    margin: 4px 14px 4px 0;
+    vertical-align: middle;
 }
 
 td form input[type="text"],
