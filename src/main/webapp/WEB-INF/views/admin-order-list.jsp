@@ -20,6 +20,8 @@
         <p class="msg-error"><c:out value="${flashError}"/></p>
     </c:if>
 
+    <p><a href="${pageContext.request.contextPath}/admin/reports">Xem báo cáo doanh thu</a></p>
+
     <form action="${pageContext.request.contextPath}/admin/orders" method="get">
         <label>Lọc theo trạng thái:</label>
         <select name="status">
