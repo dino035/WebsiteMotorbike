@@ -7,6 +7,11 @@
     <a class="brand" href="${ctx}/products">MOTORBIKE<span>.</span>SHOP</a>
     <a href="${ctx}/products">Sản phẩm</a>
 
+    <%-- Khách chưa đăng nhập và khách hàng: so sánh xe (admin không thấy) --%>
+    <c:if test="${sessionScope.currentUser.userRole != 'ADMIN'}">
+        <a href="${ctx}/compare">So sánh xe</a>
+    </c:if>
+
     <%-- Admin: các trang quản trị --%>
     <c:if test="${sessionScope.currentUser.userRole == 'ADMIN'}">
         <a href="${ctx}/products/add">Thêm sản phẩm</a>
@@ -14,6 +19,7 @@
         <a href="${ctx}/admin/installations">Quản lý lắp đặt</a>
         <a href="${ctx}/admin/warranty">Quản lý bảo hành</a>
         <a href="${ctx}/admin/accounts">Quản lý tài khoản</a>
+        <a href="${ctx}/admin/reports">Báo cáo</a>
     </c:if>
 
     <%-- Chưa đăng nhập --%>
@@ -32,6 +38,7 @@
             <a href="${ctx}/orders">Đơn hàng</a>
             <a href="${ctx}/warranty">Bảo hành</a>
             <a href="${ctx}/addresses">Địa chỉ</a>
+            <a href="${ctx}/vehicles">Xe của tôi</a>
         </c:if>
 
         <a href="${ctx}/notifications">Thông báo</a>
