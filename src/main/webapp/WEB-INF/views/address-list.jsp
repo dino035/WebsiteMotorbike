@@ -53,7 +53,7 @@
                             <form class="inline-form" action="${pageContext.request.contextPath}/addresses/action" method="post">
                                 <input type="hidden" name="id" value="<c:out value='${a.addressId}'/>">
                                 <input type="hidden" name="action" value="DELETE">
-                                <input type="submit" value="Xóa" onclick="return confirm('Xóa địa chỉ này?')">
+                                <input type="submit" class="btn-danger" value="Xóa" onclick="return confirm('Xóa địa chỉ này?')">
                             </form>
                         </td>
                     </tr>

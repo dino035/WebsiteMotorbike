@@ -63,7 +63,7 @@
                         <td>
                             <form class="inline-form" action="${pageContext.request.contextPath}/cart/remove" method="post">
                                 <input type="hidden" name="cartItemId" value="<c:out value='${line.cartItemId}'/>">
-                                <input type="submit" value="Xóa" onclick="return confirm('Xóa sản phẩm này khỏi giỏ hàng?')">
+                                <input type="submit" class="btn-danger" value="Xóa" onclick="return confirm('Xóa sản phẩm này khỏi giỏ hàng?')">
                             </form>
                         </td>
                     </tr>
