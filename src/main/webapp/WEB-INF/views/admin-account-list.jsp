@@ -52,11 +52,13 @@
                         <td>
                             <c:choose>
                                 <c:when test="${row.locked}">
-                                    <span class="msg-error">Đã khóa</span>
-                                    (<c:out value="${row.lock.lockedAtText}"/>)
-                                    <c:if test="${not empty row.lock.reason}"><br>Lý do: <c:out value="${row.lock.reason}"/></c:if>
+                                    <span class="badge badge-danger">Đã khóa</span>
+                                    <div class="sub"><c:out value="${row.lock.lockedAtText}"/></div>
+                                    <c:if test="${not empty row.lock.reason}">
+                                        <div class="sub">Lý do: <c:out value="${row.lock.reason}"/></div>
+                                    </c:if>
                                 </c:when>
-                                <c:otherwise>Đang hoạt động</c:otherwise>
+                                <c:otherwise><span class="badge badge-ok">Đang hoạt động</span></c:otherwise>
                             </c:choose>
                         </td>
                         <td><c:out value="${row.unfinishedOrders}"/></td>
@@ -71,10 +73,10 @@
                                 <c:otherwise>
                                     <form class="inline-form" action="${pageContext.request.contextPath}/admin/accounts/lock" method="post">
                                         <input type="hidden" name="id" value="<c:out value='${row.user.accountId}'/>">
-                                        <input type="text" name="reason" maxlength="200" placeholder="Lý do (không bắt buộc)" style="width:180px;">
+                                        <input type="text" name="reason" maxlength="200" placeholder="Lý do (không bắt buộc)">
                                         <c:if test="${row.unfinishedOrders > 0}">
-                                            <br><span class="msg-notice">Cảnh báo: tài khoản có <c:out value="${row.unfinishedOrders}"/> đơn hàng chưa hoàn tất.</span>
-                                            <br><label style="display:inline;font-weight:normal;"><input type="checkbox" name="force"> Tôi hiểu, vẫn khóa</label>
+                                            <span class="msg-notice">Cảnh báo: tài khoản có <c:out value="${row.unfinishedOrders}"/> đơn hàng chưa hoàn tất.</span>
+                                            <label class="check"><input type="checkbox" name="force"> Tôi hiểu, vẫn khóa</label>
                                         </c:if>
                                         <input type="submit" value="Khóa" onclick="return confirm('Khóa tài khoản này?')">
                                     </form>
