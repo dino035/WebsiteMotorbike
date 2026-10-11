@@ -50,7 +50,10 @@ ALTER TABLE vehicleconditionassessment ENABLE ROW LEVEL SECURITY;
 
 -- 2026-10-09: fix/hardening bat Row Level Security cho moi bang trong schema public (DO block lap qua pg_tables), ung dung ket noi bang vai postgres nen khong bi anh huong. Bang JPA tao moi sau nay can chay lai khoi nay.
 -- 2026-10-09: fix/hardening them UNIQUE (accountid, productid) cho productreview.
+
 ALTER TABLE productreview ADD CONSTRAINT uq_productreview_account_product UNIQUE (accountid, productid);
 -- 2026-10-10: feature/sales-report khong doi CSDL (chi doc bang orders, orderitem, product) - 3.24 bao cao doanh thu cho Admin.
 -- 2026-10-10: feature/compare khong doi CSDL (chi doc xe, anh xe, danh gia tinh trang cua Nhom 2) - 3.8 so sanh xe.
 -- 2026-10-10: feature/vehicle-profile them bang moi vehicleprofile (JPA tu tao khi chay lan dau, khong co ALTER nao tren bang cu) - 3.15 ho so xe cua khach (biet danh, hang, dong xe).
+
+-- 2026-10-11: bat lai RLS cho bang vehicleprofile (JPA tao moi), chay lai khoi DO block o tren.
