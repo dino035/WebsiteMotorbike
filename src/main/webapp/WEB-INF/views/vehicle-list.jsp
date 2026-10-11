@@ -43,7 +43,7 @@
                             <a href="${pageContext.request.contextPath}/vehicles?edit=<c:out value='${p.profileId}'/>">Sửa</a>
                             <form class="inline-form" action="${pageContext.request.contextPath}/vehicles/delete" method="post">
                                 <input type="hidden" name="id" value="<c:out value='${p.profileId}'/>">
-                                <input type="submit" value="Xóa" onclick="return confirm('Xóa xe này?')">
+                                <input type="submit" class="btn-danger" value="Xóa" onclick="return confirm('Xóa xe này?')">
                             </form>
                         </td>
                     </tr>

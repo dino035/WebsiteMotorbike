@@ -74,7 +74,7 @@
                     <form method="post" action="${pageContext.request.contextPath}/products/delete"
                           onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
                         <input type="hidden" name="id" value="<c:out value='${product.productId}'/>">
-                        <button type="submit">Xóa</button>
+                        <button type="submit" class="btn-danger">Xóa</button>
                     </form>
                 </td>
                 <td>

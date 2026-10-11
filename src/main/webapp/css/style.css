@@ -839,3 +839,22 @@ form textarea {
 .carousel .dot.active {
     background: var(--accent);
 }
+
+/* ---------- Nút Xóa (đỏ trầm, dùng chung mọi trang) ---------- */
+.btn-danger,
+body td form .btn-danger.btn-danger {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: none;
+}
+
+body td form .btn-danger.btn-danger {
+    margin-top: 0;
+    padding: 6px 14px;
+}
+
+.btn-danger:hover,
+body td form .btn-danger.btn-danger:hover {
+    background: var(--accent-dark);
+    color: #fff;
+}
