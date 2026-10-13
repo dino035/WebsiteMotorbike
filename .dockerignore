@@ -1,0 +1,10 @@
+.git
+.idea
+out
+target
+docs
+*.md
+# Các file chứa mật khẩu tuyệt đối không được đưa vào ảnh Docker
+src/main/resources/META-INF/persistence.xml
+src/main/resources/mail.properties
+src/main/resources/vnpay.properties
