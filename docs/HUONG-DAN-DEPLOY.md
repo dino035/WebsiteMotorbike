@@ -40,7 +40,7 @@ Cơ sở dữ liệu vẫn là Supabase đang dùng chung, **không cần đổi
    |---|---|
    | `persistence.xml` | **bắt buộc**: dán nguyên nội dung file `src/main/resources/META-INF/persistence.xml` trên máy bạn (đã điền Supabase) |
    | `vnpay.properties` | tùy chọn: xem mẫu dưới đây |
-   | `mail.properties` | tùy chọn: xem `mail.example.properties` |
+   | `mail.properties` | tùy chọn, để gửi email quên mật khẩu: xem mục 5 (dùng Brevo) |
 
    Mẫu `vnpay.properties` (thay bằng giá trị của bạn và đúng tên dịch vụ):
    ```
@@ -58,19 +58,38 @@ Cơ sở dữ liệu vẫn là Supabase đang dùng chung, **không cần đổi
 - Đăng nhập trang quản lý của VNPay sandbox, vào phần cấu hình **IPN URL** của terminal và điền `https://<tên>.onrender.com/vnpay/ipn`. Trên máy chủ công khai thì VNPay gọi được IPN, nên kết quả được ghi nhận kể cả khi khách đóng trình duyệt trước khi quay về.
 - Sửa Secret File xong thì bấm **Manual Deploy → Restart** (hoặc Deploy latest commit) để áp dụng.
 
-## 5. Cập nhật phiên bản mới
+## 5. Gửi email quên mật khẩu bằng Brevo (tùy chọn)
+
+Brevo có gói miễn phí (khoảng 300 email mỗi ngày). Ứng dụng gọi API của Brevo qua HTTPS nên chạy được trên Render.
+
+1. Đăng ký tài khoản ở brevo.com (có thể dùng email của bạn).
+2. Xác minh người gửi: vào **Senders, Domains & Dedicated IPs → Senders → Add a sender**, nhập tên và một địa chỉ email của bạn, rồi bấm liên kết xác nhận Brevo gửi vào hộp thư đó. Địa chỉ này sẽ là người gửi của mọi email, **bắt buộc đã xác minh**, nếu không Brevo từ chối gửi.
+3. Tạo khóa API: **SMTP & API → API Keys → Generate a new API key**, sao chép khóa (chỉ hiện một lần). Đây là bí mật, **không dán vào chat, Git hay tài liệu**.
+4. Trên Render, sửa Secret File `mail.properties` (tạo mới nếu chưa có) với nội dung sau, thay bằng giá trị của bạn:
+   ```
+   mail.brevo.apiKey=<khóa API vừa tạo>
+   mail.from=<email người gửi đã xác minh ở bước 2>
+   mail.fromName=Motorbike Shop
+   app.baseUrl=https://<tên dịch vụ>.onrender.com
+   ```
+   `app.baseUrl` là địa chỉ web thật của bạn (không có dấu `/` ở cuối), dùng để tạo liên kết đặt lại mật khẩu trong email.
+5. Lưu Secret File, Render tự khởi động lại. Thử bằng chức năng **Quên mật khẩu**, email sẽ về hộp thư của tài khoản.
+
+Nếu không nhận được email: xem tab **Logs** trên Render, dòng `Gửi email qua Brevo thất bại: HTTP 401/400 ...` nêu lý do (sai khóa API, người gửi chưa xác minh). Kiểm tra cả thư mục Spam.
+
+## 6. Cập nhật phiên bản mới
 
 Mỗi lần push hoặc merge vào `master`, Render tự build lại và triển khai. Xem tiến trình ở tab **Events** hoặc **Logs**.
 
-## 6. Giới hạn của gói miễn phí cần biết
+## 7. Giới hạn của gói miễn phí cần biết
 
 - Dịch vụ **ngủ sau khoảng 15 phút không có người truy cập**; lần mở đầu tiên sau đó mất khoảng nửa đến một phút để khởi động lại. Nên mở web trước khi trình bày.
 - Phiên đăng nhập mất khi dịch vụ khởi động lại; khách phải đăng nhập lại.
 - Bộ nhớ 512 MB. Nếu Logs báo hết bộ nhớ (OutOfMemory), nâng gói hoặc báo lại để giảm cấu hình.
 - Gói Supabase miễn phí tự tạm dừng sau khoảng 7 ngày không hoạt động; nếu web báo không kết nối được CSDL thì vào Supabase bấm Restore/Resume project.
-- Gửi email quên mật khẩu qua SMTP có thể không chạy trên gói miễn phí nếu nền tảng chặn cổng SMTP. Khi không gửi được, chức năng quên mật khẩu vẫn chạy ở chế độ phát triển (liên kết đặt lại được in trong Logs).
+- Render gói miễn phí **chặn các cổng SMTP** (25, 465, 587) nên không gửi email bằng SMTP được. Vì vậy ứng dụng gửi qua **API của Brevo** (HTTPS cổng 443), xem mục 5. Chưa cấu hình thì chức năng quên mật khẩu vẫn chạy ở chế độ phát triển (liên kết đặt lại được in trong Logs).
 
-## 7. Khi gặp lỗi
+## 8. Khi gặp lỗi
 
 | Hiện tượng | Nguyên nhân thường gặp |
 |---|---|
@@ -81,7 +100,7 @@ Mỗi lần push hoặc merge vào `master`, Render tự build lại và triển
 | Thanh toán xong báo "Chữ ký không hợp lệ" | `vnpay.hashSecret` hoặc `vnpay.tmnCode` sai; `vnpay.returnUrl` không đúng địa chỉ web |
 | Thêm ảnh báo thiếu biến `SUPABASE_...` | Thiếu hoặc sai tên biến môi trường |
 
-## 8. Chạy thử bản Docker trên máy mình (tùy chọn)
+## 9. Chạy thử bản Docker trên máy mình (tùy chọn)
 
 Cần Docker Desktop đang chạy. Tạo thư mục `secrets` (đừng commit) chứa `persistence.xml` trỏ tới CSDL, rồi:
 
