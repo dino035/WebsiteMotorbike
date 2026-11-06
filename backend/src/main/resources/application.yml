@@ -19,5 +19,18 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
+app:
+  jwt:
+    # Khóa ký JWT (>= 32 ký tự), đặt bằng biến môi trường JWT_SECRET. Để trống: dùng khóa ngẫu nhiên mỗi lần chạy.
+    secret: ${JWT_SECRET:}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+  cors:
+    # Địa chỉ React được gọi API (cách nhau bằng dấu phẩy). Dev: Vite 5173; deploy: tên miền Static Site trên Render.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  admin:
+    # Tùy chọn: tạo admin đầu tiên khi khởi động nếu đặt cả hai biến.
+    email: ${ADMIN_EMAIL:}
+    password: ${ADMIN_PASSWORD:}
+
 server:
   port: ${PORT:8080}
