@@ -45,7 +45,3 @@ src/main/resources/META-INF/persistence.xml
 src/main/resources/mail.properties
 # Cấu hình VNPay (chứa HashSecret), mỗi máy một file riêng; xem vnpay.example.properties
 src/main/resources/vnpay.properties
-
-backend/target/
-frontend/node_modules/
-.env
