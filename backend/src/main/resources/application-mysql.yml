@@ -1,0 +1,12 @@
+# Profile tham khảo nếu chuyển sang MySQL: chạy với --spring.profiles.active=mysql
+# (nhớ bật dependency mysql-connector-j trong pom.xml và tắt postgresql)
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/motoparts_db?useSSL=false&serverTimezone=UTC
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
