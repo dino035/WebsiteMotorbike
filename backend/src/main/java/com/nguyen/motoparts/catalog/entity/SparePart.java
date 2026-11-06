@@ -1,19 +1,53 @@
 package com.nguyen.motoparts.catalog.entity;
 
-import jakarta.persistence.Entity;
+import com.nguyen.motoparts.common.enums.PartOriginType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * Tham chiếu: tài liệu "class-diagram-final-spec.md", mục "Product hierarchy".
- * TODO (bước thiết kế schema kế tiếp): khai báo @Id, các thuộc tính và quan hệ
- * (Association / Composition / Aggregation) đúng theo đặc tả đã chốt.
+ * Phụ tùng (đặc tả mục Product hierarchy): partType, partOrigin, Composition tới SparePartPhoto (1 — 1..*).
+ * Phụ tùng nào lắp được cho dòng xe nào nằm ở CompatibilityRule, không lưu trên class này.
  */
 @Entity
 @Getter
 @Setter
-public class SparePart {
+public class SparePart extends Product {
 
-    // TODO: fields
+    private String partType;
 
+    @Enumerated(EnumType.STRING)
+    private PartOriginType partOrigin;
+
+    @OneToMany(mappedBy = "sparePart", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SparePartPhoto> photos = new ArrayList<>();
+
+    public void addPhoto(SparePartPhoto photo) {
+        photos.add(photo);
+        photo.setSparePart(this);
+    }
+
+    public void removePhoto(SparePartPhoto photo) {
+        photos.remove(photo);
+        photo.setSparePart(null);
+    }
+
+    @Override
+    public String getProductType() {
+        return "Phụ tùng";
+    }
+
+    @Override
+    public String getDetail() {
+        String origin = (partOrigin == null) ? "" : " (" + partOrigin.getLabel() + ")";
+        return partType + origin;
+    }
+
+    @Override
+    public String getTypeCode() {
+        return "SparePart";
+    }
 }
