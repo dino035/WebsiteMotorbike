@@ -84,3 +84,21 @@ mvn spring-boot:run
 2. Viết DTO + mapping (entity ⇄ DTO) cho từng controller.
 3. Viết logic nghiệp vụ trong các `*Service` theo use case tương ứng.
 4. `AIRecommendationEngine`: tích hợp sau, khi có dữ liệu `CompatibilityRule` / `ProductEmbedding` thật.
+
+## Đăng nhập, JWT và biến môi trường (Người B)
+
+API đăng nhập (không cần token): `POST /api/auth/register`, `POST /api/auth/login` (trả `token`).
+Có token: gửi header `Authorization: Bearer <token>`; `GET /api/auth/me` cho biết ai đang đăng nhập.
+`GET /api/products|motorbikes|spare-parts|vehicle-models/**` mở cho khách chưa đăng nhập; `/api/admin/**` chỉ ADMIN;
+các đường còn lại cần đăng nhập. Phân quyền chi tiết hơn dùng `@PreAuthorize("hasRole('ADMIN')")` ở controller.
+Tài khoản bị khóa (có dòng trong `AccountLock`) bị chặn ở mọi request, kể cả khi token còn hạn.
+
+| Biến môi trường | Ý nghĩa |
+|---|---|
+| `JWT_SECRET` | Khóa ký JWT, ít nhất 32 ký tự. Bỏ trống: dùng khóa ngẫu nhiên mỗi lần chạy (chỉ để dev). Bắt buộc đặt khi deploy. |
+| `JWT_EXPIRATION_MINUTES` | Thời hạn token, mặc định 120. |
+| `CORS_ALLOWED_ORIGINS` | Địa chỉ React được gọi API, cách nhau bằng dấu phẩy. Mặc định `http://localhost:5173`; khi deploy là tên miền Static Site. |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Tùy chọn: tạo admin đầu tiên khi khởi động (mật khẩu >= 8 ký tự). Đã có email đó thì không ghi đè. |
+
+Kiểm thử bảo mật cần PostgreSQL: đặt `TEST_DB_URL` (vd `jdbc:postgresql://localhost:5432/motoparts_test`),
+`TEST_DB_USERNAME`, `TEST_DB_PASSWORD` rồi chạy `mvn test -Dtest=AuthSecurityTest`. Không đặt `TEST_DB_URL` thì test tự bỏ qua.
