@@ -1,11 +1,13 @@
 package com.nguyen.motoparts.catalog.service;
 
+import com.nguyen.motoparts.catalog.dto.ProductDetailResponse;
 import com.nguyen.motoparts.catalog.dto.ProductSummaryResponse;
 import com.nguyen.motoparts.catalog.entity.Product;
 import com.nguyen.motoparts.catalog.repository.ProductRepository;
 import com.nguyen.motoparts.catalog.repository.ProductSpecifications;
 import com.nguyen.motoparts.common.dto.PageResponse;
 import com.nguyen.motoparts.common.enums.ProductStatus;
+import com.nguyen.motoparts.common.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,4 +45,9 @@ public class ProductService {
         return PageResponse.from(result);
     }
 
+    public ProductDetailResponse getDetail(String id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm: " + id));
+        return ProductDetailResponse.from(product);
+    }
 }

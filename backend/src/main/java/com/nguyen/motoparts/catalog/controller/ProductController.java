@@ -1,14 +1,12 @@
 package com.nguyen.motoparts.catalog.controller;
 
+import com.nguyen.motoparts.catalog.dto.ProductDetailResponse;
 import com.nguyen.motoparts.catalog.dto.ProductSummaryResponse;
 import com.nguyen.motoparts.catalog.service.ProductService;
 import com.nguyen.motoparts.common.dto.PageResponse;
 import com.nguyen.motoparts.common.enums.ProductStatus;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
@@ -36,4 +34,8 @@ public class ProductController {
         return productService.search(keyword, type, status, minPrice, maxPrice, safePage, safeSize);
     }
 
+    @GetMapping("/{id}")
+    public ProductDetailResponse detail(@PathVariable("id") String id) {
+        return productService.getDetail(id);
+    }
 }
