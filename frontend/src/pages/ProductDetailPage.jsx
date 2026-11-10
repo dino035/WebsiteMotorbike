@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import client from '../api/client';
+import AddToCartButton from '../components/AddToCartButton.jsx';
 import './ProductDetailPage.css';
 
 const priceFormat = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
@@ -58,6 +59,8 @@ export default function ProductDetailPage() {
                 {product.statusLabel}
               </span>
                         </div>
+
+                        <AddToCartButton key={product.productId} product={product} />
 
                         <h2>Thông số</h2>
                         <table className="spec-table">
