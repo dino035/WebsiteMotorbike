@@ -40,6 +40,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(body);
     }
 
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<Map<String, String>> handleBadRequest(BadRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", ex.getMessage()));
+    }
+
+    @ExceptionHandler(EmailSendException.class)
+    public ResponseEntity<Map<String, String>> handleEmailFailure(EmailSendException ex) {
+        log.error("Gui email that bai", ex);
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                .body(Map.of("message", "Không thể gửi email lúc này, vui lòng thử lại sau."));
+    }
+
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Map<String, String>> handleConflict(ConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", ex.getMessage()));
