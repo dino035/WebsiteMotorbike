@@ -42,6 +42,8 @@ app:
     smtp-username: ${MAIL_USERNAME:}
     smtp-password: ${MAIL_PASSWORD:}
     smtp-starttls: ${MAIL_STARTTLS:true}
+  cart:
+    hold-minutes: ${CART_HOLD_MINUTES:30}   # thời gian tạm giữ một chiếc xe khi nằm trong giỏ
   admin:
     # Tùy chọn: tạo admin đầu tiên khi khởi động nếu đặt cả hai biến.
     email: ${ADMIN_EMAIL:}
