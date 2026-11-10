@@ -1,19 +1,42 @@
 package com.nguyen.motoparts.aftersales.entity;
 
-import jakarta.persistence.Entity;
+import com.nguyen.motoparts.common.enums.NotificationType;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Tham chiếu: tài liệu "class-diagram-final-spec.md", mục "After-sales".
- * TODO (bước thiết kế schema kế tiếp): khai báo @Id, các thuộc tính và quan hệ
- * (Association / Composition / Aggregation) đúng theo đặc tả đã chốt.
- */
+import java.time.LocalDateTime;
+
+/** Thông báo cho một tài khoản. Giữ accountId kiểu String, không nối User (đặc tả). */
 @Entity
 @Getter
 @Setter
 public class Notification {
 
-    // TODO: fields
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String notificationId;
 
+    @Column(nullable = false)
+    private String accountId;
+
+    @Column(length = 500)
+    private String content;
+
+    @Enumerated(EnumType.STRING)
+    private NotificationType type;
+
+    /** Kiểu Boolean (không phải boolean) để getter là getIsRead() và JSON ra đúng tên isRead. */
+    @Column(nullable = false)
+    private Boolean isRead = false;
+
+    /** Hệ thống tự đặt khi lưu, để sắp xếp thông báo mới nhất lên đầu. */
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
 }

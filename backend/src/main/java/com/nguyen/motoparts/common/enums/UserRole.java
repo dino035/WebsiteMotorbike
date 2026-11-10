@@ -1,7 +1,7 @@
 package com.nguyen.motoparts.common.enums;
 
-// User.userRole trong đặc tả là String — enum này để dùng trong code cho an toàn kiểu,
-// map sang cột String ở tầng persistence (@Enumerated(EnumType.STRING)) khi thiết kế schema.
+/** Vai trò tài khoản. Đặc tả ghi userRole: String; code dùng enum, lưu dạng chuỗi (EnumType.STRING). */
 public enum UserRole {
-    CUSTOMER, ADMIN
+    ADMIN,
+    CUSTOMER
 }

@@ -1,19 +1,32 @@
 package com.nguyen.motoparts.cart.entity;
 
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 /**
- * Tham chiếu: tài liệu "class-diagram-final-spec.md", mục "Shopping".
- * TODO (bước thiết kế schema kế tiếp): khai báo @Id, các thuộc tính và quan hệ
- * (Association / Composition / Aggregation) đúng theo đặc tả đã chốt.
+ * Một dòng trong giỏ. Giữ productId kiểu String (đặc tả), không @ManyToOne Product.
+ * addedAt giữ từ WebsiteMotorbike: dùng tính thời hạn tạm giữ xe (sản phẩm độc bản).
  */
 @Entity
 @Getter
 @Setter
 public class CartItem {
 
-    // TODO: fields
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private String cartItemId;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "cart_id")
+    private ShoppingCart cart;
+
+    @Column(nullable = false)
+    private String productId;
+
+    private int quantity;
+
+    private LocalDateTime addedAt;
 }
