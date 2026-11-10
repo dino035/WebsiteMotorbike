@@ -147,3 +147,22 @@ Gửi email (biến môi trường mới):
 
 Không cấu hình email nào: chế độ phát triển, nội dung email (kèm liên kết đặt lại mật khẩu) chỉ in ra log, không gửi đi.
 Kiểm thử: `mvn test -Dtest=AccountFeaturesTest` (cần `TEST_DB_URL`, xem mục trên).
+
+## Giỏ hàng và tạm giữ xe
+
+Cần đăng nhập (giỏ của chính người dùng, `accountId` lấy từ token). Mọi thao tác trả lại giỏ mới nhất:
+`{lines, total, itemCount, notices, holdMinutes}`.
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| GET | `/api/cart` | Xem giỏ. Dòng không còn khả dụng được gỡ và ghi vào `notices` (hiện một lần) |
+| POST | `/api/cart/items` `{productId, quantity}` | Thêm. Phụ tùng cộng dồn số lượng (tối đa 99); xe luôn là 1 và được giữ 30 phút, thêm lại thì gia hạn |
+| PUT | `/api/cart/items/{cartItemId}` `{quantity}` | Sửa số lượng (1 đến 99). Xe máy chỉ mua được 1 chiếc (400) |
+| DELETE | `/api/cart/items/{cartItemId}` | Xóa một dòng |
+
+Mã lỗi: 404 không có sản phẩm hoặc dòng (kể cả dòng của người khác), 409 sản phẩm hết hàng hoặc xe đang được khách khác giữ, 400 số lượng sai.
+
+Luật tạm giữ xe: không có bộ đếm giờ, chỉ so `addedAt` với bây giờ. Hết 30 phút mà chưa ai khác thêm xe thì xe vẫn của giỏ này.
+Khi có người khác thêm và giữ, dòng của người hết hạn bị gỡ ở lần mở giỏ sau. Hai khách thêm cùng một xe cùng lúc thì chỉ một người giữ được
+(khóa dòng sản phẩm `SELECT ... FOR UPDATE`; bản JSP cũ chưa chặn chỗ này). Đổi thời gian giữ bằng biến `CART_HOLD_MINUTES` (mặc định 30).
+Kiểm thử: `mvn test -Dtest=CartTest`.
