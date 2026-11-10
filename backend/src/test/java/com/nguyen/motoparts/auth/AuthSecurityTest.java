@@ -60,7 +60,7 @@ class AuthSecurityTest {
     @Configuration
     @EnableAutoConfiguration
     @ComponentScan({"com.nguyen.motoparts.security", "com.nguyen.motoparts.auth",
-            "com.nguyen.motoparts.common.exception"})
+            "com.nguyen.motoparts.common.exception", "com.nguyen.motoparts.mail"})
     @EntityScan("com.nguyen.motoparts.account.entity")
     @EnableJpaRepositories("com.nguyen.motoparts.account.repository")
     static class TestApp {

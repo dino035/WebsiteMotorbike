@@ -27,6 +27,21 @@ app:
   cors:
     # Địa chỉ React được gọi API (cách nhau bằng dấu phẩy). Dev: Vite 5173; deploy: tên miền Static Site trên Render.
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  frontend-url: ${FRONTEND_URL:http://localhost:5173}   # gốc địa chỉ React, dùng tạo liên kết trong email
+  reset:
+    expire-minutes: ${RESET_EXPIRE_MINUTES:30}   # thời hạn liên kết đặt lại mật khẩu
+    max-per-hour: ${RESET_MAX_PER_HOUR:5}        # số lần yêu cầu tối đa mỗi giờ cho một tài khoản
+  mail:
+    # Gửi email: ưu tiên Brevo API (HTTPS 443, dùng được trên Render vì Render chặn cổng SMTP),
+    # rồi tới SMTP. Không cấu hình cả hai: chế độ phát triển, nội dung email (kèm liên kết) chỉ in ra log.
+    from: ${MAIL_FROM:}                      # địa chỉ người gửi (với Brevo phải là địa chỉ đã xác minh)
+    from-name: ${MAIL_FROM_NAME:MotoParts}
+    brevo-api-key: ${BREVO_API_KEY:}
+    smtp-host: ${MAIL_HOST:}
+    smtp-port: ${MAIL_PORT:587}
+    smtp-username: ${MAIL_USERNAME:}
+    smtp-password: ${MAIL_PASSWORD:}
+    smtp-starttls: ${MAIL_STARTTLS:true}
   admin:
     # Tùy chọn: tạo admin đầu tiên khi khởi động nếu đặt cả hai biến.
     email: ${ADMIN_EMAIL:}

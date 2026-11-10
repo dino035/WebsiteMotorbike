@@ -51,7 +51,9 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/register", "/api/auth/login").permitAll()
+                        .requestMatchers("/api/auth/register", "/api/auth/login",
+                                "/api/auth/forgot-password", "/api/auth/reset-password",
+                                "/api/auth/reset-password/validate").permitAll()
                         // Khách chưa đăng nhập được xem sản phẩm.
                         .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/motorbikes/**",
                                 "/api/spare-parts/**", "/api/vehicle-models/**").permitAll()

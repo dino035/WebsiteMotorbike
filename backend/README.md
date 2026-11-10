@@ -102,3 +102,48 @@ Tài khoản bị khóa (có dòng trong `AccountLock`) bị chặn ở mọi re
 
 Kiểm thử bảo mật cần PostgreSQL: đặt `TEST_DB_URL` (vd `jdbc:postgresql://localhost:5432/motoparts_test`),
 `TEST_DB_USERNAME`, `TEST_DB_PASSWORD` rồi chạy `mvn test -Dtest=AuthSecurityTest`. Không đặt `TEST_DB_URL` thì test tự bỏ qua.
+
+## Tài khoản (tuần 2): quên mật khẩu, admin khóa tài khoản, sổ địa chỉ
+
+Không cần đăng nhập:
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| POST | `/api/auth/forgot-password` `{email}` | Gửi liên kết đặt lại mật khẩu. Luôn trả cùng một thông báo, dù email có tài khoản hay không |
+| POST | `/api/auth/reset-password/validate` `{token}` | `{valid: true/false}`: React gọi khi mở trang để báo liên kết hết hạn sớm |
+| POST | `/api/auth/reset-password` `{token, password, confirmPassword}` | Đặt mật khẩu mới (8 đến 72 ký tự). Mã chỉ dùng một lần |
+
+Liên kết trong email có dạng `FRONTEND_URL/reset-password?token=...`, hết hạn sau 30 phút, mỗi tài khoản tối đa 5 yêu cầu mỗi giờ.
+Chỉ lưu SHA-256 của mã trong CSDL. Yêu cầu mới thay thế mã cũ chưa dùng.
+
+Chỉ ADMIN (`/api/admin/accounts`):
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| GET | `/api/admin/accounts?q=&status=ALL\|ACTIVE\|LOCKED&page=&size=` | Danh sách khách hàng (không gồm admin), kèm trạng thái khóa và số đơn chưa hoàn tất |
+| POST | `/api/admin/accounts/{id}/lock` `{reason, force}` | Khóa. Còn đơn chưa hoàn tất thì trả 409 và cần gửi lại với `force: true` |
+| POST | `/api/admin/accounts/{id}/unlock` | Mở khóa |
+
+Cần đăng nhập (của chính người dùng, `accountId` lấy từ token), tối đa 10 địa chỉ mỗi tài khoản:
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| GET | `/api/addresses` | Sổ địa chỉ, địa chỉ mặc định lên đầu |
+| POST | `/api/addresses` | Thêm. Địa chỉ đầu tiên tự là mặc định |
+| PUT | `/api/addresses/{id}` | Sửa (`makeDefault: true` để đặt mặc định) |
+| POST | `/api/addresses/{id}/default` | Đặt làm mặc định |
+| DELETE | `/api/addresses/{id}` | Xóa. Xóa địa chỉ mặc định thì địa chỉ cũ nhất còn lại thành mặc định |
+
+Nội dung địa chỉ: `receiverName, receiverPhone, houseNumber, street, district, city, makeDefault`.
+
+Gửi email (biến môi trường mới):
+
+| Biến | Ý nghĩa |
+|---|---|
+| `FRONTEND_URL` | Gốc địa chỉ React để tạo liên kết trong email (mặc định `http://localhost:5173`) |
+| `BREVO_API_KEY`, `MAIL_FROM`, `MAIL_FROM_NAME` | Gửi qua Brevo API (HTTPS). Dùng cách này trên Render vì Render chặn cổng SMTP. `MAIL_FROM` phải là địa chỉ đã xác minh trong Brevo |
+| `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_STARTTLS` | Gửi qua SMTP (chạy máy cá nhân). Có cả Brevo và SMTP thì dùng Brevo |
+| `RESET_EXPIRE_MINUTES`, `RESET_MAX_PER_HOUR` | Thời hạn liên kết (30) và số yêu cầu tối đa mỗi giờ (5) |
+
+Không cấu hình email nào: chế độ phát triển, nội dung email (kèm liên kết đặt lại mật khẩu) chỉ in ra log, không gửi đi.
+Kiểm thử: `mvn test -Dtest=AccountFeaturesTest` (cần `TEST_DB_URL`, xem mục trên).
