@@ -1,0 +1,8 @@
+.login { max-width: 380px; margin: 0 auto; }
+.login__hint { color: #666; }
+.login__form { display: flex; flex-direction: column; gap: 14px; }
+.login__form label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #444; }
+.login__form input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
+.login__form button { padding: 10px; border: 0; border-radius: 6px; background: #d32f2f; color: #fff; font-size: 15px; cursor: pointer; }
+.login__form button:disabled { opacity: .6; cursor: default; }
+.login__error { margin: 0; padding: 8px 10px; border-radius: 6px; background: #fdecea; color: #c62828; font-size: 14px; }

@@ -7,3 +7,6 @@ body { margin: 0; font-family: system-ui, sans-serif; color: #222; background: #
 .nav a { color: #444; text-decoration: none; }
 .nav a.active { color: #d32f2f; font-weight: 600; }
 .content { max-width: 1100px; margin: 0 auto; padding: 24px; }
+.nav__user { color: #888; font-size: 14px; }
+.nav__logout { padding: 0; border: 0; background: none; color: #444; font: inherit; cursor: pointer; }
+.nav__logout:hover { color: #d32f2f; }

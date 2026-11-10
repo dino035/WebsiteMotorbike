@@ -1,0 +1,9 @@
+.add-to-cart { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
+.add-to-cart__qty { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #444; }
+.add-to-cart__qty input { width: 64px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
+.add-to-cart__button { padding: 11px 22px; border: 0; border-radius: 6px; background: #d32f2f; color: #fff; font-size: 15px; cursor: pointer; }
+.add-to-cart__button:disabled { background: #bbb; cursor: default; }
+.add-to-cart__msg { flex-basis: 100%; margin: 0; font-size: 14px; }
+.add-to-cart__msg--ok { color: #2e7d32; }
+.add-to-cart__msg--error { color: #c62828; }
+.add-to-cart__msg a { color: #d32f2f; }
