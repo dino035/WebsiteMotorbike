@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import useAuth from '../hooks/useAuth.js'
 import { apiError } from '../utils/apiError.js'
 import './LoginPage.css'
@@ -48,6 +48,9 @@ export default function LoginPage() {
                 {error && <p className="login__error" role="alert">{error}</p>}
                 <button type="submit" disabled={submitting}>{submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}</button>
             </form>
+            <p className="login__switch">
+                Chưa có tài khoản? <Link to="/register" state={{ from }}>Đăng ký</Link>
+            </p>
         </section>
     )
 }

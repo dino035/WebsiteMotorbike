@@ -19,7 +19,10 @@ export default function MainLayout() {
                             <button type="button" className="nav__logout" onClick={logout}>Đăng xuất</button>
                         </>
                     ) : (
-                        <NavLink to="/login">Đăng nhập</NavLink>
+                        <>
+                            <NavLink to="/login">Đăng nhập</NavLink>
+                            <NavLink to="/register">Đăng ký</NavLink>
+                        </>
                     )}
                 </nav>
             </header>
