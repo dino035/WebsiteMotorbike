@@ -15,6 +15,7 @@ export default function MainLayout() {
                     <NavLink to="/cart">Giỏ hàng{itemCount > 0 ? ` (${itemCount})` : ''}</NavLink>
                     {token ? (
                         <>
+                            <NavLink to="/addresses">Địa chỉ</NavLink>
                             <span className="nav__user">{user?.email}</span>
                             <button type="button" className="nav__logout" onClick={logout}>Đăng xuất</button>
                         </>

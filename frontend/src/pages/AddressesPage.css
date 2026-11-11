@@ -1,0 +1,34 @@
+.addresses { max-width: 760px; margin: 0 auto; }
+.addresses__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.addresses__head h1 { margin: 0; }
+.addresses__add { padding: 9px 16px; border: 0; border-radius: 6px; background: #d32f2f; color: #fff; font-size: 14px; cursor: pointer; }
+.addresses__add:disabled { background: #bbb; cursor: default; }
+.addresses__hint { color: #8a6100; font-size: 14px; }
+.addresses__message { padding: 16px 0; color: #666; }
+.addresses__message--error { color: #c62828; }
+
+.addresses__list { margin: 16px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.address-card { padding: 14px 16px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
+.address-card--form { margin-top: 16px; }
+.address-card h2 { margin: 0 0 12px; font-size: 17px; }
+.address-card__name { margin: 0 0 4px; font-weight: 600; }
+.address-card__phone { font-weight: normal; color: #666; }
+.address-card__badge { margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: #e8f5e9; color: #2e7d32; font-size: 12px; font-weight: normal; }
+.address-card__full { margin: 0; color: #444; }
+.address-card__actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 10px; }
+.address-card__actions button { padding: 0; border: 0; background: none; color: #d32f2f; font: inherit; font-size: 14px; cursor: pointer; text-decoration: underline; }
+.address-card__actions button:disabled { opacity: .5; cursor: default; }
+.address-card__delete { color: #888 !important; }
+
+.address-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.address-form label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #444; }
+.address-form input[type="text"], .address-form input[type="tel"] { padding: 9px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
+.address-form__wide { grid-column: 1 / -1; }
+.address-form__check { flex-direction: row !important; align-items: center; gap: 8px !important; }
+.address-form__error { color: #c62828; font-size: 13px; }
+.address-form__alert { margin: 0; padding: 8px 10px; border-radius: 6px; background: #fdecea; color: #c62828; font-size: 14px; }
+.address-form__actions { display: flex; gap: 10px; }
+.address-form__actions button { padding: 9px 18px; border: 0; border-radius: 6px; background: #d32f2f; color: #fff; font-size: 14px; cursor: pointer; }
+.address-form__actions .address-form__cancel { background: #eee; color: #444; }
+.address-form__actions button:disabled { opacity: .6; cursor: default; }
+@media (max-width: 560px) { .address-form { grid-template-columns: 1fr; } }
