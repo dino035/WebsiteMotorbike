@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import client from '../api/client.js'
+import FindPartsByVehicle from '../components/FindPartsByVehicle';
 
 export default function HomePage() {
     const [apiStatus, setApiStatus] = useState('Đang kiểm tra kết nối backend...')
@@ -14,6 +15,7 @@ export default function HomePage() {
         <section>
             <h1>Cửa hàng xe máy cũ và phụ tùng</h1>
             <p>{apiStatus}</p>
+            <FindPartsByVehicle />
         </section>
     )
 }
