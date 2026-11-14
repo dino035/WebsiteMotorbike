@@ -166,3 +166,29 @@ Luật tạm giữ xe: không có bộ đếm giờ, chỉ so `addedAt` với b�
 Khi có người khác thêm và giữ, dòng của người hết hạn bị gỡ ở lần mở giỏ sau. Hai khách thêm cùng một xe cùng lúc thì chỉ một người giữ được
 (khóa dòng sản phẩm `SELECT ... FOR UPDATE`; bản JSP cũ chưa chặn chỗ này). Đổi thời gian giữ bằng biến `CART_HOLD_MINUTES` (mặc định 30).
 Kiểm thử: `mvn test -Dtest=CartTest`.
+
+## Đặt hàng (COD, giao tận nơi, nhận tại cửa hàng, lắp đặt)
+
+Cần đăng nhập. Đặt hàng từ giỏ hiện tại của người dùng; chưa có VNPay (chọn `VNPAY` trả 400 cho tới khi làm xong).
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| GET | `/api/orders/policy` | Phí công lắp đặt và giới hạn ngày hẹn, để React vẽ trang đặt hàng |
+| POST | `/api/orders` | Đặt hàng từ giỏ (201, trả chi tiết đơn) |
+| GET | `/api/orders` | Đơn của tôi, mới nhất trước |
+| GET | `/api/orders/{orderId}` | Chi tiết một đơn (đơn của người khác trả 404) |
+
+Thân `POST /api/orders`: `{deliveryMethod: DELIVERY\|PICKUP\|INSTALL, receiverName, receiverPhone, shippingAddress, paymentMethod: COD, returnPolicyAccepted: true, installDate}`.
+`shippingAddress` bắt buộc khi `DELIVERY`; `installDate` (yyyy-MM-dd) bắt buộc khi `INSTALL`. Người nhận và địa chỉ được chụp vào đơn
+(sửa hay xóa sổ địa chỉ sau đó không đổi đơn cũ); tên và đơn giá sản phẩm cũng chụp lúc đặt.
+
+Đặt hàng chạy trong một giao dịch: khóa tài khoản, khóa từng sản phẩm (theo thứ tự mã), kiểm tra lại còn bán được, tạo đơn
+`PENDING` + dòng hàng + thanh toán COD `PENDING`, chuyển xe sang `SOLD`, xóa giỏ, ghi thông báo `ORDER_PLACED`.
+
+- Lắp đặt (`INSTALL`): chỉ đơn có phụ tùng; ngày hẹn từ ngày mai tới 60 ngày; tối đa 5 lượt mỗi ngày (khóa theo ngày để hai khách cùng đặt
+  không vượt); phí công 50.000 đ cộng vào tổng đơn. Các con số là giả định từ bản JSP, cần chốt với nhóm (`InstallationPolicy`).
+- Mã lỗi: 400 giỏ trống, thiếu hay sai dữ liệu (địa chỉ, số điện thoại, chưa đồng ý chính sách đổi trả), 409 sản phẩm không còn khả dụng hoặc ngày kín lịch.
+  Đơn bị từ chối thì không tiêu thụ gì: giỏ và trạng thái xe còn nguyên.
+- Hai lần đặt cùng lúc từ một giỏ chỉ tạo một đơn (khóa tài khoản).
+
+Chưa có: Admin đổi trạng thái đơn và xác nhận thu tiền COD, VNPay, bảo hành. Kiểm thử: `mvn test -Dtest=OrderTest`.
