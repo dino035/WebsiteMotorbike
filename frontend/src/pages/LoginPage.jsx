@@ -48,6 +48,7 @@ export default function LoginPage() {
                 {error && <p className="login__error" role="alert">{error}</p>}
                 <button type="submit" disabled={submitting}>{submitting ? 'Đang đăng nhập...' : 'Đăng nhập'}</button>
             </form>
+            <p className="login__switch"><Link to="/forgot-password">Quên mật khẩu?</Link></p>
             <p className="login__switch">
                 Chưa có tài khoản? <Link to="/register" state={{ from }}>Đăng ký</Link>
             </p>
