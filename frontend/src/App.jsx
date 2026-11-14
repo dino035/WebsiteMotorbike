@@ -10,6 +10,9 @@ import RegisterPage from './pages/RegisterPage.jsx'
 import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx'
 import ResetPasswordPage from './pages/ResetPasswordPage.jsx'
 import AddressesPage from './pages/AddressesPage.jsx'
+import CheckoutPage from './pages/CheckoutPage.jsx'
+import OrdersPage from './pages/OrdersPage.jsx'
+import OrderDetailPage from './pages/OrderDetailPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 
 export default function App() {
@@ -20,6 +23,9 @@ export default function App() {
           <Route path="/products" element={<ProductListPage />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />
           <Route path="/cart" element={<RequireAuth><CartPage /></RequireAuth>} />
+          <Route path="/checkout" element={<RequireAuth><CheckoutPage /></RequireAuth>} />
+          <Route path="/orders" element={<RequireAuth><OrdersPage /></RequireAuth>} />
+          <Route path="/orders/:id" element={<RequireAuth><OrderDetailPage /></RequireAuth>} />
           <Route path="/addresses" element={<RequireAuth><AddressesPage /></RequireAuth>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

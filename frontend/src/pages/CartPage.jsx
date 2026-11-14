@@ -118,8 +118,7 @@ export default function CartPage() {
                         <h2>Tóm tắt</h2>
                         <p className="cart__row"><span>Số món</span><span>{cart.itemCount}</span></p>
                         <p className="cart__row cart__row--total"><span>Tổng tiền</span><strong>{formatPrice(cart.total)}</strong></p>
-                        <button type="button" className="cart__checkout" disabled
-                                title="Chức năng đặt hàng sẽ có ở bước tiếp theo">Đặt hàng (sắp có)</button>
+                        <Link to="/checkout" className="cart__checkout">Đặt hàng</Link>
                         <p className="cart__hint">Xe máy được tạm giữ {cart.holdMinutes} phút kể từ lúc thêm vào giỏ.</p>
                     </aside>
                 </div>
