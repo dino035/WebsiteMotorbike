@@ -1,0 +1,29 @@
+.checkout h1 { margin-top: 0; }
+.checkout__message { padding: 24px 0; color: #666; }
+.checkout__message--error { color: #c62828; }
+.checkout__link-button { display: inline-block; padding: 10px 20px; border-radius: 6px; background: #d32f2f; color: #fff; text-decoration: none; }
+
+.checkout__layout { display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start; }
+@media (max-width: 800px) { .checkout__layout { grid-template-columns: 1fr; } }
+
+.checkout__main { display: flex; flex-direction: column; gap: 16px; }
+.checkout__box { margin: 0; padding: 14px 16px 16px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
+.checkout__box legend { padding: 0 6px; font-weight: 600; }
+.checkout__option { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; cursor: pointer; }
+.checkout__option--off { color: #999; cursor: default; }
+.checkout__option--address { padding: 8px 10px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 6px; }
+.checkout__badge { margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: #e8f5e9; color: #2e7d32; font-size: 12px; font-style: normal; }
+.checkout__note { font-size: 13px; color: #777; }
+.checkout__field { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; font-size: 14px; color: #444; }
+.checkout__field input, .checkout__field textarea { padding: 9px; border: 1px solid #ccc; border-radius: 6px; font: inherit; font-size: 15px; }
+.checkout__policy { display: flex; align-items: flex-start; gap: 8px; font-size: 14px; color: #444; cursor: pointer; }
+
+.checkout__summary { padding: 16px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
+.checkout__summary h2 { margin: 0 0 10px; font-size: 18px; }
+.checkout__lines { margin: 0 0 8px; padding: 0; list-style: none; font-size: 14px; }
+.checkout__lines li { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-bottom: 1px dashed #eee; }
+.checkout__row { display: flex; justify-content: space-between; margin: 8px 0; }
+.checkout__row--total strong { font-size: 20px; color: #d32f2f; }
+.checkout__error { margin: 10px 0 0; padding: 8px 10px; border-radius: 6px; background: #fdecea; color: #c62828; font-size: 14px; }
+.checkout__submit { width: 100%; margin-top: 12px; padding: 12px; border: 0; border-radius: 6px; background: #d32f2f; color: #fff; font-size: 15px; cursor: pointer; }
+.checkout__submit:disabled { background: #bbb; cursor: default; }
