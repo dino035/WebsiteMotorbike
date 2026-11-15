@@ -191,4 +191,26 @@ Thân `POST /api/orders`: `{deliveryMethod: DELIVERY\|PICKUP\|INSTALL, receiverN
   Đơn bị từ chối thì không tiêu thụ gì: giỏ và trạng thái xe còn nguyên.
 - Hai lần đặt cùng lúc từ một giỏ chỉ tạo một đơn (khóa tài khoản).
 
-Chưa có: Admin đổi trạng thái đơn và xác nhận thu tiền COD, VNPay, bảo hành. Kiểm thử: `mvn test -Dtest=OrderTest`.
+Chưa có: VNPay, bảo hành. Admin xem phần "Admin quản lý đơn hàng" bên dưới. Kiểm thử: `mvn test -Dtest=OrderTest`.
+
+## Admin quản lý đơn hàng và lịch lắp đặt
+
+Chỉ ADMIN (`/api/admin/**`).
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| GET | `/api/admin/orders?status=&page=&size=` | Mọi đơn, mới nhất trước; lọc theo trạng thái (bỏ trống hoặc `ALL` là không lọc); trả kèm email khách |
+| GET | `/api/admin/orders/{orderId}` | Chi tiết: đơn, khách, `nextStatuses` (các bước được chuyển), `canConfirmPayment` |
+| POST | `/api/admin/orders/{orderId}/status` `{status}` | Đổi trạng thái; chỉ theo `OrderStatus.canMoveTo` |
+| POST | `/api/admin/orders/{orderId}/confirm-payment` | Xác nhận đã thu tiền COD |
+| GET | `/api/admin/installations?status=` | Lịch lắp đặt, ngày hẹn gần nhất trước |
+| POST | `/api/admin/installations/{requestId}/action` `{action: DONE\|CANCEL\|RESCHEDULE, newDate}` | Xử lý một lịch đang `SCHEDULED` |
+
+Luật: hoàn thành đơn (`COMPLETED`) cần đã thu tiền; hủy đơn (`CANCELLED`) cần chưa thu tiền, trả các xe trong đơn về `AVAILABLE`
+và hủy luôn lịch lắp đặt (trả chỗ trống). Đánh dấu lịch lắp xong cần đơn đã xác nhận; đổi ngày kiểm tra ngày còn chỗ
+(tối đa 5 lượt mỗi ngày, khóa theo ngày). Mọi thay đổi đều ghi thông báo cho khách.
+Mã lỗi: 404 không có đơn hoặc lịch, 409 bước chuyển không hợp lệ, chưa/đã thu tiền, ngày kín lịch, lịch đã xử lý; 400 giá trị trạng thái hay ngày sai.
+Hai Admin đổi cùng một đơn cùng lúc: khóa dòng đơn (`SELECT ... FOR UPDATE`) nên chỉ một thao tác thắng (bản JSP cũng khóa; dùng truy vấn JPQL thay vì `em.find`
+vì `em.find` nối bảng lắp đặt, PostgreSQL không cho `FOR UPDATE` ở phía có thể rỗng của LEFT JOIN).
+Phí công vẫn nằm trong tổng đơn khi lịch lắp đặt bị hủy riêng (giữ như bản JSP, cần chốt với nhóm).
+Kiểm thử: `mvn test -Dtest=AdminOrderTest`.

@@ -226,7 +226,7 @@ public class OrderService {
 
     // ---------------------------------------------------------------- phụ trợ
 
-    private static OrderSummaryResponse toSummary(Order o, Payment p) {
+    static OrderSummaryResponse toSummary(Order o, Payment p) {
         int itemCount = o.getItems().stream().mapToInt(OrderItem::getQuantity).sum();
         return new OrderSummaryResponse(o.getOrderId(), o.getShortCode(), o.getOrderDate(),
                 o.getStatus().name(), o.getStatus().getLabel(), o.getTotalAmount(), itemCount,
@@ -234,7 +234,7 @@ public class OrderService {
                 p == null ? null : p.getStatus().name(), p == null ? null : p.getStatus().getLabel());
     }
 
-    private static OrderDetailResponse toDetail(Order o, Payment p) {
+    static OrderDetailResponse toDetail(Order o, Payment p) {
         List<OrderDetailResponse.Item> items = o.getItems().stream()
                 .sorted(Comparator.comparing(OrderItem::getProductName, Comparator.nullsLast(String::compareTo)))
                 .map(i -> new OrderDetailResponse.Item(i.getProductId(), i.getProductName(), i.getUnitPrice(),
@@ -248,7 +248,8 @@ public class OrderService {
                 ir.getPreferredDate(), ir.getLaborFee(), ir.getStatus().name(), ir.getStatus().getLabel());
         return new OrderDetailResponse(o.getOrderId(), o.getShortCode(), o.getOrderDate(),
                 o.getStatus().name(), o.getStatus().getLabel(),
-                o.getDeliveryMethod().name(), o.getDeliveryMethod().getLabel(),
+                o.getDeliveryMethod() == null ? null : o.getDeliveryMethod().name(),
+                o.getDeliveryMethod() == null ? null : o.getDeliveryMethod().getLabel(),
                 o.getReceiverName(), o.getReceiverPhone(), o.getShippingAddress(), o.getTotalAmount(),
                 o.isReturnPolicyAccepted(), items, payment, installation);
     }
