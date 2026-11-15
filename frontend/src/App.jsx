@@ -1,6 +1,10 @@
 import { Routes, Route } from 'react-router-dom'
 import MainLayout from './layouts/MainLayout.jsx'
 import RequireAuth from './components/RequireAuth.jsx'
+import RequireAdmin from './components/RequireAdmin.jsx'
+import AdminOrdersPage from './pages/AdminOrdersPage.jsx'
+import AdminOrderDetailPage from './pages/AdminOrderDetailPage.jsx'
+import AdminInstallationsPage from './pages/AdminInstallationsPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import ProductListPage from './pages/ProductListPage.jsx'
 import ProductDetailPage from './pages/ProductDetailPage.jsx'
@@ -27,6 +31,9 @@ export default function App() {
           <Route path="/orders" element={<RequireAuth><OrdersPage /></RequireAuth>} />
           <Route path="/orders/:id" element={<RequireAuth><OrderDetailPage /></RequireAuth>} />
           <Route path="/addresses" element={<RequireAuth><AddressesPage /></RequireAuth>} />
+          <Route path="/admin/orders" element={<RequireAdmin><AdminOrdersPage /></RequireAdmin>} />
+          <Route path="/admin/orders/:id" element={<RequireAdmin><AdminOrderDetailPage /></RequireAdmin>} />
+          <Route path="/admin/installations" element={<RequireAdmin><AdminInstallationsPage /></RequireAdmin>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />

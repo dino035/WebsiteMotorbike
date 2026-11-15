@@ -15,6 +15,7 @@ export default function MainLayout() {
                     <NavLink to="/cart">Giỏ hàng{itemCount > 0 ? ` (${itemCount})` : ''}</NavLink>
                     {token ? (
                         <>
+                            {user?.role === 'ADMIN' && <NavLink to="/admin/orders">Quản trị</NavLink>}
                             <NavLink to="/orders">Đơn hàng</NavLink>
                             <NavLink to="/addresses">Địa chỉ</NavLink>
                             <span className="nav__user">{user?.email}</span>
