@@ -13,6 +13,7 @@ import com.nguyen.motoparts.catalog.repository.ProductRepository;
 import com.nguyen.motoparts.common.enums.InstallationStatus;
 import com.nguyen.motoparts.common.enums.ProductStatus;
 import com.nguyen.motoparts.order.repository.InstallationRequestRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,8 +150,30 @@ class OrderTest {
                 .content(json.writeValueAsString(body)), c.token())).andReturn();
     }
 
+    /**
+     * Một ngày hẹn còn hoàn toàn trống (trong khoảng 2 đến 56 ngày tới). DB test giữ dữ liệu giữa các lần chạy nên không
+     * thể chọn ngày bừa: trúng ngày đã kín lịch thì đặt hàng bị 409 và test chập chờn.
+     */
     private LocalDate randomFutureDate() {
-        return LocalDate.now().plusDays(2 + new java.util.Random().nextInt(55));
+        java.util.Random random = new java.util.Random();
+        for (int i = 0; i < 300; i++) {
+            LocalDate d = LocalDate.now().plusDays(2 + random.nextInt(55));
+            if (installationRepository.countByPreferredDateAndStatusNot(d, InstallationStatus.CANCELLED) == 0) {
+                return d;
+            }
+        }
+        throw new AssertionError("không còn ngày trống để thử lịch lắp đặt");
+    }
+
+    /** Dọn sau mỗi test: hủy mọi lịch lắp đặt còn hiệu lực để lần chạy sau không bị ngày kín lịch của lần trước. */
+    @AfterEach
+    void releaseInstallationSlots() {
+        installationRepository.findAll().stream()
+                .filter(r -> r.getStatus() != InstallationStatus.CANCELLED)
+                .forEach(r -> {
+                    r.setStatus(InstallationStatus.CANCELLED);
+                    installationRepository.save(r);
+                });
     }
 
     // ------------------------------------------------------------------ tests
