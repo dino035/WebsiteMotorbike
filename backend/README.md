@@ -191,7 +191,7 @@ Thân `POST /api/orders`: `{deliveryMethod: DELIVERY\|PICKUP\|INSTALL, receiverN
   Đơn bị từ chối thì không tiêu thụ gì: giỏ và trạng thái xe còn nguyên.
 - Hai lần đặt cùng lúc từ một giỏ chỉ tạo một đơn (khóa tài khoản).
 
-Chưa có: VNPay, bảo hành. Admin xem phần "Admin quản lý đơn hàng" bên dưới. Kiểm thử: `mvn test -Dtest=OrderTest`.
+Chưa có: VNPay. Admin xem phần "Admin quản lý đơn hàng" bên dưới. Kiểm thử: `mvn test -Dtest=OrderTest`.
 
 ## Admin quản lý đơn hàng và lịch lắp đặt
 
@@ -214,3 +214,24 @@ Hai Admin đổi cùng một đơn cùng lúc: khóa dòng đơn (`SELECT ... FO
 vì `em.find` nối bảng lắp đặt, PostgreSQL không cho `FOR UPDATE` ở phía có thể rỗng của LEFT JOIN).
 Phí công vẫn nằm trong tổng đơn khi lịch lắp đặt bị hủy riêng (giữ như bản JSP, cần chốt với nhóm).
 Kiểm thử: `mvn test -Dtest=AdminOrderTest`.
+
+## Bảo hành (khách gửi yêu cầu, Admin duyệt hoặc từ chối)
+
+Cần đăng nhập; phần Admin chỉ ADMIN.
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| GET | `/api/warranty-requests/options` | Sản phẩm đã mua trong đơn Hoàn thành, kèm `purchasedAt`, `deadline`, `expired`, `pending`, `canRequest` |
+| POST | `/api/warranty-requests` `{orderItemId, description, attachmentUrl}` | Gửi yêu cầu (201). `attachmentUrl` (ảnh/video minh chứng) không bắt buộc |
+| GET | `/api/warranty-requests` | Yêu cầu của tôi, mới nhất trước |
+| GET | `/api/warranty-requests/{requestId}` | Chi tiết một yêu cầu (của người khác trả 404) |
+| GET | `/api/admin/warranty-requests?status=&page=&size=` | Mọi yêu cầu, mới nhất trước, lọc theo `PENDING`/`APPROVED`/`REJECTED` |
+| GET | `/api/admin/warranty-requests/{requestId}` | Chi tiết: yêu cầu, khách, ngày mua, hạn bảo hành, `canDecide` |
+| POST | `/api/admin/warranty-requests/{requestId}/decide` `{approve, note}` | Duyệt (thay mới) hoặc từ chối; từ chối bắt buộc có `note` là lý do |
+
+Gửi yêu cầu cần: sản phẩm thuộc khách (không thì 404), đơn đã Hoàn thành, còn trong hạn (xe 24 tháng, phụ tùng 6 tháng, tính từ ngày đặt đơn;
+sản phẩm đã bị xóa khỏi hệ thống tính như phụ tùng), chưa có yêu cầu đang chờ xử lý cho sản phẩm đó (409 ở các trường hợp còn lại). Bị từ chối rồi thì gửi lại được.
+`attachmentUrl` chỉ nhận `http://` hoặc `https://` (Admin sẽ bấm vào đường dẫn, nên chặn `javascript:` và các kiểu khác). Gửi xong có thông báo cho mọi Admin;
+quyết định xong có thông báo cho khách. Bấm gửi hai lần cùng lúc chỉ tạo một yêu cầu (khóa tài khoản); hai Admin quyết định cùng một yêu cầu cùng lúc chỉ một người thắng
+(khóa dòng yêu cầu `SELECT ... FOR UPDATE`; bản JSP chỉ chặn ở phía Admin). Hạn 24 tháng và 6 tháng lấy từ SRS 2.3.2 (`WarrantyPolicy`).
+Kiểm thử: `mvn test -Dtest=WarrantyTest`.

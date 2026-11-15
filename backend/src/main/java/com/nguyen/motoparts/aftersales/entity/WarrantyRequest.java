@@ -48,6 +48,11 @@ public class WarrantyRequest {
 
     private LocalDateTime resolvedAt;
 
+    /** Mã ngắn hiển thị (8 ký tự đầu của UUID), giống mã ngắn của đơn hàng. */
+    public String getShortCode() {
+        return requestId == null ? "" : requestId.substring(0, Math.min(8, requestId.length())).toUpperCase();
+    }
+
     @PrePersist
     protected void onCreate() {
         if (submittedAt == null) {
