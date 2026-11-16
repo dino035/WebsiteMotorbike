@@ -235,3 +235,21 @@ sản phẩm đã bị xóa khỏi hệ thống tính như phụ tùng), chưa c
 quyết định xong có thông báo cho khách. Bấm gửi hai lần cùng lúc chỉ tạo một yêu cầu (khóa tài khoản); hai Admin quyết định cùng một yêu cầu cùng lúc chỉ một người thắng
 (khóa dòng yêu cầu `SELECT ... FOR UPDATE`; bản JSP chỉ chặn ở phía Admin). Hạn 24 tháng và 6 tháng lấy từ SRS 2.3.2 (`WarrantyPolicy`).
 Kiểm thử: `mvn test -Dtest=WarrantyTest`.
+
+
+## Thông báo của khách
+
+Thông báo do hệ thống tạo (đặt hàng, đổi trạng thái đơn, lịch lắp đặt, bảo hành được duyệt hoặc từ chối). Tài khoản nào chỉ thấy và sửa được thông báo của chính mình (`accountId` lấy từ token). Cần đăng nhập.
+
+| Phương thức | Đường dẫn | Việc làm |
+|---|---|---|
+| GET | `/api/notifications?page=0&size=20` | Danh sách, mới nhất trước, phân trang (`size` tối đa 50). Mỗi dòng: `notificationId`, `type`, `typeLabel`, `content`, `isRead`, `createdAt` |
+| GET | `/api/notifications/unread-count` | `{ "count": n }` cho chuông trên menu |
+| POST | `/api/notifications/{id}/read` | Đánh dấu đã đọc một thông báo; gọi lại vẫn được; của người khác hoặc không có thì 404 |
+| POST | `/api/notifications/read-all` | Đánh dấu tất cả của mình đã đọc, trả `{ "updated": n }` |
+
+Đánh dấu đã đọc dùng một câu `UPDATE ... WHERE id = ? AND accountId = ?` nên điều kiện chủ sở hữu nằm ngay trong câu lệnh, không có khoảng hở giữa kiểm tra và ghi.
+
+React: mục "Thông báo (n)" trên menu (số chưa đọc tải lại khi đổi trang và mỗi 60 giây), trang `/notifications` có phân trang, bấm một thông báo để đánh dấu đã đọc, nút "Đánh dấu tất cả đã đọc".
+
+Kiểm thử: `aftersales/NotificationTest` (8 ca): phải đăng nhập, khách mới chưa có gì, mới nhất trước, mỗi người chỉ thấy của mình, phân trang ổn định, đánh dấu đã đọc lặp lại không lỗi, không đánh dấu được của người khác, đánh dấu tất cả không đụng tài khoản khác.

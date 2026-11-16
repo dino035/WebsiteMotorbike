@@ -1,10 +1,12 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import useAuth from '../hooks/useAuth.js'
 import useCart from '../hooks/useCart.js'
+import useNotifications from '../hooks/useNotifications.js'
 
 export default function MainLayout() {
     const { token, user, logout } = useAuth()
     const { itemCount } = useCart()
+    const { unreadCount } = useNotifications()
 
     return (
         <div className="layout">
@@ -18,6 +20,7 @@ export default function MainLayout() {
                             {user?.role === 'ADMIN' && <NavLink to="/admin/orders">Quản trị</NavLink>}
                             <NavLink to="/orders">Đơn hàng</NavLink>
                             <NavLink to="/warranty">Bảo hành</NavLink>
+                            <NavLink to="/notifications">Thông báo{unreadCount > 0 ? ` (${unreadCount})` : ''}</NavLink>
                             <NavLink to="/addresses">Địa chỉ</NavLink>
                             <span className="nav__user">{user?.email}</span>
                             <button type="button" className="nav__logout" onClick={logout}>Đăng xuất</button>
