@@ -8,6 +8,7 @@ import AdminInstallationsPage from './pages/AdminInstallationsPage.jsx'
 import AdminWarrantyPage from './pages/AdminWarrantyPage.jsx'
 import AdminWarrantyDetailPage from './pages/AdminWarrantyDetailPage.jsx'
 import WarrantyPage from './pages/WarrantyPage.jsx'
+import NotificationsPage from './pages/NotificationsPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import ProductListPage from './pages/ProductListPage.jsx'
 import ProductDetailPage from './pages/ProductDetailPage.jsx'
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/admin/warranty" element={<RequireAdmin><AdminWarrantyPage /></RequireAdmin>} />
           <Route path="/admin/warranty/:id" element={<RequireAdmin><AdminWarrantyDetailPage /></RequireAdmin>} />
           <Route path="/warranty" element={<RequireAuth><WarrantyPage /></RequireAuth>} />
+          <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
