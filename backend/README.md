@@ -166,3 +166,72 @@ Luật tạm giữ xe: không có bộ đếm giờ, chỉ so `addedAt` với b�
 Khi có người khác thêm và giữ, dòng của người hết hạn bị gỡ ở lần mở giỏ sau. Hai khách thêm cùng một xe cùng lúc thì chỉ một người giữ được
 (khóa dòng sản phẩm `SELECT ... FOR UPDATE`; bản JSP cũ chưa chặn chỗ này). Đổi thời gian giữ bằng biến `CART_HOLD_MINUTES` (mặc định 30).
 Kiểm thử: `mvn test -Dtest=CartTest`.
+
+## Đặt hàng (COD, giao tận nơi, nhận tại cửa hàng, lắp đặt)
+
+Cần đăng nhập. Đặt hàng từ giỏ hiện tại của người dùng; chưa có VNPay (chọn `VNPAY` trả 400 cho tới khi làm xong).
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| GET | `/api/orders/policy` | Phí công lắp đặt và giới hạn ngày hẹn, để React vẽ trang đặt hàng |
+| POST | `/api/orders` | Đặt hàng từ giỏ (201, trả chi tiết đơn) |
+| GET | `/api/orders` | Đơn của tôi, mới nhất trước |
+| GET | `/api/orders/{orderId}` | Chi tiết một đơn (đơn của người khác trả 404) |
+
+Thân `POST /api/orders`: `{deliveryMethod: DELIVERY\|PICKUP\|INSTALL, receiverName, receiverPhone, shippingAddress, paymentMethod: COD, returnPolicyAccepted: true, installDate}`.
+`shippingAddress` bắt buộc khi `DELIVERY`; `installDate` (yyyy-MM-dd) bắt buộc khi `INSTALL`. Người nhận và địa chỉ được chụp vào đơn
+(sửa hay xóa sổ địa chỉ sau đó không đổi đơn cũ); tên và đơn giá sản phẩm cũng chụp lúc đặt.
+
+Đặt hàng chạy trong một giao dịch: khóa tài khoản, khóa từng sản phẩm (theo thứ tự mã), kiểm tra lại còn bán được, tạo đơn
+`PENDING` + dòng hàng + thanh toán COD `PENDING`, chuyển xe sang `SOLD`, xóa giỏ, ghi thông báo `ORDER_PLACED`.
+
+- Lắp đặt (`INSTALL`): chỉ đơn có phụ tùng; ngày hẹn từ ngày mai tới 60 ngày; tối đa 5 lượt mỗi ngày (khóa theo ngày để hai khách cùng đặt
+  không vượt); phí công 50.000 đ cộng vào tổng đơn. Các con số là giả định từ bản JSP, cần chốt với nhóm (`InstallationPolicy`).
+- Mã lỗi: 400 giỏ trống, thiếu hay sai dữ liệu (địa chỉ, số điện thoại, chưa đồng ý chính sách đổi trả), 409 sản phẩm không còn khả dụng hoặc ngày kín lịch.
+  Đơn bị từ chối thì không tiêu thụ gì: giỏ và trạng thái xe còn nguyên.
+- Hai lần đặt cùng lúc từ một giỏ chỉ tạo một đơn (khóa tài khoản).
+
+Chưa có: VNPay. Admin xem phần "Admin quản lý đơn hàng" bên dưới. Kiểm thử: `mvn test -Dtest=OrderTest`.
+
+## Admin quản lý đơn hàng và lịch lắp đặt
+
+Chỉ ADMIN (`/api/admin/**`).
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| GET | `/api/admin/orders?status=&page=&size=` | Mọi đơn, mới nhất trước; lọc theo trạng thái (bỏ trống hoặc `ALL` là không lọc); trả kèm email khách |
+| GET | `/api/admin/orders/{orderId}` | Chi tiết: đơn, khách, `nextStatuses` (các bước được chuyển), `canConfirmPayment` |
+| POST | `/api/admin/orders/{orderId}/status` `{status}` | Đổi trạng thái; chỉ theo `OrderStatus.canMoveTo` |
+| POST | `/api/admin/orders/{orderId}/confirm-payment` | Xác nhận đã thu tiền COD |
+| GET | `/api/admin/installations?status=` | Lịch lắp đặt, ngày hẹn gần nhất trước |
+| POST | `/api/admin/installations/{requestId}/action` `{action: DONE\|CANCEL\|RESCHEDULE, newDate}` | Xử lý một lịch đang `SCHEDULED` |
+
+Luật: hoàn thành đơn (`COMPLETED`) cần đã thu tiền; hủy đơn (`CANCELLED`) cần chưa thu tiền, trả các xe trong đơn về `AVAILABLE`
+và hủy luôn lịch lắp đặt (trả chỗ trống). Đánh dấu lịch lắp xong cần đơn đã xác nhận; đổi ngày kiểm tra ngày còn chỗ
+(tối đa 5 lượt mỗi ngày, khóa theo ngày). Mọi thay đổi đều ghi thông báo cho khách.
+Mã lỗi: 404 không có đơn hoặc lịch, 409 bước chuyển không hợp lệ, chưa/đã thu tiền, ngày kín lịch, lịch đã xử lý; 400 giá trị trạng thái hay ngày sai.
+Hai Admin đổi cùng một đơn cùng lúc: khóa dòng đơn (`SELECT ... FOR UPDATE`) nên chỉ một thao tác thắng (bản JSP cũng khóa; dùng truy vấn JPQL thay vì `em.find`
+vì `em.find` nối bảng lắp đặt, PostgreSQL không cho `FOR UPDATE` ở phía có thể rỗng của LEFT JOIN).
+Phí công vẫn nằm trong tổng đơn khi lịch lắp đặt bị hủy riêng (giữ như bản JSP, cần chốt với nhóm).
+Kiểm thử: `mvn test -Dtest=AdminOrderTest`.
+
+## Bảo hành (khách gửi yêu cầu, Admin duyệt hoặc từ chối)
+
+Cần đăng nhập; phần Admin chỉ ADMIN.
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| GET | `/api/warranty-requests/options` | Sản phẩm đã mua trong đơn Hoàn thành, kèm `purchasedAt`, `deadline`, `expired`, `pending`, `canRequest` |
+| POST | `/api/warranty-requests` `{orderItemId, description, attachmentUrl}` | Gửi yêu cầu (201). `attachmentUrl` (ảnh/video minh chứng) không bắt buộc |
+| GET | `/api/warranty-requests` | Yêu cầu của tôi, mới nhất trước |
+| GET | `/api/warranty-requests/{requestId}` | Chi tiết một yêu cầu (của người khác trả 404) |
+| GET | `/api/admin/warranty-requests?status=&page=&size=` | Mọi yêu cầu, mới nhất trước, lọc theo `PENDING`/`APPROVED`/`REJECTED` |
+| GET | `/api/admin/warranty-requests/{requestId}` | Chi tiết: yêu cầu, khách, ngày mua, hạn bảo hành, `canDecide` |
+| POST | `/api/admin/warranty-requests/{requestId}/decide` `{approve, note}` | Duyệt (thay mới) hoặc từ chối; từ chối bắt buộc có `note` là lý do |
+
+Gửi yêu cầu cần: sản phẩm thuộc khách (không thì 404), đơn đã Hoàn thành, còn trong hạn (xe 24 tháng, phụ tùng 6 tháng, tính từ ngày đặt đơn;
+sản phẩm đã bị xóa khỏi hệ thống tính như phụ tùng), chưa có yêu cầu đang chờ xử lý cho sản phẩm đó (409 ở các trường hợp còn lại). Bị từ chối rồi thì gửi lại được.
+`attachmentUrl` chỉ nhận `http://` hoặc `https://` (Admin sẽ bấm vào đường dẫn, nên chặn `javascript:` và các kiểu khác). Gửi xong có thông báo cho mọi Admin;
+quyết định xong có thông báo cho khách. Bấm gửi hai lần cùng lúc chỉ tạo một yêu cầu (khóa tài khoản); hai Admin quyết định cùng một yêu cầu cùng lúc chỉ một người thắng
+(khóa dòng yêu cầu `SELECT ... FOR UPDATE`; bản JSP chỉ chặn ở phía Admin). Hạn 24 tháng và 6 tháng lấy từ SRS 2.3.2 (`WarrantyPolicy`).
+Kiểm thử: `mvn test -Dtest=WarrantyTest`.

@@ -10,3 +10,7 @@
 .login__field-error { color: #c62828; font-size: 13px; }
 .login__switch { margin-top: 16px; font-size: 14px; color: #666; }
 .login__switch a { color: #d32f2f; }
+
+.login__success { margin: 0 0 12px; padding: 10px 12px; border-radius: 6px; background: #e8f5e9; color: #2e7d32; font-size: 14px; }
+.login__cta { display: inline-block; padding: 10px 20px; border-radius: 6px; background: #d32f2f; color: #fff; text-decoration: none; }
+.login__link-button { padding: 0; border: 0; background: none; color: #d32f2f; font: inherit; cursor: pointer; text-decoration: underline; }

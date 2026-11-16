@@ -1,6 +1,7 @@
 package com.nguyen.motoparts.account.repository;
 
 import com.nguyen.motoparts.account.entity.User;
+import com.nguyen.motoparts.common.enums.UserRole;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,6 +20,9 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByEmailIgnoreCase(String email);
 
     boolean existsByEmailIgnoreCase(String email);
+
+    /** Mọi tài khoản có vai trò này (ví dụ ADMIN, để gửi thông báo cho quản trị viên). */
+    List<User> findByUserRole(UserRole userRole);
 
     /** Khóa dòng tài khoản (SELECT ... FOR UPDATE) để các thao tác trên sổ địa chỉ của một khách chạy lần lượt. */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
