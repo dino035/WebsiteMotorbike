@@ -17,6 +17,7 @@ export default function MainLayout() {
                         <>
                             {user?.role === 'ADMIN' && <NavLink to="/admin/orders">Quản trị</NavLink>}
                             <NavLink to="/orders">Đơn hàng</NavLink>
+                            <NavLink to="/warranty">Bảo hành</NavLink>
                             <NavLink to="/addresses">Địa chỉ</NavLink>
                             <span className="nav__user">{user?.email}</span>
                             <button type="button" className="nav__logout" onClick={logout}>Đăng xuất</button>

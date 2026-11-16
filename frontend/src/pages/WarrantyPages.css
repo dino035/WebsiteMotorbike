@@ -1,0 +1,28 @@
+.warranty h1 { margin-top: 0; }
+.warranty h2 { margin: 24px 0 10px; font-size: 18px; }
+.warranty__rule { margin: 0 0 12px; color: #555; }
+.warranty__message { padding: 12px 0; color: #666; }
+.warranty__message--error { color: #c62828; }
+
+.warranty__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.warranty-card { padding: 14px 16px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
+.warranty-card__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.warranty-card__sub { display: block; font-size: 13px; color: #777; margin-top: 2px; }
+.warranty-card__text { margin: 10px 0 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.warranty-card__result { margin: 8px 0 0; padding: 8px 10px; border-radius: 6px; background: #f5f5f5; font-size: 14px; overflow-wrap: anywhere; }
+.warranty-card a { color: #d32f2f; overflow-wrap: anywhere; }
+
+.status-badge--approved { background: #e8f5e9; color: #2e7d32; }
+.status-badge--rejected { background: #fdecea; color: #c62828; }
+
+.warranty__btn { padding: 7px 14px; border: 1px solid #ccc; border-radius: 6px; background: #fff; color: #333; font: inherit; font-size: 14px; cursor: pointer; }
+.warranty__btn--primary { background: #d32f2f; border-color: #d32f2f; color: #fff; }
+.warranty__btn--danger { border-color: #c62828; color: #c62828; }
+.warranty__btn:disabled { opacity: .6; cursor: default; }
+
+.warranty-form { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e0e0e0; }
+.warranty-form label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #444; }
+.warranty-form textarea, .warranty-form input { padding: 9px; border: 1px solid #ccc; border-radius: 6px; font: inherit; font-size: 15px; }
+.warranty-form__error { color: #c62828; font-size: 13px; }
+.warranty-form__alert { margin: 0; padding: 8px 10px; border-radius: 6px; background: #fdecea; color: #c62828; font-size: 14px; }
+.warranty-form__actions { display: flex; gap: 10px; }

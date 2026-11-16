@@ -6,6 +6,7 @@ export default function AdminNav() {
         <nav className="admin-nav" aria-label="Quản trị">
             <NavLink to="/admin/orders">Đơn hàng</NavLink>
             <NavLink to="/admin/installations">Lịch lắp đặt</NavLink>
+            <NavLink to="/admin/warranty">Bảo hành</NavLink>
         </nav>
     )
 }
