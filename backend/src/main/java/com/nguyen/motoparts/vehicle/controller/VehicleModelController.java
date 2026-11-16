@@ -1,12 +1,11 @@
 package com.nguyen.motoparts.vehicle.controller;
 
+import com.nguyen.motoparts.catalog.dto.ProductSummaryResponse;
+import com.nguyen.motoparts.compatibility.service.CompatibilityRuleService;
 import com.nguyen.motoparts.vehicle.dto.VehicleYearOption;
 import com.nguyen.motoparts.vehicle.service.VehicleModelService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -16,6 +15,9 @@ import java.util.List;
 public class VehicleModelController {
 
     private final VehicleModelService vehicleModelService;
+
+    private final CompatibilityRuleService ruleService;
+
 
     @GetMapping("/brands")
     public List<String> brands() {
@@ -30,5 +32,10 @@ public class VehicleModelController {
     @GetMapping("/years")
     public List<VehicleYearOption> years(@RequestParam(name = "brand", required = false) String brand, @RequestParam(name = "model", required = false) String model){
         return vehicleModelService.getYears(brand, model);
+    }
+    
+    @GetMapping("/{modelId}/compatible-parts")
+    public List<ProductSummaryResponse> compatibleParts(@PathVariable String modelId) {
+        return ruleService.findCompatibleParts(modelId);
     }
 }

@@ -18,4 +18,6 @@ public interface VehicleModelRepository extends JpaRepository<VehicleModel, Stri
     List<String> findDistinctModelsByBrand(@Param("brand") String brand);
 
     List<VehicleModel> findByBrandAndModelOrderByYearFromDesc(String brand, String model);
+
+    List<VehicleModel> findByBrandAndModelAndYearFromBetweenOrderByYearFrom(String brand, String model, int from, int to);
 }
