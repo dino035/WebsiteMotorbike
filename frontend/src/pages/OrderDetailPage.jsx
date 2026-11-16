@@ -51,6 +51,9 @@ export default function OrderDetailPage() {
                         <span className={`status-badge status-badge--${o.status.toLowerCase()}`}>{o.statusLabel}</span>
                     </div>
                     <p className="order-detail__date">Đặt lúc {formatDateTime(o.orderDate)}</p>
+                    {o.status === 'COMPLETED' && (
+                        <p className="order-detail__date"><Link to="/warranty">Sản phẩm bị lỗi? Gửi yêu cầu bảo hành</Link></p>
+                    )}
 
                     <div className="order-detail__grid">
                         <div className="order-detail__box">

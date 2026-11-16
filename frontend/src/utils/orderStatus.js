@@ -13,3 +13,10 @@ export const INSTALLATION_STATUSES = [
     { value: 'DONE', label: 'Đã lắp đặt' },
     { value: 'CANCELLED', label: 'Đã hủy' },
 ]
+
+// Trạng thái yêu cầu bảo hành, khớp WarrantyStatus ở backend.
+export const WARRANTY_STATUSES = [
+    { value: 'PENDING', label: 'Chờ xử lý' },
+    { value: 'APPROVED', label: 'Đã duyệt (thay mới)' },
+    { value: 'REJECTED', label: 'Từ chối' },
+]
