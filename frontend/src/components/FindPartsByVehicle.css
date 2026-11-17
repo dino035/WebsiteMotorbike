@@ -1,0 +1,12 @@
+.find-parts { max-width: 1200px; margin: 32px auto 0; padding: 0 16px; }
+.find-parts h2 { margin: 0 0 4px; }
+.find-parts__hint { margin: 0 0 12px; color: #666; }
+
+.find-parts__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0 16px; }
+.find-parts__button { padding: 10px 18px; border: none; border-radius: 6px; background: #d32f2f; color: #fff; font: inherit; cursor: pointer; }
+.find-parts__button:disabled { background: #ccc; cursor: default; }
+.find-parts__selected { color: #555; }
+
+.find-parts__error { color: #c62828; }
+.find-parts__empty,
+.find-parts__count { color: #666; }
