@@ -1,0 +1,284 @@
+.ap-page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 16px 64px;
+}
+
+.ap-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.ap-header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.ap-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ----- nút ----- */
+.ap-btn {
+    display: inline-block;
+    padding: 8px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    color: #0f172a;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.ap-btn:hover {
+    background: #f1f5f9;
+}
+
+.ap-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.ap-btn-primary {
+    background: #1d4ed8;
+    border-color: #1d4ed8;
+    color: #fff;
+}
+
+.ap-btn-primary:hover {
+    background: #1e40af;
+}
+
+.ap-btn-danger {
+    background: #fff;
+    border-color: #fca5a5;
+    color: #b91c1c;
+}
+
+.ap-btn-danger:hover {
+    background: #fef2f2;
+}
+
+/* ----- thông báo ----- */
+.ap-error {
+    padding: 10px 12px;
+    border: 1px solid #fca5a5;
+    border-radius: 6px;
+    background: #fef2f2;
+    color: #b91c1c;
+}
+
+.ap-success {
+    padding: 10px 12px;
+    border: 1px solid #86efac;
+    border-radius: 6px;
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.ap-muted {
+    color: #64748b;
+}
+
+.ap-hint {
+    margin: 4px 0 12px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* ----- lọc ----- */
+.ap-filter {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.ap-filter label {
+    font-size: 14px;
+    color: #334155;
+}
+
+/* ----- bảng ----- */
+.ap-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.ap-table th,
+.ap-table td {
+    padding: 10px 8px;
+    border-bottom: 1px solid #e2e8f0;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.ap-table th {
+    background: #f8fafc;
+    font-weight: 600;
+}
+
+.ap-thumb {
+    width: 56px;
+    height: 42px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.ap-no-thumb {
+    color: #cbd5e1;
+}
+
+.ap-row-actions {
+    display: flex;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+/* ----- phân trang ----- */
+.ap-paging {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.ap-paging button {
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.ap-paging button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ----- form ----- */
+.ap-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 760px;
+}
+
+.ap-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.ap-row .ap-field {
+    flex: 1 1 180px;
+}
+
+.ap-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.ap-field label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.ap-field input,
+.ap-field select,
+.ap-field textarea {
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font: inherit;
+}
+
+.ap-field textarea {
+    resize: vertical;
+}
+
+/* ----- khối phụ (đánh giá, ảnh) ----- */
+.ap-section {
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.ap-section h2 {
+    margin: 0 0 12px;
+    font-size: 19px;
+}
+
+.ap-verdict {
+    padding: 12px 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    background: #eff6ff;
+    margin-bottom: 16px;
+}
+
+.ap-verdict p {
+    margin: 0 0 6px;
+}
+
+.ap-verdict ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #334155;
+    font-size: 14px;
+}
+
+/* ----- ảnh ----- */
+.ap-upload {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.ap-upload input[type='text'] {
+    flex: 1 1 220px;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font: inherit;
+}
+
+.ap-photo-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ap-photo-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 180px;
+}
+
+.ap-photo-list img {
+    width: 180px;
+    height: 135px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.ap-photo-list span {
+    font-size: 13px;
+    color: #64748b;
+    min-height: 18px;
+}

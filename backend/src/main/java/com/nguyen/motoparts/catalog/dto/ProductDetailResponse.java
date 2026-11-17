@@ -3,6 +3,7 @@ package com.nguyen.motoparts.catalog.dto;
 import com.nguyen.motoparts.catalog.entity.Motorbike;
 import com.nguyen.motoparts.catalog.entity.Product;
 import com.nguyen.motoparts.catalog.entity.SparePart;
+import com.nguyen.motoparts.common.enums.PartOriginType;
 import com.nguyen.motoparts.common.enums.ProductStatus;
 import com.nguyen.motoparts.common.enums.RatingLevel;
 import com.nguyen.motoparts.vehicle.entity.VehicleConditionAssessment;
@@ -32,7 +33,7 @@ public record ProductDetailResponse(
     }
 
 
-    public record SparePartInfo(String partType, String partOriginLabel) {
+    public record SparePartInfo(String partType, String partOriginLabel, PartOriginType partOrigin) {
     }
 
     public static ProductDetailResponse from(Product p) {
@@ -56,7 +57,7 @@ public record ProductDetailResponse(
             photos = s.getPhotos().stream()
                     .map(ph -> new PhotoResponse(ph.getPhotoId(), ph.getImageUrl(), ph.getCaption()))
                     .toList();
-            sparePart = new SparePartInfo(s.getPartType(), s.getPartOrigin() == null ? null : s.getPartOrigin().getLabel());
+            sparePart = new SparePartInfo(s.getPartType(), s.getPartOrigin() == null ? null : s.getPartOrigin().getLabel(), s.getPartOrigin());
         }
 
         return new ProductDetailResponse(p.getProductId(), p.getName(), p.getPrice(), p.getStatus(), p.getStatus().getLabel(), p.getTypeCode(), p.getProductType(), p.getDetail(), photos, motorbike, sparePart);
