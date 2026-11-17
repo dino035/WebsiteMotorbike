@@ -22,6 +22,7 @@ import CheckoutPage from './pages/CheckoutPage.jsx'
 import OrdersPage from './pages/OrdersPage.jsx'
 import OrderDetailPage from './pages/OrderDetailPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
+import AdminCompatibilityPage from './pages/AdminCompatibilityPage.jsx'
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/admin/installations" element={<RequireAdmin><AdminInstallationsPage /></RequireAdmin>} />
           <Route path="/admin/warranty" element={<RequireAdmin><AdminWarrantyPage /></RequireAdmin>} />
           <Route path="/admin/warranty/:id" element={<RequireAdmin><AdminWarrantyDetailPage /></RequireAdmin>} />
+          <Route path="/admin/compatibility" element={<RequireAdmin><AdminCompatibilityPage /></RequireAdmin>} />
           <Route path="/warranty" element={<RequireAuth><WarrantyPage /></RequireAuth>} />
           <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
           <Route path="/login" element={<LoginPage />} />

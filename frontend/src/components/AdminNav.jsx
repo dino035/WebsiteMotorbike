@@ -7,6 +7,7 @@ export default function AdminNav() {
             <NavLink to="/admin/orders">Đơn hàng</NavLink>
             <NavLink to="/admin/installations">Lịch lắp đặt</NavLink>
             <NavLink to="/admin/warranty">Bảo hành</NavLink>
+            <NavLink to="/admin/compatibility">Luật tương thích</NavLink>
         </nav>
     )
 }
