@@ -292,4 +292,6 @@ Bảng `chatmessage` có thêm cột `product_ids` (mã các sản phẩm đã g
 
 **Kiểm thử:** `advisory/GeminiLlmClientTest` (9 ca, máy chủ HTTP giả, không cần CSDL): khóa nằm trong header, đọc JSON tiêu chí khoan dung với giá trị sai, mọi kiểu lỗi thành `LlmUnavailableException`, không có khóa thì không gọi ra ngoài. `advisory/ChatTest` (21 ca, PostgreSQL thật, LLM giả): chỉ hàng còn bán và rẻ nhất trước, tối đa 5, ký tự `%` từ LLM không thành mẫu tìm kiếm, phụ tùng chỉ theo luật tương thích và khoảng năm, các tình huống UNANSWERED, Gemini lỗi vẫn lưu hội thoại, giới hạn tần suất, quyền Admin. Chưa gọi Gemini thật (cần khóa).
 
-**Chưa làm:** hồ sơ xe của khách (`CustomerVehicleProfile`, chat hiện lấy xe từ câu hỏi), trang React cho chat và trang Admin xem câu hỏi chưa trả lời.
+**Giao diện React:** `/chat` (cần đăng nhập, menu "Hỏi AI"): danh sách cuộc trò chuyện bên trái, khung hội thoại bên phải, câu trả lời kèm thẻ sản phẩm bấm vào xem chi tiết. Cuộc mới chỉ được tạo khi khách gửi câu đầu tiên. Cuộc đang mở nằm trên địa chỉ (`?s=`) nên tải lại vẫn giữ. Admin: `/admin/chat` lọc câu hỏi (mặc định "Chưa trả lời được") và `/admin/chat/:id` đọc cả cuộc trò chuyện.
+
+**Chưa làm:** hồ sơ xe của khách (`CustomerVehicleProfile`, chat hiện lấy xe từ câu hỏi) và chạy thử với Gemini thật (cần khóa).

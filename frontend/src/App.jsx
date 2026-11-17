@@ -23,6 +23,9 @@ import OrdersPage from './pages/OrdersPage.jsx'
 import OrderDetailPage from './pages/OrderDetailPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 import AdminCompatibilityPage from './pages/AdminCompatibilityPage.jsx'
+import ChatPage from './pages/ChatPage.jsx'
+import AdminChatPage from './pages/AdminChatPage.jsx'
+import AdminChatSessionPage from './pages/AdminChatSessionPage.jsx'
 
 export default function App() {
   return (
@@ -42,6 +45,9 @@ export default function App() {
           <Route path="/admin/warranty" element={<RequireAdmin><AdminWarrantyPage /></RequireAdmin>} />
           <Route path="/admin/warranty/:id" element={<RequireAdmin><AdminWarrantyDetailPage /></RequireAdmin>} />
           <Route path="/admin/compatibility" element={<RequireAdmin><AdminCompatibilityPage /></RequireAdmin>} />
+          <Route path="/admin/chat" element={<RequireAdmin><AdminChatPage /></RequireAdmin>} />
+          <Route path="/admin/chat/:id" element={<RequireAdmin><AdminChatSessionPage /></RequireAdmin>} />
+          <Route path="/chat" element={<RequireAuth><ChatPage /></RequireAuth>} />
           <Route path="/warranty" element={<RequireAuth><WarrantyPage /></RequireAuth>} />
           <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
           <Route path="/login" element={<LoginPage />} />
