@@ -100,6 +100,12 @@ Tài khoản bị khóa (có dòng trong `AccountLock`) bị chặn ở mọi re
 | `CORS_ALLOWED_ORIGINS` | Địa chỉ React được gọi API, cách nhau bằng dấu phẩy. Mặc định `http://localhost:5173`; khi deploy là tên miền Static Site. |
 | `ADMIN_EMAIL`, `ADMIN_PASSWORD` | Tùy chọn: tạo admin đầu tiên khi khởi động (mật khẩu >= 8 ký tự). Đã có email đó thì không ghi đè. |
 
+| `SUPABASE_URL` | Địa chỉ project Supabase dùng lưu ảnh sản phẩm. Bỏ trống thì mọi thao tác ảnh báo lỗi. |
+| `SUPABASE_BUCKET` | Tên bucket chứa ảnh, mặc định `photos`. Bucket phải đặt Public thì trình duyệt mới hiển thị được ảnh. |
+| `SUPABASE_KEY` | Khóa service_role của Supabase. Bí mật: chỉ đặt bằng biến môi trường, không ghi vào file hay Git, không bao giờ đưa sang React. |
+
+Khi deploy lên Render phải đặt đủ ba biến trên, không thì toàn bộ tính năng ảnh hỏng.
+
 Kiểm thử bảo mật cần PostgreSQL: đặt `TEST_DB_URL` (vd `jdbc:postgresql://localhost:5432/motoparts_test`),
 `TEST_DB_USERNAME`, `TEST_DB_PASSWORD` rồi chạy `mvn test -Dtest=AuthSecurityTest`. Không đặt `TEST_DB_URL` thì test tự bỏ qua.
 

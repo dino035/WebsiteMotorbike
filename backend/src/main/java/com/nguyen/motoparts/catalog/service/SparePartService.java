@@ -71,13 +71,17 @@ public class SparePartService {
         }
 
         String storagePath = photoStorage.upload(file, "spareparts");
-
-        SparePartPhoto photo = new SparePartPhoto();
-        photo.setStoragePath(storagePath);
-        photo.setImageUrl(photoStorage.publicUrl(storagePath));
-        photo.setCaption(caption);
-        part.addPhoto(photo);
-        sparePartRepository.flush();
+        try {
+            SparePartPhoto photo = new SparePartPhoto();
+            photo.setStoragePath(storagePath);
+            photo.setImageUrl(photoStorage.publicUrl(storagePath));
+            photo.setCaption(caption);
+            part.addPhoto(photo);
+            sparePartRepository.flush();
+        } catch (RuntimeException e) {
+            photoStorage.delete(storagePath);   // lưu DB hỏng thì xóa luôn file vừa tải lên
+            throw e;
+        }
 
         return ProductDetailResponse.from(part);
     }
