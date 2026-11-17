@@ -24,8 +24,12 @@ public class Motorbike extends Product {
     private Integer registrationYear;
     private Integer ownerCount;
     private String accidentHistory;
+
+    @Column(unique = true)
     private String chassisNumber;
+    @Column(unique = true)
     private String engineNumber;
+
     private Integer odometerAtIntake;
 
     @OneToMany(mappedBy = "motorbike", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -105,13 +105,17 @@ public class MotorbikeService {
         }
 
         String storagePath = photoStorage.upload(file, "motorbikes");
-
-        VehiclePhoto photo = new VehiclePhoto();
-        photo.setStoragePath(storagePath);
-        photo.setImageUrl(photoStorage.publicUrl(storagePath));
-        photo.setCaption(caption);
-        bike.addPhoto(photo);
-        motorbikeRepository.flush();
+        try {
+            VehiclePhoto photo = new VehiclePhoto();
+            photo.setStoragePath(storagePath);
+            photo.setImageUrl(photoStorage.publicUrl(storagePath));
+            photo.setCaption(caption);
+            bike.addPhoto(photo);
+            motorbikeRepository.flush();
+        } catch (RuntimeException e) {
+            photoStorage.delete(storagePath);   // lưu DB hỏng thì xóa luôn file vừa tải lên
+            throw e;
+        }
 
         return ProductDetailResponse.from(bike);
     }
