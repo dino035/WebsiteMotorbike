@@ -44,6 +44,15 @@ app:
     smtp-starttls: ${MAIL_STARTTLS:true}
   cart:
     hold-minutes: ${CART_HOLD_MINUTES:30}   # thời gian tạm giữ một chiếc xe khi nằm trong giỏ
+  llm:
+    # Chat AI gọi Gemini (Google AI Studio). Khóa chỉ đặt bằng biến môi trường GEMINI_API_KEY, không ghi vào code hay Git.
+    # Chưa đặt khóa: chat vẫn chạy nhưng mọi câu hỏi được ghi lại là chưa trả lời được.
+    gemini-api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-flash-latest}
+    base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
+    timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:20}
+  chat:
+    max-messages-per-hour: ${CHAT_MAX_MESSAGES_PER_HOUR:30}   # số câu hỏi tối đa của một tài khoản mỗi giờ (giữ hạn mức Gemini)
   admin:
     # Tùy chọn: tạo admin đầu tiên khi khởi động nếu đặt cả hai biến.
     email: ${ADMIN_EMAIL:}
