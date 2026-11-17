@@ -253,3 +253,45 @@ Thông báo do hệ thống tạo (đặt hàng, đổi trạng thái đơn, l�
 React: mục "Thông báo (n)" trên menu (số chưa đọc tải lại khi đổi trang và mỗi 60 giây), trang `/notifications` có phân trang, bấm một thông báo để đánh dấu đã đọc, nút "Đánh dấu tất cả đã đọc".
 
 Kiểm thử: `aftersales/NotificationTest` (8 ca): phải đăng nhập, khách mới chưa có gì, mới nhất trước, mỗi người chỉ thấy của mình, phân trang ổn định, đánh dấu đã đọc lặp lại không lỗi, không đánh dấu được của người khác, đánh dấu tất cả không đụng tài khoản khác.
+
+
+## Chat box AI (gợi ý sản phẩm)
+
+Khách hỏi bằng tiếng Việt ("nhớt cho Honda Wave 2015 dưới 200k", "xe số đời 2018 trở lên dưới 20 triệu"), chat box gợi ý tối đa 5 sản phẩm thật của cửa hàng. Cần đăng nhập.
+
+**Cách hoạt động (LLM không tự chọn sản phẩm):**
+1. Gemini đọc câu hỏi (kèm tối đa 6 lượt hội thoại trước) thành tiêu chí JSON: loại (xe máy / phụ tùng), hãng, dòng, năm xe, khoảng giá, loại phụ tùng, nguồn gốc...
+2. Code lọc sản phẩm trong CSDL (`ChatProductSearch`): chỉ hàng còn bán, rẻ nhất trước. Phụ tùng theo xe của khách đi qua luật tương thích (`CompatibilityRule`): dòng xe khớp hãng + tên và khoảng năm sản xuất bao trùm năm đăng ký.
+3. Gemini viết lời tư vấn chỉ dựa trên các sản phẩm đã lọc. Lời gọi Gemini nằm sau interface `LlmClient` nên đổi nhà cung cấp không phải sửa bộ máy gợi ý.
+
+Chỉ câu hỏi, lịch sử hội thoại và dữ kiện sản phẩm (tên, loại, giá, mô tả) được gửi cho Gemini; không gửi email, số điện thoại hay địa chỉ của khách. Khóa gửi trong header `x-goog-api-key`, không nằm trên URL.
+
+**Câu hỏi nào là "chưa trả lời được" (UNANSWERED):** ngoài phạm vi xe và phụ tùng, không có sản phẩm còn hàng khớp, dòng xe chưa có dữ liệu tương thích, hoặc Gemini không dùng được lúc đó. Admin lọc các câu này để biết khách đang cần gì mà cửa hàng chưa có. Chào hỏi được trả lời bình thường. Gemini lỗi ở bước viết lời đáp nhưng đã có sản phẩm thật thì dùng lời đáp dựng sẵn, câu hỏi vẫn tính là đã trả lời.
+
+| Phương thức | Đường dẫn | Việc làm |
+|---|---|---|
+| POST | `/api/chat-sessions` | Tạo cuộc trò chuyện mới |
+| GET | `/api/chat-sessions` | 20 cuộc gần nhất của tôi (tiêu đề là câu hỏi đầu) |
+| GET | `/api/chat-sessions/{id}` | Toàn bộ tin nhắn, kèm sản phẩm đã gợi ý trong từng câu trả lời |
+| POST | `/api/chat-sessions/{id}/messages` | Gửi câu hỏi (`content`, tối đa 500 ký tự), trả `customerMessage` (có `status`) và `assistantMessage` (có `products`) |
+| GET | `/api/admin/chat/questions?status=UNANSWERED&page=&size=` | Admin: các câu hỏi của khách, lọc theo trạng thái |
+| GET | `/api/admin/chat/sessions/{id}` | Admin: đọc cả cuộc trò chuyện, kèm email khách |
+
+Cuộc trò chuyện của người khác trả 404. Mỗi tài khoản tối đa 30 câu hỏi mỗi giờ (`CHAT_MAX_MESSAGES_PER_HOUR`), vượt thì 429, để giữ hạn mức gói miễn phí của Gemini. Mỗi cuộc tối đa 100 tin nhắn. Giao dịch CSDL không bị giữ trong lúc chờ Gemini.
+
+**Biến môi trường:**
+
+| Biến | Mặc định | Ý nghĩa |
+|---|---|---|
+| `GEMINI_API_KEY` | (trống) | Khóa tạo ở Google AI Studio. Chưa đặt thì chat vẫn chạy, mọi câu hỏi là "chưa trả lời được". Chỉ đặt bằng biến môi trường, không ghi vào file hay Git |
+| `GEMINI_MODEL` | `gemini-flash-latest` | Tên model; xem tên và hạn mức hiện có trong AI Studio |
+| `GEMINI_TIMEOUT_SECONDS` | 20 | Thời gian chờ mỗi lời gọi |
+| `CHAT_MAX_MESSAGES_PER_HOUR` | 30 | Giới hạn câu hỏi mỗi tài khoản mỗi giờ |
+
+Bảng `chatmessage` có thêm cột `product_ids` (mã các sản phẩm đã gợi ý, cách nhau dấu phẩy); Hibernate tự thêm khi chạy.
+
+**Kiểm thử:** `advisory/GeminiLlmClientTest` (9 ca, máy chủ HTTP giả, không cần CSDL): khóa nằm trong header, đọc JSON tiêu chí khoan dung với giá trị sai, mọi kiểu lỗi thành `LlmUnavailableException`, không có khóa thì không gọi ra ngoài. `advisory/ChatTest` (21 ca, PostgreSQL thật, LLM giả): chỉ hàng còn bán và rẻ nhất trước, tối đa 5, ký tự `%` từ LLM không thành mẫu tìm kiếm, phụ tùng chỉ theo luật tương thích và khoảng năm, các tình huống UNANSWERED, Gemini lỗi vẫn lưu hội thoại, giới hạn tần suất, quyền Admin. Chưa gọi Gemini thật (cần khóa).
+
+**Giao diện React:** `/chat` (cần đăng nhập, menu "Hỏi AI"): danh sách cuộc trò chuyện bên trái, khung hội thoại bên phải, câu trả lời kèm thẻ sản phẩm bấm vào xem chi tiết. Cuộc mới chỉ được tạo khi khách gửi câu đầu tiên. Cuộc đang mở nằm trên địa chỉ (`?s=`) nên tải lại vẫn giữ. Admin: `/admin/chat` lọc câu hỏi (mặc định "Chưa trả lời được") và `/admin/chat/:id` đọc cả cuộc trò chuyện.
+
+**Chưa làm:** hồ sơ xe của khách (`CustomerVehicleProfile`, chat hiện lấy xe từ câu hỏi) và chạy thử với Gemini thật (cần khóa).

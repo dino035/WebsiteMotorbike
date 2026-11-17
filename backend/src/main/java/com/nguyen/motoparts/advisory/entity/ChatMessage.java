@@ -38,6 +38,10 @@ public class ChatMessage {
     @Enumerated(EnumType.STRING)
     private AnswerStatus status;
 
+    /** Mã các sản phẩm trợ lý gợi ý trong tin nhắn này (cách nhau bằng dấu phẩy); null với tin của khách. */
+    @Column(length = 1000)
+    private String productIds;
+
     @PrePersist
     protected void onCreate() {
         if (sentAt == null) {

@@ -26,6 +26,9 @@ import AdminCompatibilityPage from './pages/AdminCompatibilityPage.jsx'
 import AdminProductsPage from './pages/AdminProductsPage';
 import AdminMotorbikeFormPage from './pages/AdminMotorbikeFormPage';
 import AdminSparePartFormPage from './pages/AdminSparePartFormPage';
+import ChatPage from './pages/ChatPage.jsx'
+import AdminChatPage from './pages/AdminChatPage.jsx'
+import AdminChatSessionPage from './pages/AdminChatSessionPage.jsx'
 
 export default function App() {
   return (
@@ -50,6 +53,9 @@ export default function App() {
           <Route path="/admin/products/motorbike/:productId" element={<RequireAdmin><AdminMotorbikeFormPage /></RequireAdmin>} />
           <Route path="/admin/products/spare-part/new" element={<RequireAdmin><AdminSparePartFormPage /></RequireAdmin>} />
           <Route path="/admin/products/spare-part/:productId" element={<RequireAdmin><AdminSparePartFormPage /></RequireAdmin>} />
+          <Route path="/admin/chat" element={<RequireAdmin><AdminChatPage /></RequireAdmin>} />
+          <Route path="/admin/chat/:id" element={<RequireAdmin><AdminChatSessionPage /></RequireAdmin>} />
+          <Route path="/chat" element={<RequireAuth><ChatPage /></RequireAuth>} />
           <Route path="/warranty" element={<RequireAuth><WarrantyPage /></RequireAuth>} />
           <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
           <Route path="/login" element={<LoginPage />} />
