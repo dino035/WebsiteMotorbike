@@ -6,4 +6,11 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MotorbikeRepository extends JpaRepository<Motorbike, String> {
+    boolean existsByChassisNumber(String chassisNumber);
+
+    boolean existsByEngineNumber(String engineNumber);
+
+    boolean existsByChassisNumberAndProductIdNot(String chassisNumber, String productId);
+
+    boolean existsByEngineNumberAndProductIdNot(String engineNumber, String productId);
 }
