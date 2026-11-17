@@ -5,6 +5,7 @@ import com.nguyen.motoparts.catalog.dto.MotorbikeRequest;
 import com.nguyen.motoparts.catalog.dto.ProductDetailResponse;
 import com.nguyen.motoparts.catalog.entity.Motorbike;
 import com.nguyen.motoparts.catalog.repository.MotorbikeRepository;
+import com.nguyen.motoparts.common.enums.ProductStatus;
 import com.nguyen.motoparts.common.exception.ConflictException;
 import com.nguyen.motoparts.common.exception.ResourceNotFoundException;
 import com.nguyen.motoparts.common.storage.PhotoStorageService;
@@ -34,6 +35,7 @@ public class MotorbikeService {
         }
 
         Motorbike bike = new Motorbike();
+        requireReadyToSell(bike, req.status());
         apply(req, bike);
         return ProductDetailResponse.from(motorbikeRepository.save(bike));
     }
@@ -50,6 +52,7 @@ public class MotorbikeService {
             throw new ConflictException("Số máy này đã có xe khác sử dụng.");
         }
 
+        requireReadyToSell(bike, req.status());
         apply(req, bike);
         return ProductDetailResponse.from(bike);
     }
@@ -95,6 +98,12 @@ public class MotorbikeService {
         Motorbike bike = motorbikeRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xe."));
 
+        if (bike.getPhotos().size() >= PhotoStorageService.MAX_PHOTOS) {
+            throw new ConflictException(
+                    "Mỗi xe chỉ được tối đa " + PhotoStorageService.MAX_PHOTOS
+                            + " ảnh. Hãy xóa bớt ảnh cũ trước khi thêm ảnh mới.");
+        }
+
         String storagePath = photoStorage.upload(file, "motorbikes");
 
         VehiclePhoto photo = new VehiclePhoto();
@@ -117,10 +126,36 @@ public class MotorbikeService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ảnh của xe này."));
 
+        if (bike.getStatus() == ProductStatus.AVAILABLE && bike.getPhotos().size() <= 1) {
+            throw new ConflictException(
+                    "Xe đang bán phải có ít nhất 1 ảnh. "
+                            + "Hãy thêm ảnh khác, hoặc đổi tình trạng sang Hết hàng trước khi xóa.");
+        }
+
         bike.removePhoto(photo);
         photoStorage.delete(photo.getStoragePath());
 
         return ProductDetailResponse.from(bike);
+    }
+
+    /**
+     * Chặn đặt tình trạng Có sẵn khi xe chưa đủ điều kiện bày bán:
+     * phải có ít nhất 1 ảnh và phải được chấm điểm tình trạng.
+     */
+    private void requireReadyToSell(Motorbike bike, ProductStatus newStatus) {
+        if (newStatus != ProductStatus.AVAILABLE) {
+            return;
+        }
+        if (bike.getPhotos().isEmpty()) {
+            throw new ConflictException(
+                    "Xe chưa có ảnh nên không đặt được tình trạng Có sẵn. "
+                            + "Hãy lưu với tình trạng Hết hàng, thêm ảnh rồi chuyển sang Có sẵn.");
+        }
+        if (bike.getConditionAssessment() == null) {
+            throw new ConflictException(
+                    "Xe chưa được chấm điểm tình trạng nên không đặt được tình trạng Có sẵn. "
+                            + "Hãy lưu với tình trạng Hết hàng, chấm điểm rồi chuyển sang Có sẵn.");
+        }
     }
 
     /** Chép dữ liệu từ request sang entity. Dùng chung cho thêm mới và sửa. */

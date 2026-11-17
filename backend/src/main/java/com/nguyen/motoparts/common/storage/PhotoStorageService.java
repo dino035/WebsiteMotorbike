@@ -22,6 +22,7 @@ public class PhotoStorageService {
     private static final Logger log = LoggerFactory.getLogger(PhotoStorageService.class);
 
     private static final long MAX_SIZE = 5L * 1024 * 1024;
+    public static final int MAX_PHOTOS = 10;
     private static final Map<String, String> ALLOWED = Map.of(
             "image/jpeg", ".jpg",
             "image/png", ".png",
