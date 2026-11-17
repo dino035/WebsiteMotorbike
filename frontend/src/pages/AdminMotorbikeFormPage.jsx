@@ -10,7 +10,7 @@ import './AdminProducts.css';
 const EMPTY = {
     name: '',
     price: '',
-    status: 'AVAILABLE',
+    status: 'SOLD',
     brand: '',
     model: '',
     registrationYear: '',
@@ -171,6 +171,13 @@ export default function AdminMotorbikeFormPage() {
                         </select>
                     </div>
                 </div>
+
+                {!isEdit && (
+                    <p className="ap-hint">
+                        Xe mới phải lưu ở tình trạng Hết hàng. Thêm ảnh và chấm điểm tình trạng
+                        rồi mới chuyển sang Có sẵn được.
+                    </p>
+                )}
 
                 <div className="ap-row">
                     <div className="ap-field">

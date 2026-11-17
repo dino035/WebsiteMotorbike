@@ -5,6 +5,7 @@ import com.nguyen.motoparts.catalog.dto.SparePartRequest;
 import com.nguyen.motoparts.catalog.entity.SparePart;
 import com.nguyen.motoparts.catalog.entity.SparePartPhoto;
 import com.nguyen.motoparts.catalog.repository.SparePartRepository;
+import com.nguyen.motoparts.common.enums.ProductStatus;
 import com.nguyen.motoparts.common.exception.ConflictException;
 import com.nguyen.motoparts.common.exception.ResourceNotFoundException;
 import com.nguyen.motoparts.common.storage.PhotoStorageService;
@@ -27,6 +28,7 @@ public class SparePartService {
     @Transactional
     public ProductDetailResponse create(SparePartRequest req) {
         SparePart part = new SparePart();
+        requireReadyToSell(part, req.status());
         apply(req, part);
         return ProductDetailResponse.from(sparePartRepository.save(part));
     }
@@ -35,6 +37,8 @@ public class SparePartService {
     public ProductDetailResponse update(String productId, SparePartRequest req) {
         SparePart part = sparePartRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phụ tùng."));
+
+        requireReadyToSell(part, req.status());
         apply(req, part);
         return ProductDetailResponse.from(part);
     }
@@ -60,6 +64,12 @@ public class SparePartService {
         SparePart part = sparePartRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy phụ tùng."));
 
+        if (part.getPhotos().size() >= PhotoStorageService.MAX_PHOTOS) {
+            throw new ConflictException(
+                    "Mỗi phụ tùng chỉ được tối đa " + PhotoStorageService.MAX_PHOTOS
+                            + " ảnh. Hãy xóa bớt ảnh cũ trước khi thêm ảnh mới.");
+        }
+
         String storagePath = photoStorage.upload(file, "spareparts");
 
         SparePartPhoto photo = new SparePartPhoto();
@@ -82,10 +92,28 @@ public class SparePartService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ảnh của phụ tùng này."));
 
+        if (part.getStatus() == ProductStatus.AVAILABLE && part.getPhotos().size() <= 1) {
+            throw new ConflictException(
+                    "Phụ tùng đang bán phải có ít nhất 1 ảnh. "
+                            + "Hãy thêm ảnh khác, hoặc đổi tình trạng sang Hết hàng trước khi xóa.");
+        }
+
         part.removePhoto(photo);
         photoStorage.delete(photo.getStoragePath());
 
         return ProductDetailResponse.from(part);
+    }
+
+    /** Chặn đặt tình trạng Có sẵn khi phụ tùng chưa có ảnh nào. */
+    private void requireReadyToSell(SparePart part, ProductStatus newStatus) {
+        if (newStatus != ProductStatus.AVAILABLE) {
+            return;
+        }
+        if (part.getPhotos().isEmpty()) {
+            throw new ConflictException(
+                    "Phụ tùng chưa có ảnh nên không đặt được tình trạng Có sẵn. "
+                            + "Hãy lưu với tình trạng Hết hàng, thêm ảnh rồi chuyển sang Có sẵn.");
+        }
     }
 
     /** Chép dữ liệu từ request sang entity. Dùng chung cho thêm mới và sửa. */

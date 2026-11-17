@@ -9,7 +9,7 @@ import './AdminProducts.css';
 const EMPTY = {
     name: '',
     price: '',
-    status: 'AVAILABLE',
+    status: 'SOLD',
     partType: '',
     partOrigin: 'GENUINE',
 };
@@ -148,6 +148,13 @@ export default function AdminSparePartFormPage() {
                         <option value="AVAILABLE">Có sẵn</option>
                         <option value="SOLD">Hết hàng</option>
                     </select>
+
+                    {!isEdit && (
+                        <p className="ap-hint">
+                            Phụ tùng mới phải lưu ở tình trạng Hết hàng. Thêm ảnh rồi mới
+                            chuyển sang Có sẵn được.
+                        </p>
+                    )}
                 </div>
 
                 <div className="ap-field">
