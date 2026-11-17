@@ -92,7 +92,7 @@ export default function AdminMotorbikeFormPage() {
             model: form.model.trim(),
             registrationYear: form.registrationYear === '' ? null : Number(form.registrationYear),
             ownerCount: form.ownerCount === '' ? null : Number(form.ownerCount),
-            accidentHistory: form.accidentHistory.trim() === '' ? null : form.accidentHistory.trim(),
+            accidentHistory: form.accidentHistory.trim(),
             chassisNumber: form.chassisNumber.trim(),
             engineNumber: form.engineNumber.trim(),
             odometerAtIntake: form.odometerAtIntake === '' ? null : Number(form.odometerAtIntake),
@@ -211,10 +211,10 @@ export default function AdminMotorbikeFormPage() {
                 )}
 
                 <div className="ap-field">
-                    <label htmlFor="mb-accident">Lịch sử tai nạn</label>
-                    <textarea id="mb-accident" name="accidentHistory" rows={3}
+                    <label htmlFor="mb-accident">Lịch sử tai nạn *</label>
+                    <textarea id="mb-accident" name="accidentHistory" rows={3} required
                               value={form.accidentHistory} onChange={handleChange}
-                              placeholder="Để trống nếu xe chưa từng tai nạn" />
+                              placeholder="Gõ 'Không' nếu xe chưa từng tai nạn" />
                 </div>
 
                 <button type="submit" className="ap-btn ap-btn-primary" disabled={saving}>

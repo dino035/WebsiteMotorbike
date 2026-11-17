@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import client from '../api/client';
 import ProductCard from '../components/ProductCard';
 import './ProductListPage.css';
+import { apiError } from '../utils/apiError';
 
 const PAGE_SIZE = 12;
 const EMPTY_FILTERS = { keyword: '', type: '', status: '', minPrice: '', maxPrice: '' };
@@ -27,8 +28,8 @@ export default function ProductListPage() {
             .then((res) => {
                 if (!ignore) setData(res.data);
             })
-            .catch(() => {
-                if (!ignore) setError('Không tải được danh sách sản phẩm. Kiểm tra backend đã chạy chưa.');
+            .catch((err) => {
+                if (!ignore) setError(apiError(err, 'Không tải được danh sách sản phẩm. Kiểm tra backend đã chạy chưa.'));
             })
             .finally(() => {
                 if (!ignore) setLoading(false);

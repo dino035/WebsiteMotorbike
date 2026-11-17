@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import com.nguyen.motoparts.common.exception.BadRequestException;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,10 @@ public class ProductService {
     public PageResponse<ProductSummaryResponse> search(String keyword, String type, ProductStatus status,
                                                        BigDecimal minPrice, BigDecimal maxPrice,
                                                        int page, int size) {
+
+        if (minPrice != null && maxPrice != null && minPrice.compareTo(maxPrice) > 0) {
+            throw new BadRequestException("Khoảng giá không hợp lệ: giá từ đang lớn hơn giá đến.");
+        }
 
         Specification<Product> spec = Specification.allOf(
                 ProductSpecifications.nameContains(keyword),

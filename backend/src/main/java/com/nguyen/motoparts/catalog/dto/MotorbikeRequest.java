@@ -31,6 +31,7 @@ public record MotorbikeRequest(
         @Min(value = 0, message = "Số đời chủ không được âm.")
         Integer ownerCount,
 
+        @NotBlank(message = "Vui lòng nhập lịch sử tai nạn. Gõ 'Không' nếu xe chưa từng tai nạn.")
         String accidentHistory,
 
         @NotBlank(message = "Vui lòng nhập số khung.")
