@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface OrderItemRepository extends JpaRepository<OrderItem, String> {
+    boolean existsByProductId(String productId);
 
     /** Các sản phẩm khách đã mua trong đơn có trạng thái này (thường là Hoàn thành), mới nhất trước. */
     @Query("select i from OrderItem i join fetch i.order o "

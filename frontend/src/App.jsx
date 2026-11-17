@@ -23,6 +23,9 @@ import OrdersPage from './pages/OrdersPage.jsx'
 import OrderDetailPage from './pages/OrderDetailPage.jsx'
 import NotFoundPage from './pages/NotFoundPage.jsx'
 import AdminCompatibilityPage from './pages/AdminCompatibilityPage.jsx'
+import AdminProductsPage from './pages/AdminProductsPage';
+import AdminMotorbikeFormPage from './pages/AdminMotorbikeFormPage';
+import AdminSparePartFormPage from './pages/AdminSparePartFormPage';
 import ChatPage from './pages/ChatPage.jsx'
 import AdminChatPage from './pages/AdminChatPage.jsx'
 import AdminChatSessionPage from './pages/AdminChatSessionPage.jsx'
@@ -45,6 +48,11 @@ export default function App() {
           <Route path="/admin/warranty" element={<RequireAdmin><AdminWarrantyPage /></RequireAdmin>} />
           <Route path="/admin/warranty/:id" element={<RequireAdmin><AdminWarrantyDetailPage /></RequireAdmin>} />
           <Route path="/admin/compatibility" element={<RequireAdmin><AdminCompatibilityPage /></RequireAdmin>} />
+          <Route path="/admin/products" element={<RequireAdmin><AdminProductsPage /></RequireAdmin>} />
+          <Route path="/admin/products/motorbike/new" element={<RequireAdmin><AdminMotorbikeFormPage /></RequireAdmin>} />
+          <Route path="/admin/products/motorbike/:productId" element={<RequireAdmin><AdminMotorbikeFormPage /></RequireAdmin>} />
+          <Route path="/admin/products/spare-part/new" element={<RequireAdmin><AdminSparePartFormPage /></RequireAdmin>} />
+          <Route path="/admin/products/spare-part/:productId" element={<RequireAdmin><AdminSparePartFormPage /></RequireAdmin>} />
           <Route path="/admin/chat" element={<RequireAdmin><AdminChatPage /></RequireAdmin>} />
           <Route path="/admin/chat/:id" element={<RequireAdmin><AdminChatSessionPage /></RequireAdmin>} />
           <Route path="/chat" element={<RequireAuth><ChatPage /></RequireAuth>} />
