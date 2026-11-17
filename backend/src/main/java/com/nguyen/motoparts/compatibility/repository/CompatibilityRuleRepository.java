@@ -20,4 +20,6 @@ public interface CompatibilityRuleRepository extends JpaRepository<Compatibility
     @Query("select r.sparePart from CompatibilityRule r " +
             "where r.vehicleModel.modelId = :modelId order by r.sparePart.name")
     List<SparePart> findCompatibleParts(@Param("modelId") String modelId);
+
+    void deleteBySparePart_ProductId(String productId);
 }
