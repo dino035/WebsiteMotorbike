@@ -9,4 +9,3 @@ public class MotoPartsApplication {
         SpringApplication.run(MotoPartsApplication.class, args);
     }
 }
-git add backend
