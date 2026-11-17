@@ -7,11 +7,14 @@ import com.nguyen.motoparts.catalog.entity.Motorbike;
 import com.nguyen.motoparts.catalog.repository.MotorbikeRepository;
 import com.nguyen.motoparts.common.exception.ConflictException;
 import com.nguyen.motoparts.common.exception.ResourceNotFoundException;
+import com.nguyen.motoparts.common.storage.PhotoStorageService;
 import com.nguyen.motoparts.order.repository.OrderItemRepository;
 import com.nguyen.motoparts.vehicle.entity.VehicleConditionAssessment;
+import com.nguyen.motoparts.vehicle.entity.VehiclePhoto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +22,7 @@ public class MotorbikeService {
 
     private final MotorbikeRepository motorbikeRepository;
     private final OrderItemRepository orderItemRepository;
+    private final PhotoStorageService photoStorage;
 
     @Transactional
     public ProductDetailResponse create(MotorbikeRequest req) {
@@ -61,6 +65,7 @@ public class MotorbikeService {
                             + "Bạn có thể đổi tình trạng sang Hết hàng.");
         }
 
+        bike.getPhotos().forEach(p -> photoStorage.delete(p.getStoragePath()));
         motorbikeRepository.delete(bike);
     }
 
@@ -81,6 +86,39 @@ public class MotorbikeService {
         assessment.setChainRating(req.chainRating());
         assessment.setElectricalRating(req.electricalRating());
         assessment.recalculateCoefficient();
+
+        return ProductDetailResponse.from(bike);
+    }
+
+    @Transactional
+    public ProductDetailResponse addPhoto(String productId, MultipartFile file, String caption) {
+        Motorbike bike = motorbikeRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xe."));
+
+        String storagePath = photoStorage.upload(file, "motorbikes");
+
+        VehiclePhoto photo = new VehiclePhoto();
+        photo.setStoragePath(storagePath);
+        photo.setImageUrl(photoStorage.publicUrl(storagePath));
+        photo.setCaption(caption);
+        bike.addPhoto(photo);
+        motorbikeRepository.flush();
+
+        return ProductDetailResponse.from(bike);
+    }
+
+    @Transactional
+    public ProductDetailResponse deletePhoto(String productId, String photoId) {
+        Motorbike bike = motorbikeRepository.findById(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy xe."));
+
+        VehiclePhoto photo = bike.getPhotos().stream()
+                .filter(p -> p.getPhotoId().equals(photoId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy ảnh của xe này."));
+
+        bike.removePhoto(photo);
+        photoStorage.delete(photo.getStoragePath());
 
         return ProductDetailResponse.from(bike);
     }
