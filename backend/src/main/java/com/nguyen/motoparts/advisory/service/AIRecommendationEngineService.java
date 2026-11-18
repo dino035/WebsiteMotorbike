@@ -51,6 +51,11 @@ public class AIRecommendationEngineService {
     }
 
     public Recommendation recommend(String question, List<LlmClient.ChatTurn> history) {
+        return recommend(question, history, null);
+    }
+
+    /** vehicle: xe trong hồ sơ của khách (có thể null), dùng khi khách hỏi phụ tùng mà không nói rõ xe nào. */
+    public Recommendation recommend(String question, List<LlmClient.ChatTurn> history, VehicleContext vehicle) {
         SearchCriteria criteria;
         try {
             criteria = llm.extractCriteria(question, history).sanitized();
@@ -68,7 +73,7 @@ public class AIRecommendationEngineService {
                 break;
         }
 
-        ChatProductSearch.Found found = search.search(criteria);
+        ChatProductSearch.Found found = search.search(withProfileVehicle(criteria, vehicle));
         if (found.productIds().isEmpty()) {
             return new Recommendation(AnswerStatus.UNANSWERED,
                     found.vehicleUnknown() ? REPLY_UNKNOWN_VEHICLE : REPLY_NO_PRODUCT, List.of());
@@ -85,6 +90,19 @@ public class AIRecommendationEngineService {
             text = fallbackText(found.facts());
         }
         return new Recommendation(AnswerStatus.ANSWERED, text, found.productIds());
+    }
+
+    /**
+     * Khách hỏi phụ tùng mà không nhắc tới xe nào (không hãng, không dòng, không năm) thì lấy xe trong hồ sơ.
+     * Khách đã nói rõ xe thì giữ nguyên lời khách; hỏi xe máy thì hồ sơ không giới hạn kết quả.
+     */
+    static SearchCriteria withProfileVehicle(SearchCriteria c, VehicleContext vehicle) {
+        if (vehicle == null || c.kind() != SearchCriteria.Kind.SPARE_PART
+                || c.brand() != null || c.model() != null || c.vehicleYear() != null) {
+            return c;
+        }
+        return new SearchCriteria(c.intent(), c.kind(), c.keyword(), vehicle.brand(), vehicle.model(), vehicle.registrationYear(),
+                c.minPrice(), c.maxPrice(), c.partType(), c.partOrigin(), c.minRegistrationYear(), c.maxRegistrationYear()).sanitized();
     }
 
     /** Lời đáp dựng sẵn khi LLM không viết được: vẫn có sản phẩm thật nên câu hỏi vẫn được coi là đã trả lời. */

@@ -3,6 +3,7 @@ package com.nguyen.motoparts.advisory.repository;
 import com.nguyen.motoparts.advisory.entity.ChatSession;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -19,6 +20,11 @@ public interface ChatSessionRepository extends JpaRepository<ChatSession, String
 
     @Query("select s from ChatSession s where s.user.accountId = :accountId order by s.startedAt desc, s.sessionId desc")
     List<ChatSession> findMine(@Param("accountId") String accountId, Pageable pageable);
+
+    /** Khi hồ sơ xe bị xóa: các cuộc trò chuyện đang gắn với nó chuyển thành hỏi chung. */
+    @Modifying
+    @Query("update ChatSession s set s.profileId = null where s.profileId = :profileId")
+    int clearProfile(@Param("profileId") String profileId);
 
     /** Cho Admin xem: kèm người dùng để lấy email. */
     @Query("select s from ChatSession s join fetch s.user where s.sessionId = :id")

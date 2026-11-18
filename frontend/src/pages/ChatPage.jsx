@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import client from '../api/client.js'
 import ChatMessageList from '../components/ChatMessageList.jsx'
 import useAuth from '../hooks/useAuth.js'
@@ -15,11 +15,13 @@ const EXAMPLES = [
     'Xe số đời 2018 trở lên dưới 20 triệu',
     'Lọc gió cho Yamaha Exciter 2012',
 ]
-const EMPTY = { id: '', messages: [], error: '' }
+const EMPTY = { id: '', messages: [], error: '', vehicle: null }
 
 /**
  * Chat box AI: hỏi bằng tiếng Việt, trợ lý gợi ý sản phẩm thật của cửa hàng.
  * Cuộc trò chuyện đang mở nằm trên địa chỉ (?s=mã) nên tải lại vẫn giữ. Cuộc mới chỉ được tạo trên máy chủ khi khách gửi câu đầu tiên.
+ * Cuộc mới có thể gắn với một xe trong "Xe của tôi" (?vehicle=mã chọn sẵn xe đó): hỏi phụ tùng mà không nói rõ xe thì
+ * trợ lý gợi ý theo xe đã chọn. Mặc định chọn xe mới nhất; có thể chuyển sang "Hỏi chung". Xe gắn với cuộc trò chuyện không đổi được.
  */
 export default function ChatPage() {
     const { logout } = useAuth()
@@ -33,6 +35,9 @@ export default function ChatPage() {
     const [text, setText] = useState('')
     const [sending, setSending] = useState(false)
     const [sendError, setSendError] = useState('')
+    const [profiles, setProfiles] = useState([])   // xe đã lưu của khách
+    // null = chưa chọn gì (mặc định xe mới nhất); '' = chủ động chọn "Hỏi chung"
+    const [chosenProfile, setChosenProfile] = useState(() => params.get('vehicle') || null)
     const loadedRef = useRef('')   // cuộc trò chuyện đã có tin nhắn trong conv, không cần tải lại
     const logRef = useRef(null)
 
@@ -45,18 +50,26 @@ export default function ChatPage() {
     }, [listVersion, logout])
 
     useEffect(() => {
+        let ignore = false
+        client.get('/vehicle-profiles')
+            .then((res) => { if (!ignore) setProfiles(res.data) })
+            .catch((err) => { if (err.response?.status === 401) logout() })
+        return () => { ignore = true }
+    }, [logout])
+
+    useEffect(() => {
         if (!activeId || loadedRef.current === activeId) return undefined
         let ignore = false
         client.get(`/chat-sessions/${encodeURIComponent(activeId)}`)
             .then((res) => {
                 if (ignore) return
                 loadedRef.current = activeId
-                setConv({ id: activeId, messages: res.data.messages, error: '' })
+                setConv({ id: activeId, messages: res.data.messages, error: '', vehicle: res.data.vehicle ?? null })
             })
             .catch((err) => {
                 if (ignore) return
                 if (err.response?.status === 401) logout()
-                else setConv({ id: activeId, messages: [], error: apiError(err, 'Không tải được cuộc trò chuyện này.') })
+                else setConv({ id: activeId, messages: [], error: apiError(err, 'Không tải được cuộc trò chuyện này.'), vehicle: null })
             })
         return () => { ignore = true }
     }, [activeId, logout])
@@ -69,6 +82,10 @@ export default function ChatPage() {
     }, [shownCount, sending, activeId])
 
     const loading = Boolean(activeId) && conv.id !== activeId
+    // Xe gắn cho cuộc mới: lựa chọn của khách nếu còn tồn tại, không thì xe mới nhất (nếu có)
+    const profileForNewChat = chosenProfile === null
+        ? (profiles[0]?.profileId ?? '')
+        : (profiles.some((p) => p.profileId === chosenProfile) ? chosenProfile : '')
     // Quay lại (nút Back) về cuộc mới trong lúc conv còn giữ cuộc cũ: coi như cuộc trống
     const current = activeId ? conv : (conv.id === '' ? conv : EMPTY)
 
@@ -76,6 +93,7 @@ export default function ChatPage() {
         loadedRef.current = ''
         setConv(EMPTY)
         setSendError('')
+        setChosenProfile(null)
         setParams({})
     }
 
@@ -97,18 +115,20 @@ export default function ChatPage() {
         const base = current.messages
         const optimistic = { messageId: `tmp-${Date.now()}`, sender: 'CUSTOMER', content, sentAt: null, status: null, products: [] }
         let sessionId = activeId
+        let vehicle = current.vehicle
         setSending(true)
         setSendError('')
-        setConv({ id: activeId, messages: [...base, optimistic], error: '' })
+        setConv({ id: activeId, messages: [...base, optimistic], error: '', vehicle })
         setText('')
         try {
             if (!sessionId) {
-                const created = await client.post('/chat-sessions')
+                const created = await client.post('/chat-sessions', profileForNewChat ? { profileId: profileForNewChat } : undefined)
                 sessionId = created.data.sessionId
+                vehicle = created.data.vehicle ?? null
             }
             const res = await client.post(`/chat-sessions/${encodeURIComponent(sessionId)}/messages`, { content }, { timeout: SEND_TIMEOUT_MS })
             loadedRef.current = sessionId
-            setConv({ id: sessionId, messages: [...base, res.data.customerMessage, res.data.assistantMessage], error: '' })
+            setConv({ id: sessionId, messages: [...base, res.data.customerMessage, res.data.assistantMessage], error: '', vehicle })
             if (sessionId !== activeId) setParams({ s: sessionId })
             setListVersion((v) => v + 1)
         } catch (err) {
@@ -120,11 +140,11 @@ export default function ChatPage() {
             if (sessionId && sessionId !== activeId) {
                 // cuộc mới đã được tạo trên máy chủ: chuyển sang dùng nó
                 loadedRef.current = sessionId
-                setConv({ id: sessionId, messages: base, error: '' })
+                setConv({ id: sessionId, messages: base, error: '', vehicle })
                 setParams({ s: sessionId })
                 setListVersion((v) => v + 1)
             } else {
-                setConv({ id: activeId, messages: base, error: '' })
+                setConv({ id: activeId, messages: base, error: '', vehicle })
             }
             setText(content)
             setSendError(err.code === 'ECONNABORTED'
@@ -163,6 +183,28 @@ export default function ChatPage() {
             </aside>
 
             <div className="chat__panel">
+                {!activeId ? (
+                    profiles.length > 0 ? (
+                        <div className="chat__vehicle">
+                            <label>
+                                <span>Tư vấn cho xe:</span>
+                                <select value={profileForNewChat} disabled={sending} aria-label="Xe cần tư vấn"
+                                        onChange={(e) => setChosenProfile(e.target.value)}>
+                                    <option value="">Hỏi chung (không chọn xe)</option>
+                                    {profiles.map((p) => <option key={p.profileId} value={p.profileId}>{p.label}</option>)}
+                                </select>
+                            </label>
+                        </div>
+                    ) : (
+                        <div className="chat__vehicle chat__vehicle--hint">
+                            Lưu xe của bạn để được gợi ý phụ tùng đúng xe. <Link to="/vehicles">Thêm xe</Link>
+                        </div>
+                    )
+                ) : (
+                    current.vehicle && (
+                        <div className="chat__vehicle">Đang tư vấn cho: <strong>{current.vehicle.label}</strong></div>
+                    )
+                )}
                 <div className="chat__log" ref={logRef}>
                     {loading && <p className="chat__note">Đang tải...</p>}
                     {!loading && current.error && <p className="chat__note chat__note--error">{current.error}</p>}

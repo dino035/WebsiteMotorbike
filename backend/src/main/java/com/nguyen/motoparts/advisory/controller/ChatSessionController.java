@@ -1,5 +1,6 @@
 package com.nguyen.motoparts.advisory.controller;
 
+import com.nguyen.motoparts.advisory.dto.CreateChatSessionRequest;
 import com.nguyen.motoparts.advisory.dto.ChatSessionResponse;
 import com.nguyen.motoparts.advisory.dto.ChatSessionSummary;
 import com.nguyen.motoparts.advisory.dto.SendMessageRequest;
@@ -32,8 +33,9 @@ public class ChatSessionController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ChatSessionResponse create(@AuthenticationPrincipal AuthUser user) {
-        return service.create(user.accountId());
+    public ChatSessionResponse create(@AuthenticationPrincipal AuthUser user,
+                                      @RequestBody(required = false) CreateChatSessionRequest request) {
+        return service.create(user.accountId(), request == null ? null : request.profileId());
     }
 
     @GetMapping

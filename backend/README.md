@@ -302,4 +302,23 @@ Bảng `chatmessage` có thêm cột `product_ids` (mã các sản phẩm đã g
 
 **Giao diện React:** `/chat` (cần đăng nhập, menu "Hỏi AI"): danh sách cuộc trò chuyện bên trái, khung hội thoại bên phải, câu trả lời kèm thẻ sản phẩm bấm vào xem chi tiết. Cuộc mới chỉ được tạo khi khách gửi câu đầu tiên. Cuộc đang mở nằm trên địa chỉ (`?s=`) nên tải lại vẫn giữ. Admin: `/admin/chat` lọc câu hỏi (mặc định "Chưa trả lời được") và `/admin/chat/:id` đọc cả cuộc trò chuyện.
 
-**Chưa làm:** hồ sơ xe của khách (`CustomerVehicleProfile`, chat hiện lấy xe từ câu hỏi) và chạy thử với Gemini thật (cần khóa).
+**Chưa làm:** chạy thử với Gemini thật (cần khóa).
+
+## Hồ sơ xe của khách (SRS 3.15)
+
+Khách lưu các xe mình đang có để chat gợi ý phụ tùng lắp vừa xe đó mà không phải nói lại xe mỗi lần. Cần đăng nhập; mọi thao tác chỉ trên hồ sơ của chính khách (`accountId` lấy từ token), hồ sơ của người khác trả 404.
+
+| Phương thức | Đường dẫn | Việc làm |
+|---|---|---|
+| GET | `/api/vehicle-profiles` | Các xe của tôi, mới nhất trước |
+| POST | `/api/vehicle-profiles` | Thêm xe: `{nickname?, vehicleModelId, registrationYear}` |
+| PUT | `/api/vehicle-profiles/{id}` | Sửa (cùng dữ liệu và cùng kiểm tra như thêm) |
+| DELETE | `/api/vehicle-profiles/{id}` | Xóa; các cuộc trò chuyện đang gắn với xe này chuyển thành hỏi chung |
+
+Kiểm tra: dòng xe phải có trong bảng `VehicleModel`; năm đăng ký phải nằm trong khoảng năm sản xuất của dòng xe đó (sai thì 400, báo rõ khoảng năm); biệt danh tối đa 50 ký tự, toàn khoảng trắng coi như không có; tối đa 10 xe mỗi khách (thêm xe thứ 11 trả 409; thêm đồng thời vẫn không vượt giới hạn vì khóa dòng tài khoản).
+
+**Dùng trong chat:** `POST /api/chat-sessions` nhận thêm `{"profileId": "..."}` (không bắt buộc; hồ sơ của người khác hoặc không tồn tại trả 404). Phản hồi cuộc trò chuyện có thêm `vehicle` (hồ sơ đang tư vấn cho, hoặc `null`). Khi khách hỏi **phụ tùng** mà câu hỏi không nhắc hãng, dòng hay năm xe nào, bộ máy gợi ý lấy xe trong hồ sơ và lọc qua luật tương thích như thường. Khách đã nói rõ xe thì giữ nguyên lời khách; hỏi xe máy thì hồ sơ không giới hạn kết quả. Xe gắn với một cuộc trò chuyện không đổi được (muốn đổi xe thì mở cuộc mới).
+
+**Giao diện React:** `/vehicles` (menu "Xe của tôi"): thêm xe bằng bộ chọn hãng, dòng xe, năm (dùng lại `VehicleModelPicker`), sửa biệt danh hoặc đổi dòng xe, xóa có bước xác nhận, nút "Hỏi AI về xe này" mở chat với xe đó. Trang `/chat`: cuộc mới có ô "Tư vấn cho xe" (mặc định xe mới nhất, có thể chọn "Hỏi chung"); cuộc đã mở hiện "Đang tư vấn cho: ...".
+
+**Kiểm thử:** `advisory/VehicleProfileTest` (11 ca: thêm, xem, sửa, xóa, kiểm tra dữ liệu, quyền sở hữu, giới hạn 10 xe, thêm 8 xe cùng lúc) và `advisory/ChatVehicleProfileTest` (9 ca: dùng xe trong hồ sơ, xe nói rõ thắng hồ sơ, xe máy không bị thu hẹp, xe chưa có phụ tùng tương thích, hồ sơ của người khác, xóa hồ sơ).

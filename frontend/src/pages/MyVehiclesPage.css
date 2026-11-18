@@ -1,0 +1,26 @@
+.vehicles h1 { margin: 0 0 6px; }
+.vehicles__intro { margin: 0 0 16px; color: #666; }
+.vehicles__message { padding: 10px 0; color: #666; }
+.vehicles__message--error { color: #c62828; }
+
+.vehicles__list { margin: 18px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.vehicle-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px;
+    padding: 12px 14px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
+.vehicle-card__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.vehicle-card__info span { font-size: 14px; color: #666; }
+.vehicle-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.vehicle-card__ask { font-size: 14px; }
+.vehicle-card .vehicle-form { width: 100%; }
+
+.vehicles__btn { display: inline-block; padding: 7px 14px; border: 1px solid #ccc; border-radius: 6px; background: #fff; color: #333;
+    font: inherit; font-size: 14px; text-decoration: none; cursor: pointer; }
+.vehicles__btn--primary { background: #d32f2f; border-color: #d32f2f; color: #fff; }
+.vehicles__btn--danger { border-color: #c62828; color: #c62828; }
+.vehicles__btn:disabled { opacity: .5; cursor: default; }
+
+.vehicle-form { display: flex; flex-direction: column; gap: 12px; padding: 14px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
+.vehicle-form h2 { margin: 0; font-size: 18px; }
+.vehicle-form__field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.vehicle-form__field input[type="text"] { max-width: 360px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
+.vehicle-form__check { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.vehicle-form__actions { display: flex; flex-wrap: wrap; gap: 8px; }
