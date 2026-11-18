@@ -19,6 +19,7 @@ export default function MainLayout() {
                         <>
                             {user?.role === 'ADMIN' && <NavLink to="/admin/orders">Quản trị</NavLink>}
                             <NavLink to="/chat">Hỏi AI</NavLink>
+                            <NavLink to="/vehicles">Xe của tôi</NavLink>
                             <NavLink to="/orders">Đơn hàng</NavLink>
                             <NavLink to="/warranty">Bảo hành</NavLink>
                             <NavLink to="/notifications">Thông báo{unreadCount > 0 ? ` (${unreadCount})` : ''}</NavLink>

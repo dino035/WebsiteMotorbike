@@ -6,11 +6,14 @@ import com.nguyen.motoparts.advisory.dto.ChatMessageResponse;
 import com.nguyen.motoparts.advisory.dto.ChatSessionResponse;
 import com.nguyen.motoparts.advisory.dto.ChatSessionSummary;
 import com.nguyen.motoparts.advisory.dto.SendMessageResponse;
+import com.nguyen.motoparts.advisory.dto.VehicleProfileResponse;
 import com.nguyen.motoparts.advisory.entity.ChatMessage;
+import com.nguyen.motoparts.advisory.entity.CustomerVehicleProfile;
 import com.nguyen.motoparts.advisory.entity.ChatSession;
 import com.nguyen.motoparts.advisory.llm.LlmClient;
 import com.nguyen.motoparts.advisory.repository.ChatMessageRepository;
 import com.nguyen.motoparts.advisory.repository.ChatSessionRepository;
+import com.nguyen.motoparts.advisory.repository.CustomerVehicleProfileRepository;
 import com.nguyen.motoparts.catalog.dto.ProductSummaryResponse;
 import com.nguyen.motoparts.catalog.entity.Product;
 import com.nguyen.motoparts.catalog.repository.ProductRepository;
@@ -35,6 +38,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -58,30 +62,43 @@ public class ChatSessionService {
     private final ChatMessageRepository messages;
     private final UserRepository users;
     private final ProductRepository products;
+    private final CustomerVehicleProfileRepository profiles;
     private final AIRecommendationEngineService engine;
     private final TransactionTemplate tx;
     private final int maxQuestionsPerHour;
 
     public ChatSessionService(ChatSessionRepository sessions, ChatMessageRepository messages, UserRepository users,
-                              ProductRepository products, AIRecommendationEngineService engine,
+                              ProductRepository products, CustomerVehicleProfileRepository profiles,
+                              AIRecommendationEngineService engine,
                               PlatformTransactionManager transactionManager,
                               @Value("${app.chat.max-messages-per-hour:30}") int maxQuestionsPerHour) {
         this.sessions = sessions;
         this.messages = messages;
         this.users = users;
         this.products = products;
+        this.profiles = profiles;
         this.engine = engine;
         this.tx = new TransactionTemplate(transactionManager);
         this.maxQuestionsPerHour = maxQuestionsPerHour;
     }
 
+    /** profileId: hồ sơ xe làm ngữ cảnh (phải là của chính khách), bỏ trống nếu hỏi chung. */
     @Transactional
-    public ChatSessionResponse create(String accountId) {
+    public ChatSessionResponse create(String accountId, String profileId) {
         User user = users.findById(accountId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản."));
+        CustomerVehicleProfile profile = null;
+        if (profileId != null && !profileId.isBlank()) {
+            profile = profiles.findOwned(profileId.trim(), accountId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ xe này."));
+        }
         ChatSession session = new ChatSession();
         session.setUser(user);
+        if (profile != null) {
+            session.setProfileId(profile.getProfileId());
+        }
         sessions.save(session);
-        return new ChatSessionResponse(session.getSessionId(), session.getStartedAt(), List.of());
+        return new ChatSessionResponse(session.getSessionId(), session.getStartedAt(), List.of(),
+                profile == null ? null : VehicleProfileResponse.from(profile));
     }
 
     @Transactional(readOnly = true)
@@ -107,10 +124,12 @@ public class ChatSessionService {
     /** Dùng chung cho Admin xem: đổi cuộc trò chuyện thành phản hồi (kèm sản phẩm đã gợi ý). Gọi trong giao dịch. */
     @Transactional(readOnly = true)
     public ChatSessionResponse toResponse(ChatSession session) {
-        return new ChatSessionResponse(session.getSessionId(), session.getStartedAt(), toMessageResponses(session.getChatMessage()));
+        return new ChatSessionResponse(session.getSessionId(), session.getStartedAt(), toMessageResponses(session.getChatMessage()),
+                vehicleOf(session));
     }
 
-    private record Prepared(String questionId, LocalDateTime questionSentAt, List<LlmClient.ChatTurn> history) {
+    private record Prepared(String questionId, LocalDateTime questionSentAt, List<LlmClient.ChatTurn> history,
+                            VehicleContext vehicle) {
     }
 
     public SendMessageResponse send(String accountId, String sessionId, String rawContent) {
@@ -137,13 +156,16 @@ public class ChatSessionService {
             question.setContent(content);
             session.addMessage(question);
             messages.saveAndFlush(question);
-            return new Prepared(question.getMessageId(), question.getSentAt(), history);
+            VehicleContext vehicle = profileOf(session)
+                    .map(p -> new VehicleContext(p.getVehicleModel().getBrand(), p.getVehicleModel().getModel(), p.getRegistrationYear()))
+                    .orElse(null);
+            return new Prepared(question.getMessageId(), question.getSentAt(), history, vehicle);
         });
 
         // 2) trả lời (có thể mất vài giây, không giữ giao dịch)
         AIRecommendationEngineService.Recommendation recommendation;
         try {
-            recommendation = engine.recommend(content, prepared.history());
+            recommendation = engine.recommend(content, prepared.history(), prepared.vehicle());
         } catch (RuntimeException e) {
             log.error("Chat AI loi bat ngo", e);
             recommendation = new AIRecommendationEngineService.Recommendation(
@@ -175,6 +197,18 @@ public class ChatSessionService {
     }
 
     // ---------------------------------------------------------------- chung
+
+    /** Hồ sơ xe gắn với cuộc trò chuyện, nếu còn tồn tại và đúng là của chủ cuộc trò chuyện. Gọi trong giao dịch. */
+    private Optional<CustomerVehicleProfile> profileOf(ChatSession session) {
+        if (session.getProfileId() == null) {
+            return Optional.empty();
+        }
+        return profiles.findOwned(session.getProfileId(), session.getUser().getAccountId());
+    }
+
+    private VehicleProfileResponse vehicleOf(ChatSession session) {
+        return profileOf(session).map(VehicleProfileResponse::from).orElse(null);
+    }
 
     private static List<LlmClient.ChatTurn> lastTurns(List<ChatMessage> all) {
         int from = Math.max(all.size() - HISTORY_TURNS, 0);

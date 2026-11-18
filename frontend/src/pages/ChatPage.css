@@ -37,3 +37,8 @@
     .chat__sessions { max-height: 140px; }
     .chat__panel { height: calc(100vh - 330px); min-height: 380px; }
 }
+
+.chat__vehicle { padding: 8px 16px; border-bottom: 1px solid #eee; background: #fafafa; font-size: 14px; color: #555; }
+.chat__vehicle label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.chat__vehicle select { max-width: 100%; padding: 5px 8px; border: 1px solid #ccc; border-radius: 6px; background: #fff; font: inherit; }
+.chat__vehicle--hint { color: #777; }
