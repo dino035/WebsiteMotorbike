@@ -130,6 +130,8 @@ Chỉ ADMIN (`/api/admin/accounts`):
 | POST | `/api/admin/accounts/{id}/lock` `{reason, force}` | Khóa. Còn đơn chưa hoàn tất thì trả 409 và cần gửi lại với `force: true` |
 | POST | `/api/admin/accounts/{id}/unlock` | Mở khóa |
 
+Giao diện React: `/admin/accounts` (tab "Tài khoản" trong trang quản trị). Tìm theo email, lọc Tất cả / Đang hoạt động / Đã khóa, phân trang; bộ lọc nằm trên địa chỉ. Khóa có ô nhập lý do; tài khoản còn đơn chưa hoàn tất phải tick xác nhận mới khóa được (gửi `force: true`). Mở khóa có bước xác nhận.
+
 Cần đăng nhập (của chính người dùng, `accountId` lấy từ token), tối đa 10 địa chỉ mỗi tài khoản:
 
 | Method | Đường dẫn | Việc |

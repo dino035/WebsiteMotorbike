@@ -29,6 +29,7 @@ import AdminSparePartFormPage from './pages/AdminSparePartFormPage';
 import ChatPage from './pages/ChatPage.jsx'
 import AdminChatPage from './pages/AdminChatPage.jsx'
 import AdminChatSessionPage from './pages/AdminChatSessionPage.jsx'
+import AdminAccountsPage from './pages/AdminAccountsPage.jsx'
 
 export default function App() {
   return (
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/admin/products/spare-part/:productId" element={<RequireAdmin><AdminSparePartFormPage /></RequireAdmin>} />
           <Route path="/admin/chat" element={<RequireAdmin><AdminChatPage /></RequireAdmin>} />
           <Route path="/admin/chat/:id" element={<RequireAdmin><AdminChatSessionPage /></RequireAdmin>} />
+          <Route path="/admin/accounts" element={<RequireAdmin><AdminAccountsPage /></RequireAdmin>} />
           <Route path="/chat" element={<RequireAuth><ChatPage /></RequireAuth>} />
           <Route path="/warranty" element={<RequireAuth><WarrantyPage /></RequireAuth>} />
           <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />
