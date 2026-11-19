@@ -177,16 +177,16 @@ Kiểm thử: `mvn test -Dtest=CartTest`.
 
 ## Đặt hàng (COD, giao tận nơi, nhận tại cửa hàng, lắp đặt)
 
-Cần đăng nhập. Đặt hàng từ giỏ hiện tại của người dùng; chưa có VNPay (chọn `VNPAY` trả 400 cho tới khi làm xong).
+Cần đăng nhập. Đặt hàng từ giỏ hiện tại của người dùng; `paymentMethod` là `COD` hoặc `VNPAY` (VNPay xem mục riêng bên dưới; chưa cấu hình VNPay thì chọn `VNPAY` trả 400).
 
 | Method | Đường dẫn | Việc |
 |---|---|---|
-| GET | `/api/orders/policy` | Phí công lắp đặt và giới hạn ngày hẹn, để React vẽ trang đặt hàng |
+| GET | `/api/orders/policy` | Phí công lắp đặt, giới hạn ngày hẹn và `vnpayEnabled`, để React vẽ trang đặt hàng |
 | POST | `/api/orders` | Đặt hàng từ giỏ (201, trả chi tiết đơn) |
 | GET | `/api/orders` | Đơn của tôi, mới nhất trước |
 | GET | `/api/orders/{orderId}` | Chi tiết một đơn (đơn của người khác trả 404) |
 
-Thân `POST /api/orders`: `{deliveryMethod: DELIVERY\|PICKUP\|INSTALL, receiverName, receiverPhone, shippingAddress, paymentMethod: COD, returnPolicyAccepted: true, installDate}`.
+Thân `POST /api/orders`: `{deliveryMethod: DELIVERY\|PICKUP\|INSTALL, receiverName, receiverPhone, shippingAddress, paymentMethod: COD\|VNPAY, returnPolicyAccepted: true, installDate}`.
 `shippingAddress` bắt buộc khi `DELIVERY`; `installDate` (yyyy-MM-dd) bắt buộc khi `INSTALL`. Người nhận và địa chỉ được chụp vào đơn
 (sửa hay xóa sổ địa chỉ sau đó không đổi đơn cũ); tên và đơn giá sản phẩm cũng chụp lúc đặt.
 
@@ -199,7 +199,45 @@ Thân `POST /api/orders`: `{deliveryMethod: DELIVERY\|PICKUP\|INSTALL, receiverN
   Đơn bị từ chối thì không tiêu thụ gì: giỏ và trạng thái xe còn nguyên.
 - Hai lần đặt cùng lúc từ một giỏ chỉ tạo một đơn (khóa tài khoản).
 
-Chưa có: VNPay. Admin xem phần "Admin quản lý đơn hàng" bên dưới. Kiểm thử: `mvn test -Dtest=OrderTest`.
+Admin xem phần "Admin quản lý đơn hàng" bên dưới. Kiểm thử: `mvn test -Dtest=OrderTest`.
+
+## Thanh toán VNPay Sandbox (SRS 3.10)
+
+Khách chọn `VNPAY` khi đặt hàng, rồi được chuyển sang cổng VNPay (môi trường thử nghiệm) để trả tiền. Mỗi lần bấm trả tiền là một bản ghi `OnlinePayment` với mã giao dịch (`vnp_TxnRef`) mới; một đơn có thể thử lại nhiều lần.
+
+| Method | Đường dẫn | Việc |
+|---|---|---|
+| POST | `/api/orders/{orderId}/vnpay` | Cần đăng nhập, đúng chủ đơn. Tạo một lần trả tiền và trả `{paymentUrl, txnRef}`; React chuyển trình duyệt sang `paymentUrl` |
+| POST | `/api/orders/{orderId}/pay-cod` | Đổi đơn VNPay chưa trả được tiền sang COD (SRS 3.10); trả chi tiết đơn |
+| GET | `/api/payments/vnpay/return` | Không cần đăng nhập. Trang React `/payment/vnpay-return` gửi nguyên các tham số `vnp_*` sang đây; kiểm tra chữ ký, ghi nhận kết quả, trả `{outcome, paid, message, orderId, orderCode, reason}` |
+| GET | `/api/payments/vnpay/ipn` | Không cần đăng nhập. VNPay gọi thẳng máy chủ; trả `{RspCode, Message}` theo quy định của VNPay (00 đã nhận, 01 không thấy giao dịch, 02 đã xử lý, 04 sai số tiền, 97 sai chữ ký, 99 chưa cấu hình) |
+
+**Biến môi trường (khóa tuyệt đối không ghi vào file hay Git):**
+
+| Biến | Mặc định | Ý nghĩa |
+|---|---|---|
+| `VNPAY_TMN_CODE` | (trống) | Terminal ID (mã website) của tài khoản sandbox |
+| `VNPAY_HASH_SECRET` | (trống) | Chuỗi bí mật tạo chữ ký |
+| `VNPAY_PAY_URL` | `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html` | Địa chỉ cổng thanh toán |
+| `VNPAY_RETURN_URL` | `<FRONTEND_URL>/payment/vnpay-return` | Nơi VNPay đưa trình duyệt của khách quay về (trang React) |
+| `VNPAY_EXPIRE_MINUTES` | 15 | Thời gian khách được trả tiền trên cổng (5 đến 60) |
+
+Thiếu `VNPAY_TMN_CODE` hoặc `VNPAY_HASH_SECRET` thì VNPay bị khóa ở mọi cửa (`vnpayEnabled: false`, đặt hàng VNPAY trả 400, return trả 400, IPN trả 99), đơn vẫn đặt được bằng COD.
+
+**Chữ ký:** tham số `vnp_*` sắp theo tên, bỏ tham số rỗng, mã hóa URL giá trị, nối bằng `&`, ký HMAC-SHA512 bằng `VNPAY_HASH_SECRET` (phiên bản 2.1.0). Thông báo chỉ được tin khi chữ ký khớp và `vnp_TmnCode` đúng mã website của mình; số tiền gửi là VND nhân 100, giờ gửi là GMT+7 dù máy chủ ở múi giờ nào.
+
+**Ghi nhận kết quả (dùng chung cho return và IPN, chạy lặp lại không ghi trùng):** khóa dòng đơn (`SELECT ... FOR UPDATE`) rồi mới đọc giao dịch, nên return và IPN đến cùng lúc chỉ ghi nhận một lần. Các kết quả (`outcome`):
+`PAID` (đơn chuyển đã thanh toán, ghi `paidAt`, thông báo cho khách), `FAILED` (khách hủy, hết hạn hay ngân hàng từ chối; đơn chuyển `FAILED`, vẫn thử lại hoặc đổi sang COD được),
+`ALREADY_PROCESSED` (đã ghi nhận trước đó, ví dụ IPN đến trước khi khách quay về; `paid` vẫn phản ánh đúng kết quả lần trả đó),
+`AMOUNT_MISMATCH` (số tiền VNPay báo khác số tiền giao dịch: không ghi nhận gì),
+`NOT_FOUND`, và hai trường hợp đã thu tiền nhưng không áp dụng được cho đơn cần hoàn tiền thủ công: `PAID_ORDER_CANCELLED` (đơn đã bị hủy) và `PAID_DUPLICATE` (đơn đã được thanh toán bằng lần khác). Cả hai đều ghi thông báo cho khách, và Admin thấy giao dịch (mã giao dịch, mã VNPay, ngân hàng) trong chi tiết đơn để đối soát. Tiền đã thu thật thì đơn ở trạng thái đã thanh toán dù đơn bị hủy.
+Thông báo thất bại muộn của một lần cũ không hạ đơn đã thanh toán; tiền nhận được sau khi khách đã đổi sang COD vẫn được ghi là đã trả bằng VNPay.
+
+**Chạy trên máy (localhost):** VNPay không gọi IPN tới `localhost` được, nên kết quả được ghi nhận khi trình duyệt quay về `/payment/vnpay-return`. IPN chỉ cần khi triển khai có địa chỉ công khai (khai địa chỉ IPN trong trang Merchant của VNPay). Thẻ thử của sandbox: ngân hàng NCB, số thẻ `9704198526191432198`, tên `NGUYEN VAN A`, ngày phát hành `07/15`, OTP `123456`.
+
+**Chưa làm:** hết hạn tự động cho đơn VNPay chưa trả (xe vẫn ở `SOLD` cho tới khi Admin hủy đơn), tra cứu và hoàn tiền qua API của VNPay (hoàn tiền làm thủ công trên trang Merchant).
+
+**Kiểm thử:** `order/service/VnpayGatewayTest` (không cần CSDL: chữ ký so với cài đặt HMAC độc lập viết bằng Python, dữ liệu ký, liên kết thanh toán, từ chối chữ ký sai hoặc mã website khác, giờ Việt Nam) và `order/VnpayPaymentTest` (PostgreSQL thật, test tự ký thông báo như VNPay: đặt hàng, tạo liên kết, ghi nhận thành công một lần, IPN trước khi quay về, chữ ký sai hay số tiền sai, thử lại sau khi thất bại, đổi sang COD, đơn đã hủy, trả trùng, 8 luồng return và IPN cùng lúc).
 
 ## Admin quản lý đơn hàng và lịch lắp đặt
 
@@ -208,7 +246,7 @@ Chỉ ADMIN (`/api/admin/**`).
 | Method | Đường dẫn | Việc |
 |---|---|---|
 | GET | `/api/admin/orders?status=&page=&size=` | Mọi đơn, mới nhất trước; lọc theo trạng thái (bỏ trống hoặc `ALL` là không lọc); trả kèm email khách |
-| GET | `/api/admin/orders/{orderId}` | Chi tiết: đơn, khách, `nextStatuses` (các bước được chuyển), `canConfirmPayment` |
+| GET | `/api/admin/orders/{orderId}` | Chi tiết: đơn, khách, `nextStatuses` (các bước được chuyển), `canConfirmPayment`, `onlinePayments` (các lần trả tiền VNPay để đối soát) |
 | POST | `/api/admin/orders/{orderId}/status` `{status}` | Đổi trạng thái; chỉ theo `OrderStatus.canMoveTo` |
 | POST | `/api/admin/orders/{orderId}/confirm-payment` | Xác nhận đã thu tiền COD |
 | GET | `/api/admin/installations?status=` | Lịch lắp đặt, ngày hẹn gần nhất trước |
@@ -292,7 +330,7 @@ Cuộc trò chuyện của người khác trả 404. Mỗi tài khoản tối đ
 | Biến | Mặc định | Ý nghĩa |
 |---|---|---|
 | `GEMINI_API_KEY` | (trống) | Khóa tạo ở Google AI Studio. Chưa đặt thì chat vẫn chạy, mọi câu hỏi là "chưa trả lời được". Chỉ đặt bằng biến môi trường, không ghi vào file hay Git |
-| `GEMINI_MODEL` | `gemini-flash-latest` | Tên model; xem tên và hạn mức hiện có trong AI Studio |
+| `GEMINI_MODEL` | `gemini-flash-latest` | Tên model; xem tên và hạn mức hiện có trong AI Studio. Ngày 20/11/2026 với khóa AI Studio thử: `gemini-flash-latest` treo quá thời gian chờ, `gemini-2.5-flash` trả 404, `gemini-3.5-flash` trả 503; `gemini-flash-lite-latest` chạy ổn (khoảng 3 giây mỗi câu). Danh sách này thay đổi theo thời điểm và khóa nên cần thử lại khi lỗi |
 | `GEMINI_TIMEOUT_SECONDS` | 20 | Thời gian chờ mỗi lời gọi |
 | `CHAT_MAX_MESSAGES_PER_HOUR` | 30 | Giới hạn câu hỏi mỗi tài khoản mỗi giờ |
 
@@ -302,7 +340,7 @@ Bảng `chatmessage` có thêm cột `product_ids` (mã các sản phẩm đã g
 
 **Giao diện React:** `/chat` (cần đăng nhập, menu "Hỏi AI"): danh sách cuộc trò chuyện bên trái, khung hội thoại bên phải, câu trả lời kèm thẻ sản phẩm bấm vào xem chi tiết. Cuộc mới chỉ được tạo khi khách gửi câu đầu tiên. Cuộc đang mở nằm trên địa chỉ (`?s=`) nên tải lại vẫn giữ. Admin: `/admin/chat` lọc câu hỏi (mặc định "Chưa trả lời được") và `/admin/chat/:id` đọc cả cuộc trò chuyện.
 
-**Chưa làm:** chạy thử với Gemini thật (cần khóa).
+**Đã chạy thử với Gemini thật** (20/11/2026, model `gemini-flash-lite-latest`): chào hỏi, tìm xe máy theo hãng và giá, hỏi phụ tùng khi chưa biết xe (hỏi lại khách), câu hỏi ngoài phạm vi (từ chối lịch sự, ghi nhận cho Admin) đều đúng. Gemini có thể tự thêm chi tiết không có trong dữ liệu sản phẩm (ví dụ số km, "chính chủ") dù lời nhắc cấm; chưa siết thêm.
 
 ## Hồ sơ xe của khách (SRS 3.15)
 

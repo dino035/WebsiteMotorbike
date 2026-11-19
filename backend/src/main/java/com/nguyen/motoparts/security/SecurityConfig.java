@@ -54,6 +54,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/register", "/api/auth/login",
                                 "/api/auth/forgot-password", "/api/auth/reset-password",
                                 "/api/auth/reset-password/validate").permitAll()
+                        // VNPay báo kết quả về: tin nhờ chữ ký HMAC, không nhờ phiên đăng nhập (trình duyệt hay máy chủ VNPay gọi).
+                        .requestMatchers(HttpMethod.GET, "/api/payments/vnpay/return", "/api/payments/vnpay/ipn").permitAll()
                         // Khách chưa đăng nhập được xem sản phẩm.
                         .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/motorbikes/**",
                                 "/api/spare-parts/**", "/api/vehicle-models/**").permitAll()

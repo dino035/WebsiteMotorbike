@@ -80,6 +80,12 @@ export default function AdminOrderDetailPage() {
                     </div>
                     <p className="order-detail__date">Đặt lúc {formatDateTime(o.orderDate)}</p>
 
+                    {o.status === 'CANCELLED' && o.payment?.status === 'PAID' && (
+                        <p className="order-detail__warn" role="alert">
+                            Đơn đã hủy nhưng khách đã trả tiền qua VNPay: hãy hoàn tiền thủ công cho khách
+                            (dùng mã giao dịch ở khung Thanh toán để đối soát trên trang Merchant của VNPay).
+                        </p>
+                    )}
                     {done && <p className="order-detail__success" role="status">{done}</p>}
                     {actionError && <p className="admin__message admin__message--error" role="alert">{actionError}</p>}
 
@@ -156,6 +162,23 @@ export default function AdminOrderDetailPage() {
                                         <span className={`pay-badge pay-badge--${o.payment.status.toLowerCase()}`}>{o.payment.statusLabel}</span>
                                         {o.payment.paidAt && <> lúc {formatDateTime(o.payment.paidAt)}</>}
                                     </p>
+                                    {detail.onlinePayments.length > 0 && (
+                                        <table className="order-detail__attempts">
+                                            <thead>
+                                                <tr><th>Mã giao dịch</th><th>Kết quả</th><th>Mã VNPay</th><th>Ngân hàng</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                {detail.onlinePayments.map((a) => (
+                                                    <tr key={a.txnRef}>
+                                                        <td>{a.txnRef}</td>
+                                                        <td>{a.statusLabel}{a.responseCode && ` (${a.responseCode})`}</td>
+                                                        <td>{a.transactionNo ?? '—'}</td>
+                                                        <td>{a.bankCode ?? '—'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    )}
                                 </div>
                             )}
                         </div>

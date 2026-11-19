@@ -63,13 +63,14 @@ public class OrderService {
     private final ProductLockRepository productLockRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final VnpayGateway vnpayGateway;
     private final int holdMinutes;
 
     public OrderService(OrderRepository orderRepository, PaymentRepository paymentRepository,
                         InstallationRequestRepository installationRepository, CartItemRepository cartItemRepository,
                         ProductRepository productRepository, ProductLockRepository productLockRepository,
                         UserRepository userRepository, NotificationService notificationService,
-                        @Value("${app.cart.hold-minutes:30}") int holdMinutes) {
+                        VnpayGateway vnpayGateway, @Value("${app.cart.hold-minutes:30}") int holdMinutes) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
         this.installationRepository = installationRepository;
@@ -78,12 +79,13 @@ public class OrderService {
         this.productLockRepository = productLockRepository;
         this.userRepository = userRepository;
         this.notificationService = notificationService;
+        this.vnpayGateway = vnpayGateway;
         this.holdMinutes = holdMinutes;
     }
 
     public CheckoutPolicyResponse policy() {
         return new CheckoutPolicyResponse(InstallationPolicy.LABOR_FEE, InstallationPolicy.MAX_PER_DAY,
-                InstallationPolicy.MAX_DAYS_AHEAD);
+                InstallationPolicy.MAX_DAYS_AHEAD, vnpayGateway.isConfigured());
     }
 
     // ---------------------------------------------------------------- đặt hàng
@@ -101,8 +103,8 @@ public class OrderService {
                 throw new BadRequestException("Vui lòng nhập địa chỉ giao hàng.");
             }
         }
-        if (req.paymentMethod() == PaymentMethod.VNPAY) {
-            throw new BadRequestException("Thanh toán VNPay chưa được hỗ trợ, vui lòng chọn thanh toán khi nhận hàng (COD).");
+        if (req.paymentMethod() == PaymentMethod.VNPAY && !vnpayGateway.isConfigured()) {
+            throw new BadRequestException("Hệ thống chưa cấu hình VNPay, vui lòng chọn thanh toán khi nhận hàng (COD).");
         }
         if (!req.returnPolicyAccepted()) {
             throw new BadRequestException("Vui lòng xác nhận chính sách đổi trả để tiếp tục.");
@@ -187,7 +189,7 @@ public class OrderService {
         order.setTotalAmount(total);
         orderRepository.save(order);
 
-        // 5) Thanh toán (COD: chờ Admin xác nhận đã thu tiền), xóa giỏ, thông báo
+        // 5) Thanh toán (COD: chờ Admin xác nhận đã thu tiền; VNPay: khách bấm trả tiền ở bước sau), xóa giỏ, thông báo
         Payment payment = new Payment();
         payment.setOrderId(order.getOrderId());
         payment.setMethod(req.paymentMethod());
@@ -242,7 +244,9 @@ public class OrderService {
                 .toList();
         OrderDetailResponse.PaymentInfo payment = p == null ? null : new OrderDetailResponse.PaymentInfo(
                 p.getMethod().name(), p.getMethod().getLabel(), p.getStatus().name(), p.getStatus().getLabel(),
-                p.getAmount(), p.getPaidAt());
+                p.getAmount(), p.getPaidAt(),
+                p.getMethod() == PaymentMethod.VNPAY && p.getStatus() != PaymentStatus.PAID
+                        && o.getStatus() != OrderStatus.CANCELLED);
         InstallationRequest ir = o.getInstallationRequest();
         OrderDetailResponse.InstallationInfo installation = ir == null ? null : new OrderDetailResponse.InstallationInfo(
                 ir.getPreferredDate(), ir.getLaborFee(), ir.getStatus().name(), ir.getStatus().getLabel());

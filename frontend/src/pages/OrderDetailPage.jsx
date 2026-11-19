@@ -13,6 +13,8 @@ export default function OrderDetailPage() {
     const location = useLocation()
     const justPlaced = location.state?.placed === true
     const [result, setResult] = useState({ id: null, order: null, error: '' })
+    const [busy, setBusy] = useState(false)
+    const [actionError, setActionError] = useState(location.state?.payError ?? '')
 
     useEffect(() => {
         let ignore = false
@@ -28,6 +30,36 @@ export default function OrderDetailPage() {
             })
         return () => { ignore = true }
     }, [id, logout])
+
+    /** Bắt đầu (hoặc thử lại) một lần trả tiền VNPay rồi chuyển khách sang cổng thanh toán. */
+    async function payOnline() {
+        setBusy(true)
+        setActionError('')
+        try {
+            const res = await client.post(`/orders/${encodeURIComponent(id)}/vnpay`)
+            window.location.assign(res.data.paymentUrl)   // nút vẫn khóa trong lúc chuyển trang
+        } catch (err) {
+            if (err.response?.status === 401) { logout(); return }
+            setActionError(apiError(err, 'Không mở được cổng thanh toán, vui lòng thử lại.'))
+            setBusy(false)
+        }
+    }
+
+    /** Thanh toán trực tuyến lỗi thì khách được đổi sang thanh toán khi nhận hàng (SRS 3.10). */
+    async function switchToCod() {
+        if (!window.confirm('Chuyển sang thanh toán khi nhận hàng (COD)? Bạn sẽ trả tiền mặt khi nhận hàng.')) return
+        setBusy(true)
+        setActionError('')
+        try {
+            const res = await client.post(`/orders/${encodeURIComponent(id)}/pay-cod`)
+            setResult({ id, order: res.data, error: '' })
+        } catch (err) {
+            if (err.response?.status === 401) { logout(); return }
+            setActionError(apiError(err, 'Không đổi được phương thức thanh toán, vui lòng thử lại.'))
+        } finally {
+            setBusy(false)
+        }
+    }
 
     const loading = result.id !== id
     const o = result.order
@@ -105,6 +137,18 @@ export default function OrderDetailPage() {
                                         <span className={`pay-badge pay-badge--${o.payment.status.toLowerCase()}`}>{o.payment.statusLabel}</span>
                                         {o.payment.paidAt && <> lúc {formatDateTime(o.payment.paidAt)}</>}
                                     </p>
+                                    {o.payment.canPayOnline && (
+                                        <div className="order-detail__pay">
+                                            <button type="button" className="order-detail__btn order-detail__btn--primary"
+                                                    disabled={busy} onClick={payOnline}>
+                                                {o.payment.status === 'FAILED' ? 'Thanh toán lại bằng VNPay' : 'Thanh toán bằng VNPay'}
+                                            </button>
+                                            <button type="button" className="order-detail__btn" disabled={busy} onClick={switchToCod}>
+                                                Chuyển sang thanh toán khi nhận hàng
+                                            </button>
+                                        </div>
+                                    )}
+                                    {actionError && <p className="order-detail__error" role="alert">{actionError}</p>}
                                 </div>
                             )}
                         </div>

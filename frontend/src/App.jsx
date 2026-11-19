@@ -31,6 +31,7 @@ import MyVehiclesPage from './pages/MyVehiclesPage.jsx'
 import AdminChatPage from './pages/AdminChatPage.jsx'
 import AdminChatSessionPage from './pages/AdminChatSessionPage.jsx'
 import AdminAccountsPage from './pages/AdminAccountsPage.jsx'
+import VnpayReturnPage from './pages/VnpayReturnPage.jsx'
 
 export default function App() {
   return (
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="/checkout" element={<RequireAuth><CheckoutPage /></RequireAuth>} />
           <Route path="/orders" element={<RequireAuth><OrdersPage /></RequireAuth>} />
           <Route path="/orders/:id" element={<RequireAuth><OrderDetailPage /></RequireAuth>} />
+          <Route path="/payment/vnpay-return" element={<VnpayReturnPage />} />
           <Route path="/addresses" element={<RequireAuth><AddressesPage /></RequireAuth>} />
           <Route path="/admin/orders" element={<RequireAdmin><AdminOrdersPage /></RequireAdmin>} />
           <Route path="/admin/orders/:id" element={<RequireAdmin><AdminOrderDetailPage /></RequireAdmin>} />
