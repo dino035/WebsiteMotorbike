@@ -242,8 +242,12 @@ class VehicleProfileTest {
     void listsNewestFirst() throws Exception {
         String token = register();
         VehicleModel v = vehicle(2010, 2020);
+        // Dừng vài mili giây giữa các lần tạo: đồng hồ Windows thô, hai lần tạo liền nhau có thể trùng thời điểm tạo
+        // (khi trùng, thứ tự chỉ còn theo mã ngẫu nhiên nên test chập chờn).
         String first = create(token, "Một", v, 2011).get("profileId").asText();
+        Thread.sleep(20);
         String second = create(token, "Hai", v, 2012).get("profileId").asText();
+        Thread.sleep(20);
         String third = create(token, "Ba", v, 2013).get("profileId").asText();
 
         assertEquals(List.of(third, second, first), ids(list(token)));

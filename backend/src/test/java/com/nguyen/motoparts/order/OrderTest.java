@@ -39,6 +39,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -192,6 +193,27 @@ class OrderTest {
         assertEquals(0, new BigDecimal("50000").compareTo(p.get("laborFee").decimalValue()));
         assertEquals(5, p.get("installMaxPerDay").asInt());
         assertEquals(60, p.get("installMaxDaysAhead").asInt());
+    }
+
+    @Test
+    void vnpayIsLockedWhenTheMerchantKeysAreNotConfigured() throws Exception {
+        // Context này không đặt app.vnpay.tmn-code / hash-secret: VNPay phải bị khóa ở mọi cửa, chỉ còn COD.
+        Customer c = register();
+        JsonNode p = read(mvc.perform(auth(get("/api/orders/policy"), c.token())).andReturn());
+        assertFalse(p.get("vnpayEnabled").asBoolean());
+
+        addToCart(c, newPart("100000").getProductId(), 1);
+        String orderId = read(placeOrder(c, checkout())).get("orderId").asText();
+        MvcResult r = mvc.perform(auth(post("/api/orders/" + orderId + "/vnpay"), c.token())).andReturn();
+        assertEquals(400, r.getResponse().getStatus());
+        assertTrue(message(r).contains("VNPay"));
+
+        // Dù ai đó tự ký bằng khóa rỗng, thông báo VNPay cũng không được chấp nhận.
+        assertEquals(400, mvc.perform(get("/api/payments/vnpay/return").param("vnp_TxnRef", "x")
+                .param("vnp_TmnCode", "").param("vnp_SecureHash", "abc")).andReturn().getResponse().getStatus());
+        MvcResult ipn = mvc.perform(get("/api/payments/vnpay/ipn").param("vnp_TxnRef", "x")).andReturn();
+        assertEquals(200, ipn.getResponse().getStatus());
+        assertEquals("99", read(ipn).get("RspCode").asText());
     }
 
     @Test

@@ -56,6 +56,15 @@ app:
     model: ${GEMINI_MODEL:gemini-flash-latest}
     base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
     timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:20}
+  vnpay:
+    # Thanh toán VNPay Sandbox. Mã website và khóa bí mật chỉ đặt bằng biến môi trường, không ghi vào code hay Git.
+    # Thiếu VNPAY_TMN_CODE hoặc VNPAY_HASH_SECRET: VNPay bị khóa, đặt hàng chỉ cho COD.
+    tmn-code: ${VNPAY_TMN_CODE:}
+    hash-secret: ${VNPAY_HASH_SECRET:}
+    pay-url: ${VNPAY_PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+    # Địa chỉ VNPay đưa trình duyệt của khách quay về sau khi trả tiền: trang React, trang này gọi lại /api/payments/vnpay/return.
+    return-url: ${VNPAY_RETURN_URL:${app.frontend-url}/payment/vnpay-return}
+    expire-minutes: ${VNPAY_EXPIRE_MINUTES:15}   # thời gian khách được trả tiền trên cổng VNPay (5 đến 60 phút)
   chat:
     max-messages-per-hour: ${CHAT_MAX_MESSAGES_PER_HOUR:30}   # số câu hỏi tối đa của một tài khoản mỗi giờ (giữ hạn mức Gemini)
   admin:

@@ -60,6 +60,7 @@ function CheckoutForm({ cart, addresses, policy }) {
     const [receiverPhone, setReceiverPhone] = useState(defaultAddress?.receiverPhone ?? '')
     const [shippingAddress, setShippingAddress] = useState('')   // chỉ dùng khi chọn "địa chỉ khác"
     const [installDate, setInstallDate] = useState('')
+    const [paymentMethod, setPaymentMethod] = useState('COD')
     const [accepted, setAccepted] = useState(false)
     const [error, setError] = useState('')
     const [submitting, setSubmitting] = useState(false)
@@ -101,12 +102,27 @@ function CheckoutForm({ cart, addresses, policy }) {
                 receiverName: receiverName.trim(),
                 receiverPhone: receiverPhone.trim(),
                 shippingAddress: address,
-                paymentMethod: 'COD',
+                paymentMethod,
                 returnPolicyAccepted: accepted,
                 installDate: deliveryMethod === 'INSTALL' ? installDate : null,
             })
             refresh().catch(() => {})   // giỏ đã trống: cập nhật số món trên menu
-            navigate(`/orders/${res.data.orderId}`, { replace: true, state: { placed: true } })
+            const orderId = res.data.orderId
+            if (paymentMethod === 'VNPAY') {
+                try {
+                    const link = await client.post(`/orders/${encodeURIComponent(orderId)}/vnpay`)
+                    window.location.assign(link.data.paymentUrl)   // sang cổng VNPay; nút vẫn khóa trong lúc chuyển trang
+                    return
+                } catch (payErr) {
+                    // Đơn đã được tạo: đưa khách tới đơn để bấm thanh toán lại hoặc chuyển sang COD
+                    navigate(`/orders/${orderId}`, { replace: true, state: {
+                        placed: true,
+                        payError: apiError(payErr, 'Không mở được cổng thanh toán VNPay, bạn có thể thử lại bên dưới.'),
+                    } })
+                    return
+                }
+            }
+            navigate(`/orders/${orderId}`, { replace: true, state: { placed: true } })
         } catch (err) {
             setError(apiError(err, 'Không đặt hàng được, vui lòng thử lại.'))
             setSubmitting(false)
@@ -196,13 +212,19 @@ function CheckoutForm({ cart, addresses, policy }) {
                     <fieldset className="checkout__box">
                         <legend>Thanh toán</legend>
                         <label className="checkout__option">
-                            <input type="radio" name="payment" checked readOnly />
+                            <input type="radio" name="payment" checked={paymentMethod === 'COD'}
+                                   onChange={() => setPaymentMethod('COD')} />
                             Thanh toán khi nhận hàng (COD)
                         </label>
-                        <label className="checkout__option checkout__option--off">
-                            <input type="radio" name="payment" disabled />
-                            VNPay <span className="checkout__note">— sắp có</span>
+                        <label className={policy.vnpayEnabled ? 'checkout__option' : 'checkout__option checkout__option--off'}>
+                            <input type="radio" name="payment" disabled={!policy.vnpayEnabled}
+                                   checked={paymentMethod === 'VNPAY'} onChange={() => setPaymentMethod('VNPAY')} />
+                            Thanh toán trực tuyến qua VNPay (môi trường thử nghiệm)
+                            {!policy.vnpayEnabled && <span className="checkout__note"> — hệ thống chưa cấu hình</span>}
                         </label>
+                        {paymentMethod === 'VNPAY' && (
+                            <p className="checkout__note">Sau khi đặt hàng, bạn sẽ được chuyển sang cổng VNPay để trả tiền.</p>
+                        )}
                     </fieldset>
 
                     <label className="checkout__policy">
@@ -228,7 +250,8 @@ function CheckoutForm({ cart, addresses, policy }) {
 
                     {error && <p className="checkout__error" role="alert">{error}</p>}
                     <button type="submit" className="checkout__submit" disabled={submitting}>
-                        {submitting ? 'Đang đặt hàng...' : 'Đặt hàng'}
+                        {submitting ? (paymentMethod === 'VNPAY' ? 'Đang chuyển sang VNPay...' : 'Đang đặt hàng...')
+                            : (paymentMethod === 'VNPAY' ? 'Đặt hàng và thanh toán' : 'Đặt hàng')}
                     </button>
                     <p className="checkout__note"><Link to="/cart">← Quay lại giỏ hàng</Link></p>
                 </aside>

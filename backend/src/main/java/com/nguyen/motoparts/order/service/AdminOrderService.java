@@ -22,6 +22,7 @@ import com.nguyen.motoparts.order.entity.InstallationRequest;
 import com.nguyen.motoparts.order.entity.Order;
 import com.nguyen.motoparts.order.entity.OrderItem;
 import com.nguyen.motoparts.order.entity.Payment;
+import com.nguyen.motoparts.order.repository.OnlinePaymentRepository;
 import com.nguyen.motoparts.order.repository.OrderRepository;
 import com.nguyen.motoparts.order.repository.PaymentRepository;
 import org.springframework.data.domain.Page;
@@ -53,16 +54,19 @@ public class AdminOrderService {
     private final ProductRepository productRepository;
     private final ProductLockRepository productLockRepository;
     private final NotificationService notificationService;
+    private final OnlinePaymentRepository onlinePaymentRepository;
 
     public AdminOrderService(OrderRepository orderRepository, PaymentRepository paymentRepository,
                              UserRepository userRepository, ProductRepository productRepository,
-                             ProductLockRepository productLockRepository, NotificationService notificationService) {
+                             ProductLockRepository productLockRepository, NotificationService notificationService,
+                             OnlinePaymentRepository onlinePaymentRepository) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.productLockRepository = productLockRepository;
         this.notificationService = notificationService;
+        this.onlinePaymentRepository = onlinePaymentRepository;
     }
 
     // ---------------------------------------------------------------- xem
@@ -182,7 +186,13 @@ public class AdminOrderService {
                 .map(s -> new AdminOrderDetail.NextStatus(s.name(), s.getLabel())).toList();
         boolean canConfirm = payment != null && payment.getMethod() == PaymentMethod.COD
                 && payment.getStatus() == PaymentStatus.PENDING && order.getStatus() != OrderStatus.CANCELLED;
-        return new AdminOrderDetail(OrderService.toDetail(order, payment), customer, next, canConfirm);
+        List<AdminOrderDetail.OnlineAttempt> attempts = onlinePaymentRepository
+                .findByOrderIdOrderByCreatedAtDesc(order.getOrderId()).stream()
+                .map(a -> new AdminOrderDetail.OnlineAttempt(a.getTxnRef(), a.getAmount(), a.getStatus().name(),
+                        a.getStatus().getLabel(), a.getResponseCode(), a.getTransactionNo(), a.getBankCode(),
+                        a.getCreatedAt(), a.getCompletedAt()))
+                .toList();
+        return new AdminOrderDetail(OrderService.toDetail(order, payment), customer, next, canConfirm, attempts);
     }
 
     private static OrderStatus parseStatus(String text) {

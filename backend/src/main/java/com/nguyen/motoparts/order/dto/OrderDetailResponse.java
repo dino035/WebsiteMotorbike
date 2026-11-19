@@ -28,8 +28,9 @@ public record OrderDetailResponse(
     public record Item(String productId, String productName, BigDecimal unitPrice, int quantity, BigDecimal lineTotal) {
     }
 
+    /** canPayOnline: đơn chọn VNPay, chưa trả được tiền và chưa hủy, nên khách được bấm "Thanh toán" hoặc đổi sang COD. */
     public record PaymentInfo(String method, String methodLabel, String status, String statusLabel,
-                              BigDecimal amount, LocalDateTime paidAt) {
+                              BigDecimal amount, LocalDateTime paidAt, boolean canPayOnline) {
     }
 
     public record InstallationInfo(LocalDate preferredDate, BigDecimal laborFee, String status, String statusLabel) {

@@ -4,8 +4,11 @@ import com.nguyen.motoparts.order.dto.CheckoutPolicyResponse;
 import com.nguyen.motoparts.order.dto.CheckoutRequest;
 import com.nguyen.motoparts.order.dto.OrderDetailResponse;
 import com.nguyen.motoparts.order.dto.OrderSummaryResponse;
+import com.nguyen.motoparts.order.dto.PaymentLinkResponse;
+import com.nguyen.motoparts.order.service.OnlinePaymentService;
 import com.nguyen.motoparts.order.service.OrderService;
 import com.nguyen.motoparts.security.AuthUser;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -25,9 +28,11 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService service;
+    private final OnlinePaymentService onlinePayments;
 
-    public OrderController(OrderService service) {
+    public OrderController(OrderService service, OnlinePaymentService onlinePayments) {
         this.service = service;
+        this.onlinePayments = onlinePayments;
     }
 
     /** Quy tắc cho trang đặt hàng: phí công và giới hạn ngày hẹn lắp đặt. */
@@ -51,5 +56,24 @@ public class OrderController {
     @GetMapping("/{orderId}")
     public OrderDetailResponse detail(@AuthenticationPrincipal AuthUser user, @PathVariable String orderId) {
         return service.getMine(user.accountId(), orderId);
+    }
+
+    /** Bắt đầu (hoặc thử lại) một lần trả tiền VNPay cho đơn; trả liên kết để React chuyển khách sang cổng VNPay. */
+    @PostMapping("/{orderId}/vnpay")
+    public PaymentLinkResponse payWithVnpay(@AuthenticationPrincipal AuthUser user, @PathVariable String orderId,
+                                            HttpServletRequest request) {
+        return onlinePayments.startAttempt(user.accountId(), orderId, clientIp(request));
+    }
+
+    /** Đổi đơn VNPay chưa trả được tiền sang thanh toán khi nhận hàng (COD). */
+    @PostMapping("/{orderId}/pay-cod")
+    public OrderDetailResponse payWithCod(@AuthenticationPrincipal AuthUser user, @PathVariable String orderId) {
+        return onlinePayments.useCod(user.accountId(), orderId);
+    }
+
+    /** Địa chỉ IP gửi cho VNPay; không tin tiêu đề X-Forwarded-For vì người dùng tự đặt được. */
+    private static String clientIp(HttpServletRequest request) {
+        String ip = request.getRemoteAddr();
+        return ip == null || ip.contains(":") ? "127.0.0.1" : ip;
     }
 }
