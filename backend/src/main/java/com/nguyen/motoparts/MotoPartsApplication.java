@@ -8,4 +8,4 @@ public class MotoPartsApplication {
     public static void main(String[] args) {
         SpringApplication.run(MotoPartsApplication.class, args);
     }
-}cd "D:\Web Programming\MotoParts-TieuLuan"
+}
