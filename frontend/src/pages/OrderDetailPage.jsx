@@ -15,6 +15,13 @@ export default function OrderDetailPage() {
     const [result, setResult] = useState({ id: null, order: null, error: '' })
     const [busy, setBusy] = useState(false)
     const [actionError, setActionError] = useState(location.state?.payError ?? '')
+    const [holdMinutes, setHoldMinutes] = useState(null)   // số phút để trả tiền VNPay trước khi đơn tự hủy
+
+    useEffect(() => {
+        client.get('/orders/policy')
+            .then((res) => setHoldMinutes(res.data.vnpayHoldMinutes))
+            .catch(() => {})   // chỉ là lời nhắc, không có cũng không sao
+    }, [])
 
     useEffect(() => {
         let ignore = false
@@ -147,6 +154,12 @@ export default function OrderDetailPage() {
                                                 Chuyển sang thanh toán khi nhận hàng
                                             </button>
                                         </div>
+                                    )}
+                                    {o.payment.canPayOnline && holdMinutes && (
+                                        <p className="order-detail__hint">
+                                            Đơn chưa thanh toán trong {holdMinutes} phút kể từ lúc đặt sẽ tự hủy
+                                            (nếu bạn vừa bấm thanh toán thì được chờ thêm cho tới khi liên kết hết hạn).
+                                        </p>
                                     )}
                                     {actionError && <p className="order-detail__error" role="alert">{actionError}</p>}
                                 </div>

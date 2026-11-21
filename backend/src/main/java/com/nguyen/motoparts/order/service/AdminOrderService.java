@@ -3,24 +3,17 @@ package com.nguyen.motoparts.order.service;
 import com.nguyen.motoparts.account.entity.User;
 import com.nguyen.motoparts.account.repository.UserRepository;
 import com.nguyen.motoparts.aftersales.service.NotificationService;
-import com.nguyen.motoparts.cart.repository.ProductLockRepository;
-import com.nguyen.motoparts.catalog.entity.Product;
-import com.nguyen.motoparts.catalog.repository.ProductRepository;
 import com.nguyen.motoparts.common.dto.PageResponse;
-import com.nguyen.motoparts.common.enums.InstallationStatus;
 import com.nguyen.motoparts.common.enums.NotificationType;
 import com.nguyen.motoparts.common.enums.OrderStatus;
 import com.nguyen.motoparts.common.enums.PaymentMethod;
 import com.nguyen.motoparts.common.enums.PaymentStatus;
-import com.nguyen.motoparts.common.enums.ProductStatus;
 import com.nguyen.motoparts.common.exception.BadRequestException;
 import com.nguyen.motoparts.common.exception.ConflictException;
 import com.nguyen.motoparts.common.exception.ResourceNotFoundException;
 import com.nguyen.motoparts.order.dto.AdminOrderDetail;
 import com.nguyen.motoparts.order.dto.AdminOrderRow;
-import com.nguyen.motoparts.order.entity.InstallationRequest;
 import com.nguyen.motoparts.order.entity.Order;
-import com.nguyen.motoparts.order.entity.OrderItem;
 import com.nguyen.motoparts.order.entity.Payment;
 import com.nguyen.motoparts.order.repository.OnlinePaymentRepository;
 import com.nguyen.motoparts.order.repository.OrderRepository;
@@ -31,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -46,27 +38,22 @@ import java.util.stream.Collectors;
 @Service
 public class AdminOrderService {
 
-    private static final String MOTORBIKE = "Motorbike";
-
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
-    private final ProductRepository productRepository;
-    private final ProductLockRepository productLockRepository;
     private final NotificationService notificationService;
     private final OnlinePaymentRepository onlinePaymentRepository;
+    private final OrderStockRelease stockRelease;
 
     public AdminOrderService(OrderRepository orderRepository, PaymentRepository paymentRepository,
-                             UserRepository userRepository, ProductRepository productRepository,
-                             ProductLockRepository productLockRepository, NotificationService notificationService,
-                             OnlinePaymentRepository onlinePaymentRepository) {
+                             UserRepository userRepository, NotificationService notificationService,
+                             OnlinePaymentRepository onlinePaymentRepository, OrderStockRelease stockRelease) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
         this.userRepository = userRepository;
-        this.productRepository = productRepository;
-        this.productLockRepository = productLockRepository;
         this.notificationService = notificationService;
         this.onlinePaymentRepository = onlinePaymentRepository;
+        this.stockRelease = stockRelease;
     }
 
     // ---------------------------------------------------------------- xem
@@ -125,11 +112,7 @@ public class AdminOrderService {
             if (paid) {
                 throw new ConflictException("Đơn hàng đã thu tiền, không thể hủy.");
             }
-            releaseMotorbikes(order);
-            InstallationRequest installation = order.getInstallationRequest();
-            if (installation != null && installation.getStatus() == InstallationStatus.SCHEDULED) {
-                installation.setStatus(InstallationStatus.CANCELLED);   // trả chỗ trống của ngày hẹn
-            }
+            stockRelease.release(order);   // trả xe về AVAILABLE, hủy lịch lắp đặt
         }
         order.setStatus(newStatus);
         notificationService.notify(order.getAccountId(), NotificationType.ORDER_STATUS_CHANGED,
@@ -164,18 +147,6 @@ public class AdminOrderService {
     private Order lockOrder(String orderId) {
         return orderRepository.findForUpdate(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng."));
-    }
-
-    /** Khi hủy đơn: các xe đã bị đặt sang SOLD được trả về AVAILABLE (ngoại lệ 2.1 của use case 3.21). */
-    private void releaseMotorbikes(Order order) {
-        List<OrderItem> items = order.getItems().stream().sorted(Comparator.comparing(OrderItem::getProductId)).toList();
-        for (OrderItem item : items) {
-            productLockRepository.lockById(item.getProductId());
-            Product product = productRepository.findById(item.getProductId()).orElse(null);
-            if (product != null && MOTORBIKE.equals(product.getTypeCode()) && product.getStatus() == ProductStatus.SOLD) {
-                product.setStatus(ProductStatus.AVAILABLE);
-            }
-        }
     }
 
     private AdminOrderDetail toDetail(Order order, Payment payment) {

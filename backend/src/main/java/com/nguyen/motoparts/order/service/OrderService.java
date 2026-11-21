@@ -64,13 +64,15 @@ public class OrderService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final VnpayGateway vnpayGateway;
+    private final VnpayOrderExpiryService vnpayExpiry;
     private final int holdMinutes;
 
     public OrderService(OrderRepository orderRepository, PaymentRepository paymentRepository,
                         InstallationRequestRepository installationRepository, CartItemRepository cartItemRepository,
                         ProductRepository productRepository, ProductLockRepository productLockRepository,
                         UserRepository userRepository, NotificationService notificationService,
-                        VnpayGateway vnpayGateway, @Value("${app.cart.hold-minutes:30}") int holdMinutes) {
+                        VnpayGateway vnpayGateway, VnpayOrderExpiryService vnpayExpiry,
+                        @Value("${app.cart.hold-minutes:30}") int holdMinutes) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
         this.installationRepository = installationRepository;
@@ -80,12 +82,13 @@ public class OrderService {
         this.userRepository = userRepository;
         this.notificationService = notificationService;
         this.vnpayGateway = vnpayGateway;
+        this.vnpayExpiry = vnpayExpiry;
         this.holdMinutes = holdMinutes;
     }
 
     public CheckoutPolicyResponse policy() {
         return new CheckoutPolicyResponse(InstallationPolicy.LABOR_FEE, InstallationPolicy.MAX_PER_DAY,
-                InstallationPolicy.MAX_DAYS_AHEAD, vnpayGateway.isConfigured());
+                InstallationPolicy.MAX_DAYS_AHEAD, vnpayGateway.isConfigured(), vnpayExpiry.holdMinutes());
     }
 
     // ---------------------------------------------------------------- đặt hàng

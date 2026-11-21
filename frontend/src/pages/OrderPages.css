@@ -26,6 +26,7 @@
 .order-detail__btn:disabled { opacity: .6; cursor: default; }
 .order-detail__btn--primary { background: #d32f2f; border-color: #d32f2f; color: #fff; }
 .order-detail__error { margin: 8px 0 0; padding: 8px 10px; border-radius: 6px; background: #fdecea; color: #c62828; font-size: 14px; }
+.order-detail__hint { margin: 8px 0 0; color: #666; font-size: 13px; }
 .order-detail__warn { margin: 0 0 16px; padding: 12px 14px; border-radius: 8px; background: #fff8e1; color: #8a6100; }
 .order-detail__attempts { width: 100%; margin-top: 8px; border-collapse: collapse; font-size: 12px; }
 .order-detail__attempts th, .order-detail__attempts td { padding: 4px 4px; border-bottom: 1px solid #eee; text-align: left; word-break: break-all; }
