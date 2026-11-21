@@ -170,16 +170,25 @@ class VehicleProfileTest {
     }
 
     @Test
-    void nicknameIsOptional() throws Exception {
+    void nicknameIsRequired() throws Exception {
+        // SRS UC-15 (ngoại lệ 2.3): biệt danh trống hoặc quá 50 ký tự thì báo lỗi
         String token = register();
         VehicleModel v = vehicle(2010, 2020);
 
-        JsonNode noNickname = create(token, null, v, 2016);
-        assertTrue(noNickname.get("nickname").isNull());
-        assertEquals(v.getBrand() + " " + v.getModel() + " 2016", noNickname.get("label").asText());
+        MvcResult missing = send(post(URL), token, body(null, v.getModelId(), 2016));
+        assertEquals(400, missing.getResponse().getStatus());
+        assertTrue(read(missing).get("message").asText().contains("biệt danh"));
+        assertEquals(400, send(post(URL), token, body("", v.getModelId(), 2016)).getResponse().getStatus());
+        assertEquals(400, send(post(URL), token, body("   ", v.getModelId(), 2016)).getResponse().getStatus(),
+                "biệt danh toàn khoảng trắng coi như trống");
+        assertEquals(0, list(token).size(), "dữ liệu sai không được lưu");
 
-        JsonNode blank = create(token, "   ", v, 2016);
-        assertTrue(blank.get("nickname").isNull(), "biệt danh toàn khoảng trắng coi như không có");
+        // đổi biệt danh của xe đã có thành trống cũng bị chặn
+        String id = create(token, "Xe đi làm", v, 2016).get("profileId").asText();
+        assertEquals(400, send(put(URL + "/" + id), token, body("  ", v.getModelId(), 2016)).getResponse().getStatus());
+        assertEquals("Xe đi làm", list(token).get(0).get("nickname").asText());
+        // đúng 50 ký tự thì được
+        create(token, "x".repeat(50), v, 2016);
     }
 
     @Test
@@ -199,8 +208,8 @@ class VehicleProfileTest {
 
         assertEquals(0, list(token).size(), "dữ liệu sai không được lưu");
         // hai đầu của khoảng năm hợp lệ
-        create(token, null, v, 2010);
-        create(token, null, v, 2020);
+        create(token, "Đầu khoảng", v, 2010);
+        create(token, "Cuối khoảng", v, 2020);
     }
 
     @Test
@@ -254,32 +263,33 @@ class VehicleProfileTest {
     }
 
     @Test
-    void limitsEachCustomerToTenVehicles() throws Exception {
+    void limitsEachCustomerToFiveVehicles() throws Exception {
         String token = register();
         VehicleModel v = vehicle(2010, 2020);
         String firstId = null;
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 5; i++) {
             String id = create(token, "Xe " + i, v, 2015).get("profileId").asText();
             if (firstId == null) {
                 firstId = id;
             }
         }
-        MvcResult eleventh = send(post(URL), token, body("Xe 11", v.getModelId(), 2015));
-        assertEquals(409, eleventh.getResponse().getStatus());
-        assertEquals(10, list(token).size());
+        MvcResult sixth = send(post(URL), token, body("Xe 6", v.getModelId(), 2015));   // test case SB07 trong SRS
+        assertEquals(409, sixth.getResponse().getStatus());
+        assertTrue(read(sixth).get("message").asText().contains("tối đa 5 hồ sơ"));
+        assertEquals(5, list(token).size());
 
         // khách khác không bị ảnh hưởng, và xóa bớt thì thêm lại được
         create(register(), "Xe", v, 2015);
         assertEquals(204, mvc.perform(auth(delete(URL + "/" + firstId), token)).andReturn().getResponse().getStatus());
-        create(token, "Xe 11", v, 2015);
-        assertEquals(10, list(token).size());
+        create(token, "Xe 6", v, 2015);
+        assertEquals(5, list(token).size());
     }
 
     @Test
     void addingManyVehiclesAtOnceNeverExceedsTheLimit() throws Exception {
         String token = register();
         VehicleModel v = vehicle(2010, 2020);
-        for (int i = 1; i <= 9; i++) {
+        for (int i = 1; i <= 4; i++) {
             create(token, "Xe " + i, v, 2015);
         }
 
@@ -309,7 +319,7 @@ class VehicleProfileTest {
         pool.shutdown();
 
         assertEquals(1, created, "chỉ còn đúng một chỗ trống nên chỉ một lần thêm thành công");
-        assertEquals(10, list(token).size());
+        assertEquals(5, list(token).size());
     }
 
     @Test
@@ -317,7 +327,7 @@ class VehicleProfileTest {
         String token = register();
         VehicleModel v = vehicle(2010, 2020);
         String id = null;
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 5; i++) {
             id = create(token, "Xe " + i, v, 2015).get("profileId").asText();
         }
         Map<String, Object> change = new HashMap<>(body("Đổi tên", v.getModelId(), 2016));

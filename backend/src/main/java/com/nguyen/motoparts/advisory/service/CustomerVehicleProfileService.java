@@ -23,8 +23,8 @@ import java.util.List;
 @Service
 public class CustomerVehicleProfileService {
 
-    /** Mỗi khách lưu tối đa chừng này xe. */
-    static final int MAX_PROFILES = 10;
+    /** Mỗi khách lưu tối đa chừng này xe (QĐ03 trong SRS: tối đa 5 hồ sơ xe). */
+    static final int MAX_PROFILES = 5;
 
     private final CustomerVehicleProfileRepository profiles;
     private final VehicleModelRepository vehicleModels;
@@ -49,7 +49,7 @@ public class CustomerVehicleProfileService {
         // khóa dòng tài khoản để hai lần thêm cùng lúc không vượt giới hạn
         users.findByIdForUpdate(accountId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản."));
         if (profiles.countByAccountId(accountId) >= MAX_PROFILES) {
-            throw new ConflictException("Bạn chỉ lưu được tối đa " + MAX_PROFILES + " xe. Hãy xóa bớt một xe trước khi thêm.");
+            throw new ConflictException("Bạn chỉ lưu được tối đa " + MAX_PROFILES + " hồ sơ xe. Hãy xóa bớt một xe trước khi thêm.");
         }
         VehicleModel vehicle = checkedVehicle(request);
         CustomerVehicleProfile profile = new CustomerVehicleProfile();
@@ -91,8 +91,7 @@ public class CustomerVehicleProfileService {
     }
 
     private static void fill(CustomerVehicleProfile profile, VehicleProfileRequest request, VehicleModel vehicle) {
-        String nickname = request.nickname() == null ? "" : request.nickname().trim();
-        profile.setNickname(nickname.isEmpty() ? null : nickname);
+        profile.setNickname(request.nickname().trim());   // đã được kiểm tra không trống ở VehicleProfileRequest
         profile.setVehicleModel(vehicle);
         profile.setRegistrationYear(request.registrationYear());
     }
