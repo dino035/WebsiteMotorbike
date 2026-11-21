@@ -4,6 +4,7 @@ import com.nguyen.motoparts.catalog.dto.CompareResponse;
 import com.nguyen.motoparts.catalog.dto.CompareResponse.CompareRow;
 import com.nguyen.motoparts.catalog.entity.Motorbike;
 import com.nguyen.motoparts.catalog.repository.MotorbikeRepository;
+import com.nguyen.motoparts.common.enums.ProductStatus;
 import com.nguyen.motoparts.common.exception.BadRequestException;
 import com.nguyen.motoparts.common.exception.ResourceNotFoundException;
 import com.nguyen.motoparts.vehicle.entity.VehicleConditionAssessment;
@@ -48,6 +49,15 @@ public class CompareService {
         List<Motorbike> found = motorbikeRepository.findAllById(unique);
         if (found.size() != unique.size()) {
             throw new ResourceNotFoundException("Có mã không tồn tại hoặc không phải xe máy, vui lòng chọn lại.");
+        }
+
+        List<String> notAvailable = found.stream()
+                .filter(bike -> bike.getStatus() != ProductStatus.AVAILABLE)
+                .map(Motorbike::getName)
+                .toList();
+        if (!notAvailable.isEmpty()) {
+            throw new BadRequestException(
+                    "Chỉ so sánh được xe đang bán. Xe không còn bán: " + String.join(", ", notAvailable));
         }
 
         Map<String, Motorbike> byId = found.stream()
