@@ -223,7 +223,11 @@ function CheckoutForm({ cart, addresses, policy }) {
                             {!policy.vnpayEnabled && <span className="checkout__note"> — hệ thống chưa cấu hình</span>}
                         </label>
                         {paymentMethod === 'VNPAY' && (
-                            <p className="checkout__note">Sau khi đặt hàng, bạn sẽ được chuyển sang cổng VNPay để trả tiền.</p>
+                            <p className="checkout__note">
+                                Sau khi đặt hàng, bạn sẽ được chuyển sang cổng VNPay để trả tiền. Đơn chưa thanh toán sau
+                                {' '}{policy.vnpayHoldMinutes} phút sẽ tự hủy để nhường sản phẩm cho khách khác
+                                (bạn vẫn có thể chuyển sang thanh toán khi nhận hàng trước đó).
+                            </p>
                         )}
                     </fieldset>
 

@@ -1,6 +1,8 @@
 package com.nguyen.motoparts.order.repository;
 
 import com.nguyen.motoparts.common.enums.OrderStatus;
+import com.nguyen.motoparts.common.enums.PaymentMethod;
+import com.nguyen.motoparts.common.enums.PaymentStatus;
 import com.nguyen.motoparts.order.entity.Order;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +44,15 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select o from Order o where o.orderId = :orderId")
     Optional<Order> findForUpdate(@Param("orderId") String orderId);
+
+    /**
+     * Mã các đơn đang chờ xác nhận, thanh toán bằng VNPay mà chưa trả tiền, đặt từ trước cutoff. Chỉ là danh sách ứng viên
+     * (chưa khóa dòng): người gọi khóa từng đơn rồi kiểm tra lại trước khi hủy.
+     */
+    @Query("select o.orderId from Order o, Payment p where p.orderId = o.orderId and o.status = :status "
+            + "and p.method = :method and p.status <> :paid and o.orderDate < :cutoff order by o.orderDate")
+    List<String> findUnpaidOrderIds(@Param("status") OrderStatus status, @Param("method") PaymentMethod method,
+                                    @Param("paid") PaymentStatus paid, @Param("cutoff") LocalDateTime cutoff);
 
     /** Số đơn theo trạng thái của từng tài khoản trong danh sách; mỗi dòng là {accountId, số đơn}. */
     @Query("select o.accountId, count(o) from Order o "

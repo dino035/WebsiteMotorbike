@@ -60,6 +60,11 @@ public class VnpayGateway {
         return tmnCode;
     }
 
+    /** Số phút một liên kết thanh toán còn hiệu lực trên cổng VNPay. */
+    public int expireMinutes() {
+        return expireMinutes;
+    }
+
     // ---------------------------------------------------------------- tạo liên kết thanh toán
 
     /** Liên kết chuyển khách sang cổng VNPay cho một lần thanh toán. */

@@ -66,6 +66,9 @@ app:
     # Địa chỉ VNPay đưa trình duyệt của khách quay về sau khi trả tiền: trang React, trang này gọi lại /api/payments/vnpay/return.
     return-url: ${VNPAY_RETURN_URL:${app.frontend-url}/payment/vnpay-return}
     expire-minutes: ${VNPAY_EXPIRE_MINUTES:15}   # thời gian khách được trả tiền trên cổng VNPay (5 đến 60 phút)
+    # Đơn chọn VNPay mà chưa trả tiền sau chừng này phút (tính từ lúc đặt, hoặc từ lần thử lại cuối) thì tự hủy để xe mở bán lại.
+    order-hold-minutes: ${VNPAY_ORDER_HOLD_MINUTES:15}
+    order-check-ms: ${VNPAY_ORDER_CHECK_MS:60000}   # bao lâu quét một lần (mili giây)
   chat:
     max-messages-per-hour: ${CHAT_MAX_MESSAGES_PER_HOUR:30}   # số câu hỏi tối đa của một tài khoản mỗi giờ (giữ hạn mức Gemini)
   admin:

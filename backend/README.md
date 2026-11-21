@@ -221,6 +221,8 @@ Khách chọn `VNPAY` khi đặt hàng, rồi được chuyển sang cổng VNPa
 | `VNPAY_PAY_URL` | `https://sandbox.vnpayment.vn/paymentv2/vpcpay.html` | Địa chỉ cổng thanh toán |
 | `VNPAY_RETURN_URL` | `<FRONTEND_URL>/payment/vnpay-return` | Nơi VNPay đưa trình duyệt của khách quay về (trang React) |
 | `VNPAY_EXPIRE_MINUTES` | 15 | Thời gian khách được trả tiền trên cổng (5 đến 60) |
+| `VNPAY_ORDER_HOLD_MINUTES` | 15 | Đơn VNPay chưa trả tiền sau chừng này phút thì tự hủy (5 đến 1440); xem "Tự hủy đơn quá hạn" |
+| `VNPAY_ORDER_CHECK_MS` | 60000 | Bao lâu quét đơn quá hạn một lần (mili giây) |
 
 Thiếu `VNPAY_TMN_CODE` hoặc `VNPAY_HASH_SECRET` thì VNPay bị khóa ở mọi cửa (`vnpayEnabled: false`, đặt hàng VNPAY trả 400, return trả 400, IPN trả 99), đơn vẫn đặt được bằng COD.
 
@@ -235,9 +237,11 @@ Thông báo thất bại muộn của một lần cũ không hạ đơn đã tha
 
 **Chạy trên máy (localhost):** VNPay không gọi IPN tới `localhost` được, nên kết quả được ghi nhận khi trình duyệt quay về `/payment/vnpay-return`. IPN chỉ cần khi triển khai có địa chỉ công khai (khai địa chỉ IPN trong trang Merchant của VNPay). Thẻ thử của sandbox: ngân hàng NCB, số thẻ `9704198526191432198`, tên `NGUYEN VAN A`, ngày phát hành `07/15`, OTP `123456`.
 
-**Chưa làm:** hết hạn tự động cho đơn VNPay chưa trả (xe vẫn ở `SOLD` cho tới khi Admin hủy đơn), tra cứu và hoàn tiền qua API của VNPay (hoàn tiền làm thủ công trên trang Merchant).
+**Tự hủy đơn quá hạn:** đặt xe là xe sang `SOLD` ngay, nên đơn VNPay mà khách bỏ dở sẽ kẹt xe. `VnpayOrderExpiryJob` (`@Scheduled`, mỗi phút) tìm đơn đang chờ xác nhận, thanh toán VNPay chưa trả, đặt quá `VNPAY_ORDER_HOLD_MINUTES` phút; từng đơn được hủy trong giao dịch riêng, dùng chung `OrderStockRelease` với Admin hủy đơn (xe về `AVAILABLE`, hủy lịch lắp đặt trả chỗ trống), thanh toán chuyển `FAILED` và khách nhận thông báo. Sau khi khóa dòng đơn (cùng khóa với trả tiền, đổi sang COD và Admin đổi trạng thái) tác vụ kiểm tra lại, và không hủy khi: đơn đã chuyển COD hoặc đã trả tiền, Admin đã xác nhận đơn, hoặc khách vừa bấm thử lại và liên kết thanh toán còn hiệu lực (cộng 2 phút chờ IPN), để không hủy đúng lúc khách đang nhập OTP. Nếu tiền về sau khi đơn đã bị hủy thì vẫn là `PAID_ORDER_CANCELLED` (hoàn tiền thủ công như mục trên). Tắt tác vụ bằng `app.scheduling.enabled=false` (bộ kiểm thử tắt sẵn trong `src/test/resources/application.properties`). Chạy nhiều bản backend cùng lúc cũng an toàn vì mỗi lần hủy đều khóa và kiểm tra lại.
 
-**Kiểm thử:** `order/service/VnpayGatewayTest` (không cần CSDL: chữ ký so với cài đặt HMAC độc lập viết bằng Python, dữ liệu ký, liên kết thanh toán, từ chối chữ ký sai hoặc mã website khác, giờ Việt Nam) và `order/VnpayPaymentTest` (PostgreSQL thật, test tự ký thông báo như VNPay: đặt hàng, tạo liên kết, ghi nhận thành công một lần, IPN trước khi quay về, chữ ký sai hay số tiền sai, thử lại sau khi thất bại, đổi sang COD, đơn đã hủy, trả trùng, 8 luồng return và IPN cùng lúc).
+**Chưa làm:** tra cứu và hoàn tiền qua API của VNPay (hoàn tiền làm thủ công trên trang Merchant).
+
+**Kiểm thử:** `order/service/VnpayGatewayTest` (không cần CSDL: chữ ký so với cài đặt HMAC độc lập viết bằng Python, dữ liệu ký, liên kết thanh toán, từ chối chữ ký sai hoặc mã website khác, giờ Việt Nam) và `order/VnpayPaymentTest` (PostgreSQL thật, test tự ký thông báo như VNPay: đặt hàng, tạo liên kết, ghi nhận thành công một lần, IPN trước khi quay về, chữ ký sai hay số tiền sai, thử lại sau khi thất bại, đổi sang COD, đơn đã hủy, trả trùng, 8 luồng return và IPN cùng lúc) và `order/VnpayOrderExpiryTest` (14 ca, thời gian truyền vào tác vụ nên không phải chờ: hủy đúng hạn và đúng ranh giới, xe mở bán lại và khách khác mua được, không hủy đơn COD, đơn đã đổi sang COD, đơn đã trả, đơn Admin đã xác nhận, giữ đơn khi khách vừa thử lại, hủy cả lịch lắp đặt, báo khách một lần, trả tiền và hủy đơn cùng lúc luôn ra trạng thái nhất quán, tác vụ thật sự được đăng ký với bộ lập lịch).
 
 ## Admin quản lý đơn hàng và lịch lắp đặt
 
