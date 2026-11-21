@@ -1,7 +1,9 @@
 package com.nguyen.motoparts.catalog.controller;
 
+import com.nguyen.motoparts.catalog.dto.CompareResponse;
 import com.nguyen.motoparts.catalog.dto.ProductDetailResponse;
 import com.nguyen.motoparts.catalog.dto.ProductSummaryResponse;
+import com.nguyen.motoparts.catalog.service.CompareService;
 import com.nguyen.motoparts.catalog.service.ProductService;
 import com.nguyen.motoparts.common.dto.PageResponse;
 import com.nguyen.motoparts.common.enums.ProductStatus;
@@ -9,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -16,6 +19,7 @@ import java.math.BigDecimal;
 public class ProductController {
 
     private final ProductService productService;
+    private final CompareService compareService;
 
     @GetMapping
     public PageResponse<ProductSummaryResponse> list(
@@ -32,6 +36,11 @@ public class ProductController {
         int safeSize = Math.min(Math.max(size, 1), 50);
 
         return productService.search(keyword, type, status, minPrice, maxPrice, safePage, safeSize);
+    }
+
+    @GetMapping("/compare")
+    public CompareResponse compare(@RequestParam("ids") List<String> ids) {
+        return compareService.compare(ids);
     }
 
     @GetMapping("/{id}")
