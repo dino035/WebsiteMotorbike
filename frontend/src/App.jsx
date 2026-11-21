@@ -32,6 +32,7 @@ import AdminChatPage from './pages/AdminChatPage.jsx'
 import AdminChatSessionPage from './pages/AdminChatSessionPage.jsx'
 import AdminAccountsPage from './pages/AdminAccountsPage.jsx'
 import VnpayReturnPage from './pages/VnpayReturnPage.jsx'
+import ComparePage from './pages/ComparePage.jsx'
 
 export default function App() {
   return (
@@ -69,6 +70,7 @@ export default function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="*" element={<NotFoundPage />} />
+          <Route path="/compare" element={<ComparePage />} />
         </Route>
       </Routes>
   )

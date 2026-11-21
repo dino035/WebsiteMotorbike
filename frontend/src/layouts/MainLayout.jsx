@@ -14,6 +14,7 @@ export default function MainLayout() {
                 <NavLink to="/" className="brand">MotoParts</NavLink>
                 <nav className="nav">
                     <NavLink to="/products">Sản phẩm</NavLink>
+                    <NavLink to="/compare">So sánh xe</NavLink>
                     <NavLink to="/cart">Giỏ hàng{itemCount > 0 ? ` (${itemCount})` : ''}</NavLink>
                     {token ? (
                         <>
