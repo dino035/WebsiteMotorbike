@@ -330,17 +330,17 @@ Cuộc trò chuyện của người khác trả 404. Mỗi tài khoản tối đ
 | Biến | Mặc định | Ý nghĩa |
 |---|---|---|
 | `GEMINI_API_KEY` | (trống) | Khóa tạo ở Google AI Studio. Chưa đặt thì chat vẫn chạy, mọi câu hỏi là "chưa trả lời được". Chỉ đặt bằng biến môi trường, không ghi vào file hay Git |
-| `GEMINI_MODEL` | `gemini-flash-latest` | Tên model; xem tên và hạn mức hiện có trong AI Studio. Ngày 20/11/2026 với khóa AI Studio thử: `gemini-flash-latest` treo quá thời gian chờ, `gemini-2.5-flash` trả 404, `gemini-3.5-flash` trả 503; `gemini-flash-lite-latest` chạy ổn (khoảng 3 giây mỗi câu). Danh sách này thay đổi theo thời điểm và khóa nên cần thử lại khi lỗi |
+| `GEMINI_MODEL` | `gemini-flash-lite-latest` | Tên model; xem tên và hạn mức hiện có trong AI Studio. Thử với khóa AI Studio ngày 20/11/2026: `gemini-flash-latest` treo quá thời gian chờ, `gemini-2.5-flash` trả 404, `gemini-3.5-flash` trả 503; `gemini-flash-lite-latest` chạy ổn (khoảng 3 giây mỗi câu) nên là mặc định. Danh sách này thay đổi theo thời điểm và theo khóa, nên khi lỗi hãy thử đặt `GEMINI_MODEL` sang tên khác |
 | `GEMINI_TIMEOUT_SECONDS` | 20 | Thời gian chờ mỗi lời gọi |
 | `CHAT_MAX_MESSAGES_PER_HOUR` | 30 | Giới hạn câu hỏi mỗi tài khoản mỗi giờ |
 
 Bảng `chatmessage` có thêm cột `product_ids` (mã các sản phẩm đã gợi ý, cách nhau dấu phẩy); Hibernate tự thêm khi chạy.
 
-**Kiểm thử:** `advisory/GeminiLlmClientTest` (9 ca, máy chủ HTTP giả, không cần CSDL): khóa nằm trong header, đọc JSON tiêu chí khoan dung với giá trị sai, mọi kiểu lỗi thành `LlmUnavailableException`, không có khóa thì không gọi ra ngoài. `advisory/ChatTest` (21 ca, PostgreSQL thật, LLM giả): chỉ hàng còn bán và rẻ nhất trước, tối đa 5, ký tự `%` từ LLM không thành mẫu tìm kiếm, phụ tùng chỉ theo luật tương thích và khoảng năm, các tình huống UNANSWERED, Gemini lỗi vẫn lưu hội thoại, giới hạn tần suất, quyền Admin. Chưa gọi Gemini thật (cần khóa).
+**Kiểm thử:** `advisory/GeminiLlmClientTest` (14 ca, máy chủ HTTP giả, không cần CSDL): khóa nằm trong header, đọc JSON tiêu chí khoan dung với giá trị sai, mọi kiểu lỗi thành `LlmUnavailableException`, không có khóa thì không gọi ra ngoài, lời nhắc cấm bịa dữ kiện, model mặc định là bản lite, thử lại đúng một lần khi 503 và không thử lại các lỗi khác. `advisory/ChatTest` (21 ca, PostgreSQL thật, LLM giả): chỉ hàng còn bán và rẻ nhất trước, tối đa 5, ký tự `%` từ LLM không thành mẫu tìm kiếm, phụ tùng chỉ theo luật tương thích và khoảng năm, các tình huống UNANSWERED, Gemini lỗi vẫn lưu hội thoại, giới hạn tần suất, quyền Admin. Chưa gọi Gemini thật (cần khóa).
 
 **Giao diện React:** `/chat` (cần đăng nhập, menu "Hỏi AI"): danh sách cuộc trò chuyện bên trái, khung hội thoại bên phải, câu trả lời kèm thẻ sản phẩm bấm vào xem chi tiết. Cuộc mới chỉ được tạo khi khách gửi câu đầu tiên. Cuộc đang mở nằm trên địa chỉ (`?s=`) nên tải lại vẫn giữ. Admin: `/admin/chat` lọc câu hỏi (mặc định "Chưa trả lời được") và `/admin/chat/:id` đọc cả cuộc trò chuyện.
 
-**Đã chạy thử với Gemini thật** (20/11/2026, model `gemini-flash-lite-latest`): chào hỏi, tìm xe máy theo hãng và giá, hỏi phụ tùng khi chưa biết xe (hỏi lại khách), câu hỏi ngoài phạm vi (từ chối lịch sự, ghi nhận cho Admin) đều đúng. Gemini có thể tự thêm chi tiết không có trong dữ liệu sản phẩm (ví dụ số km, "chính chủ") dù lời nhắc cấm; chưa siết thêm.
+**Đã chạy thử với Gemini thật** (model `gemini-flash-lite-latest`): chào hỏi, tìm xe máy theo hãng và giá, hỏi phụ tùng khi chưa biết xe (hỏi lại khách), câu hỏi ngoài phạm vi (từ chối lịch sự, ghi nhận cho Admin) đều đúng. Lời tư vấn bám dữ kiện của sản phẩm: lời nhắc cấm thêm số km, số chủ, tình trạng, bảo hành... không có trong dòng sản phẩm, dùng đúng cách gọi trong dữ liệu ("1 chủ", không đổi thành "chính chủ") và khi khách hỏi điều dữ liệu không có (lịch sử tai nạn, bảo hành) thì nói thẳng là chưa có thông tin. Gemini trả 503 (quá tải) thoáng qua khá thường xuyên ở gói miễn phí nên client thử lại đúng một lần sau 0,7 giây; các lỗi khác (400, 403, 429, 500) không thử lại.
 
 ## Hồ sơ xe của khách (SRS 3.15)
 

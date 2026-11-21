@@ -53,7 +53,8 @@ app:
     # Chat AI gọi Gemini (Google AI Studio). Khóa chỉ đặt bằng biến môi trường GEMINI_API_KEY, không ghi vào code hay Git.
     # Chưa đặt khóa: chat vẫn chạy nhưng mọi câu hỏi được ghi lại là chưa trả lời được.
     gemini-api-key: ${GEMINI_API_KEY:}
-    model: ${GEMINI_MODEL:gemini-flash-latest}
+    # Mặc định dùng bản lite: gemini-flash-latest từng treo quá thời gian chờ, các bản flash đầy đủ hay báo 503 quá tải.
+    model: ${GEMINI_MODEL:gemini-flash-lite-latest}
     base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com/v1beta}
     timeout-seconds: ${GEMINI_TIMEOUT_SECONDS:20}
   vnpay:
