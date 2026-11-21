@@ -62,7 +62,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
                 "app.jwt.secret=test-secret-test-secret-test-secret-0123456789",
                 "app.admin.email=admin-test@example.com",
                 "app.admin.password=AdminPass123",
-                "app.cart.hold-minutes=30"
+                "app.cart.hold-minutes=30",
+                // test này cần VNPay CHƯA cấu hình, kể cả khi máy đã đặt biến môi trường VNPAY_* thật
+                "app.vnpay.tmn-code=",
+                "app.vnpay.hash-secret="
         })
 @AutoConfigureMockMvc
 class OrderTest {

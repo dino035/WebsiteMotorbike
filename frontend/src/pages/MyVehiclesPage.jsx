@@ -78,7 +78,7 @@ export default function MyVehiclesPage() {
         <section className="vehicles">
             <h1>Xe của tôi</h1>
             <p className="vehicles__intro">
-                Lưu xe bạn đang chạy để trợ lý gợi ý phụ tùng lắp vừa xe đó. Bạn có thể lưu tối đa 10 xe.
+                Lưu xe bạn đang chạy để trợ lý gợi ý phụ tùng lắp vừa xe đó. Bạn có thể lưu tối đa 5 xe.
             </p>
 
             {loadError && <p className="vehicles__message vehicles__message--error">{loadError}</p>}
@@ -145,13 +145,13 @@ function VehicleForm({ title, submitLabel, busy, current, requireVehicle = false
     const [picked, setPicked] = useState(null)   // { modelId, year } hoặc null khi chọn chưa đủ
 
     const needPick = requireVehicle || changeVehicle
-    const canSubmit = !busy && (!needPick || picked !== null)
+    const canSubmit = !busy && nickname.trim() !== '' && (!needPick || picked !== null)   // biệt danh bắt buộc (SRS UC-15)
 
     function submit(event) {
         event.preventDefault()
         if (!canSubmit) return
         onSubmit({
-            nickname: nickname.trim() || null,
+            nickname: nickname.trim(),
             vehicleModelId: needPick ? picked.modelId : current.vehicleModelId,
             registrationYear: needPick ? picked.year : current.registrationYear,
         })
@@ -161,8 +161,8 @@ function VehicleForm({ title, submitLabel, busy, current, requireVehicle = false
         <form className="vehicle-form" onSubmit={submit}>
             <h2>{title}</h2>
             <label className="vehicle-form__field">
-                <span>Biệt danh (không bắt buộc)</span>
-                <input type="text" value={nickname} maxLength={MAX_NICKNAME} placeholder="Ví dụ: Xe đi làm" disabled={busy}
+                <span>Biệt danh</span>
+                <input type="text" value={nickname} maxLength={MAX_NICKNAME} placeholder="Ví dụ: Xe đi làm" disabled={busy} required
                        onChange={(e) => setNickname(e.target.value)} />
             </label>
 
