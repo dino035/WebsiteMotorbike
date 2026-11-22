@@ -101,7 +101,7 @@ public class AdminInstallationService {
     private static InstallationRow toRow(InstallationRequest r, String email) {
         Order o = r.getOrder();
         return new InstallationRow(r.getRequestId(), o.getOrderId(), o.getShortCode(),
-                o.getStatus().name(), o.getStatus().getLabel(), email, o.getReceiverName(), o.getReceiverPhone(),
+                o.getStatus().name(), o.getStatus().labelFor(o.getDeliveryMethod()), email, o.getReceiverName(), o.getReceiverPhone(),
                 r.getPreferredDate(), r.getLaborFee(), r.getStatus().name(), r.getStatus().getLabel());
     }
 

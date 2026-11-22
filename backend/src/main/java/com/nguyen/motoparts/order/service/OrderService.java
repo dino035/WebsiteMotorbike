@@ -234,7 +234,7 @@ public class OrderService {
     static OrderSummaryResponse toSummary(Order o, Payment p) {
         int itemCount = o.getItems().stream().mapToInt(OrderItem::getQuantity).sum();
         return new OrderSummaryResponse(o.getOrderId(), o.getShortCode(), o.getOrderDate(),
-                o.getStatus().name(), o.getStatus().getLabel(), o.getTotalAmount(), itemCount,
+                o.getStatus().name(), o.getStatus().labelFor(o.getDeliveryMethod()), o.getTotalAmount(), itemCount,
                 p == null ? null : p.getMethod().name(), p == null ? null : p.getMethod().getLabel(),
                 p == null ? null : p.getStatus().name(), p == null ? null : p.getStatus().getLabel());
     }
@@ -254,7 +254,7 @@ public class OrderService {
         OrderDetailResponse.InstallationInfo installation = ir == null ? null : new OrderDetailResponse.InstallationInfo(
                 ir.getPreferredDate(), ir.getLaborFee(), ir.getStatus().name(), ir.getStatus().getLabel());
         return new OrderDetailResponse(o.getOrderId(), o.getShortCode(), o.getOrderDate(),
-                o.getStatus().name(), o.getStatus().getLabel(),
+                o.getStatus().name(), o.getStatus().labelFor(o.getDeliveryMethod()),
                 o.getDeliveryMethod() == null ? null : o.getDeliveryMethod().name(),
                 o.getDeliveryMethod() == null ? null : o.getDeliveryMethod().getLabel(),
                 o.getReceiverName(), o.getReceiverPhone(), o.getShippingAddress(), o.getTotalAmount(),

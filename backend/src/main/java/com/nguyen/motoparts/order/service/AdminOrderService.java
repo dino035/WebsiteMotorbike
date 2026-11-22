@@ -77,7 +77,7 @@ public class AdminOrderService {
         return PageResponse.from(orders.map(o -> {
             Payment p = payments.get(o.getOrderId());
             return new AdminOrderRow(o.getOrderId(), o.getShortCode(), o.getOrderDate(),
-                    o.getStatus().name(), o.getStatus().getLabel(), o.getTotalAmount(),
+                    o.getStatus().name(), o.getStatus().labelFor(o.getDeliveryMethod()), o.getTotalAmount(),
                     emails.get(o.getAccountId()), o.getReceiverName(),
                     o.getDeliveryMethod() == null ? null : o.getDeliveryMethod().getLabel(),   // đơn nhập tay/cũ có thể thiếu
                     p == null ? null : p.getMethod().name(), p == null ? null : p.getMethod().getLabel(),
@@ -99,8 +99,8 @@ public class AdminOrderService {
         Order order = lockOrder(orderId);
         OrderStatus current = order.getStatus();
         if (!current.canMoveTo(newStatus)) {
-            throw new ConflictException("Không thể chuyển đơn từ \"" + current.getLabel()
-                    + "\" sang \"" + newStatus.getLabel() + "\".");
+            throw new ConflictException("Không thể chuyển đơn từ \"" + current.labelFor(order.getDeliveryMethod())
+                    + "\" sang \"" + newStatus.labelFor(order.getDeliveryMethod()) + "\".");
         }
         Payment payment = paymentRepository.findByOrderId(orderId).orElse(null);
         boolean paid = payment != null && payment.getStatus() == PaymentStatus.PAID;
@@ -116,7 +116,7 @@ public class AdminOrderService {
         }
         order.setStatus(newStatus);
         notificationService.notify(order.getAccountId(), NotificationType.ORDER_STATUS_CHANGED,
-                "Đơn hàng #" + order.getShortCode() + " đã chuyển sang trạng thái: " + newStatus.getLabel());
+                "Đơn hàng #" + order.getShortCode() + " đã chuyển sang trạng thái: " + newStatus.labelFor(order.getDeliveryMethod()));
         return toDetail(order, payment);
     }
 
@@ -154,7 +154,7 @@ public class AdminOrderService {
         AdminOrderDetail.Customer customer = new AdminOrderDetail.Customer(order.getAccountId(),
                 user == null ? null : user.getEmail(), user == null ? null : user.getPhone());
         List<AdminOrderDetail.NextStatus> next = order.getStatus().getNextStatuses().stream()
-                .map(s -> new AdminOrderDetail.NextStatus(s.name(), s.getLabel())).toList();
+                .map(s -> new AdminOrderDetail.NextStatus(s.name(), s.labelFor(order.getDeliveryMethod()))).toList();
         boolean canConfirm = payment != null && payment.getMethod() == PaymentMethod.COD
                 && payment.getStatus() == PaymentStatus.PENDING && order.getStatus() != OrderStatus.CANCELLED;
         List<AdminOrderDetail.OnlineAttempt> attempts = onlinePaymentRepository
