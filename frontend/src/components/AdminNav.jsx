@@ -11,6 +11,7 @@ export default function AdminNav() {
             <NavLink to="/admin/products">Sản phẩm</NavLink>
             <NavLink to="/admin/chat">Câu hỏi chat</NavLink>
             <NavLink to="/admin/accounts">Tài khoản</NavLink>
+            <NavLink to="/admin/reports">Báo cáo</NavLink>
         </nav>
     )
 }
