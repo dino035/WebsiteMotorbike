@@ -9,6 +9,7 @@ import com.nguyen.motoparts.order.repository.OrderItemRepository;
 import com.nguyen.motoparts.order.repository.OrderRepository;
 import com.nguyen.motoparts.report.dto.DailyRevenueRow;
 import com.nguyen.motoparts.report.dto.InventoryRow;
+import com.nguyen.motoparts.report.dto.OrderStatusRow;
 import com.nguyen.motoparts.report.dto.SalesReportResponse;
 import com.nguyen.motoparts.report.dto.TopProductRow;
 import org.springframework.data.domain.PageRequest;
@@ -16,21 +17,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Báo cáo doanh thu cho Admin (UC-23, QĐ09): doanh thu theo ngày, 10 sản phẩm bán chạy nhất và số lượng sản phẩm
- * theo loại / trạng thái, trong khoảng ngày Admin chọn.
+ * Báo cáo doanh thu cho Admin (UC-23, QĐ09): doanh thu theo ngày, số đơn theo trạng thái, 10 sản phẩm bán chạy
+ * nhất, và số lượng / giá trị sản phẩm theo loại và trạng thái.
  *
- * Chỉ tính đơn COMPLETED. Lọc theo orderDate (ngày đặt, dữ liệu nghiệp vụ) chứ không theo createdAt — createdAt là
- * mốc kỹ thuật, còn updatedAt thì bị ghi đè mỗi lần đơn bị sửa nên không dùng làm "ngày hoàn thành" được.
+ * Doanh thu chỉ tính đơn COMPLETED; bảng đơn theo trạng thái thì tính mọi trạng thái, vì mục đích của nó là cho
+ * thấy đơn phân bố ra sao. Lọc theo orderDate (ngày đặt, dữ liệu nghiệp vụ) chứ không theo createdAt — createdAt
+ * là mốc kỹ thuật, còn updatedAt bị ghi đè mỗi lần đơn bị sửa nên không dùng làm "ngày hoàn thành" được.
  * Toàn bộ chỉ đọc, không sửa dữ liệu nào.
  */
 @Service
@@ -79,8 +83,13 @@ public class SalesReportService {
             totalRevenue = totalRevenue.add(row.revenue());
         }
 
-        return new SalesReportResponse(start, end, orderCount, totalRevenue, daily,
-                topProducts(fromTime, toTime), inventory());
+        // Làm tròn tới đồng. Chia ở đây chứ không ở React để quy tắc làm tròn nằm một chỗ và vẫn là BigDecimal.
+        BigDecimal averageOrderValue = (orderCount == 0)
+                ? BigDecimal.ZERO
+                : totalRevenue.divide(BigDecimal.valueOf(orderCount), 0, RoundingMode.HALF_UP);
+
+        return new SalesReportResponse(start, end, orderCount, totalRevenue, averageOrderValue, daily,
+                ordersByStatus(fromTime, toTime), topProducts(fromTime, toTime), inventory());
     }
 
     /**
@@ -106,6 +115,24 @@ public class SalesReportService {
         return daily;
     }
 
+    /**
+     * Số đơn theo từng trạng thái. Liệt kê đủ mọi trạng thái kể cả trạng thái không có đơn nào — cùng lý do với
+     * việc điền ngày trống ở trên: một dòng biến mất thì người đọc tưởng hệ thống không có trạng thái đó.
+     * Dùng EnumMap vì khóa là enum: lưu bằng mảng theo thứ tự hằng số, nhanh hơn HashMap.
+     */
+    private List<OrderStatusRow> ordersByStatus(LocalDateTime from, LocalDateTime to) {
+        Map<OrderStatus, Long> counts = new EnumMap<>(OrderStatus.class);
+        for (Object[] row : orderRepository.countByStatusInRange(from, to)) {
+            counts.put((OrderStatus) row[0], (Long) row[1]);
+        }
+
+        List<OrderStatusRow> rows = new ArrayList<>();
+        for (OrderStatus status : OrderStatus.values()) {
+            rows.add(new OrderStatusRow(status.name(), status.getLabel(), counts.getOrDefault(status, 0L)));
+        }
+        return rows;
+    }
+
     /** 10 sản phẩm bán nhiều nhất. Tên lấy từ bản chụp trong OrderItem nên sản phẩm đã xóa vẫn hiện đúng tên lúc bán. */
     private List<TopProductRow> topProducts(LocalDateTime from, LocalDateTime to) {
         List<Object[]> rows = orderItemRepository.findTopProducts(
@@ -123,8 +150,9 @@ public class SalesReportService {
     }
 
     /**
-     * Số sản phẩm theo loại và trạng thái tại thời điểm xem, không theo khoảng ngày: hệ thống không lưu lịch sử
-     * tồn kho nên không dựng lại được tình trạng của quá khứ.
+     * Số lượng và tổng giá sản phẩm theo loại và trạng thái tại thời điểm xem, không theo khoảng ngày: hệ thống
+     * không lưu lịch sử tồn kho nên không dựng lại được tình trạng của quá khứ. Tổng giá là giá niêm yết, không
+     * phải giá vốn — hệ thống không lưu giá nhập.
      */
     private List<InventoryRow> inventory() {
         List<InventoryRow> inventory = new ArrayList<>();
@@ -133,7 +161,8 @@ public class SalesReportService {
             // và SparePart.getProductType().
             String typeLabel = Motorbike.class.equals(row[0]) ? "Xe máy" : "Phụ tùng";
             ProductStatus status = (ProductStatus) row[1];
-            inventory.add(new InventoryRow(typeLabel, status.getLabel(), (Long) row[2]));
+            BigDecimal totalValue = row[3] == null ? BigDecimal.ZERO : (BigDecimal) row[3];
+            inventory.add(new InventoryRow(typeLabel, status.getLabel(), (Long) row[2], totalValue));
         }
         inventory.sort(Comparator.comparing(InventoryRow::typeLabel).thenComparing(InventoryRow::statusLabel));
         return inventory;

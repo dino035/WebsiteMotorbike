@@ -6,6 +6,7 @@ import useAuth from '../hooks/useAuth.js'
 import { apiError } from '../utils/apiError.js'
 import { formatDate, formatPrice } from '../utils/format.js'
 import './AdminPages.css'
+import './OrderPages.css'   // .status-badge--* dùng cho bảng đơn theo trạng thái
 import './AdminReports.css'
 
 /**
@@ -92,6 +93,10 @@ export default function AdminReportsPage() {
                             <span className="report__card-label">Doanh thu</span>
                             <strong>{formatPrice(data.totalRevenue)}</strong>
                         </div>
+                        <div className="report__card">
+                            <span className="report__card-label">Trung bình mỗi đơn</span>
+                            <strong>{formatPrice(data.averageOrderValue)}</strong>
+                        </div>
                     </div>
 
                     <h2 className="report__heading">Doanh thu theo ngày</h2>
@@ -116,6 +121,27 @@ export default function AdminReportsPage() {
                         </div>
                     )}
 
+                    <h2 className="report__heading">Đơn hàng theo trạng thái</h2>
+                    <div className="admin__table-wrap">
+                        <table className="admin__table">
+                            <thead>
+                            <tr><th>Trạng thái</th><th>Số đơn</th></tr>
+                            </thead>
+                            <tbody>
+                            {data.ordersByStatus.map((row) => (
+                                <tr key={row.status}>
+                                    <td>
+                                            <span className={`status-badge status-badge--${row.status.toLowerCase()}`}>
+                                                {row.statusLabel}
+                                            </span>
+                                    </td>
+                                    <td>{row.count}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+
                     <h2 className="report__heading">Sản phẩm bán chạy</h2>
                     {data.topProducts.length === 0 ? (
                         <p className="admin__message">Chưa có sản phẩm nào bán được trong khoảng này.</p>
@@ -123,17 +149,17 @@ export default function AdminReportsPage() {
                         <div className="admin__table-wrap">
                             <table className="admin__table">
                                 <thead>
-                                    <tr><th>#</th><th>Sản phẩm</th><th>Số lượng</th><th>Doanh thu</th></tr>
+                                <tr><th>#</th><th>Sản phẩm</th><th>Số lượng</th><th>Doanh thu</th></tr>
                                 </thead>
                                 <tbody>
-                                    {data.topProducts.map((p, i) => (
-                                        <tr key={p.productId}>
-                                            <td>{i + 1}</td>
-                                            <td>{p.productName}</td>
-                                            <td>{p.quantitySold}</td>
-                                            <td>{formatPrice(p.revenue)}</td>
-                                        </tr>
-                                    ))}
+                                {data.topProducts.map((p, i) => (
+                                    <tr key={p.productId}>
+                                        <td>{i + 1}</td>
+                                        <td>{p.productName}</td>
+                                        <td>{p.quantitySold}</td>
+                                        <td>{formatPrice(p.revenue)}</td>
+                                    </tr>
+                                ))}
                                 </tbody>
                             </table>
                         </div>
@@ -144,16 +170,17 @@ export default function AdminReportsPage() {
                     <div className="admin__table-wrap">
                         <table className="admin__table">
                             <thead>
-                                <tr><th>Loại</th><th>Trạng thái</th><th>Số lượng</th></tr>
+                            <tr><th>Loại</th><th>Trạng thái</th><th>Số lượng</th><th>Giá trị</th></tr>
                             </thead>
                             <tbody>
-                                {data.inventory.map((row) => (
-                                    <tr key={`${row.typeLabel}|${row.statusLabel}`}>
-                                        <td>{row.typeLabel}</td>
-                                        <td>{row.statusLabel}</td>
-                                        <td>{row.count}</td>
-                                    </tr>
-                                ))}
+                            {data.inventory.map((row) => (
+                                <tr key={`${row.typeLabel}|${row.statusLabel}`}>
+                                    <td>{row.typeLabel}</td>
+                                    <td>{row.statusLabel}</td>
+                                    <td>{row.count}</td>
+                                    <td>{formatPrice(row.totalValue)}</td>
+                                </tr>
+                            ))}
                             </tbody>
                         </table>
                     </div>

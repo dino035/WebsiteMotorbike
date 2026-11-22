@@ -66,4 +66,10 @@ public interface OrderRepository extends JpaRepository<Order, String> {
     List<Object[]> findRevenueRows(@Param("status") OrderStatus status,
                                    @Param("from") LocalDateTime from,
                                    @Param("to") LocalDateTime to);
+
+    /** Số đơn theo trạng thái trong khoảng, mọi trạng thái; mỗi dòng {trạng thái, số đơn}. */
+    @Query("select o.status, count(o) from Order o "
+            + "where o.orderDate >= :from and o.orderDate < :to group by o.status")
+    List<Object[]> countByStatusInRange(@Param("from") LocalDateTime from,
+                                        @Param("to") LocalDateTime to);
 }
