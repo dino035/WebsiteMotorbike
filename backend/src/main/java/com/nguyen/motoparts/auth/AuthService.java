@@ -45,6 +45,7 @@ public class AuthService {
     /** Đăng ký tài khoản khách (CUSTOMER). Admin không đăng ký qua API công khai. */
     @Transactional
     public AuthResponse register(RegisterRequest req) {
+        PasswordPolicy.requireFitsBcrypt(req.password());
         String email = normalize(req.email());
         if (userRepository.existsByEmailIgnoreCase(email)) {
             throw new ConflictException("Email này đã được đăng ký.");

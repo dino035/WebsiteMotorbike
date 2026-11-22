@@ -70,6 +70,7 @@ class AuthSecurityTest {
     @Autowired ObjectMapper json;
     @Autowired UserRepository userRepository;
     @Autowired AccountLockRepository accountLockRepository;
+    @Autowired org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
 
     private static String email() {
         return "u" + UUID.randomUUID().toString().substring(0, 8) + "@test.local";
@@ -134,6 +135,39 @@ class AuthSecurityTest {
                 .andExpect(jsonPath("$.errors.phone").exists());
         mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON).content("{not json"))
                 .andExpect(status().isBadRequest());
+    }
+
+    /** 24 chữ "ậ" = 24 ký tự nhưng đúng 72 byte UTF-8; thêm một chữ "a" ở đầu thành 73 byte. */
+    private static final String PASSWORD_72_BYTES = "ậ".repeat(24);
+    private static final String PASSWORD_73_BYTES = "a" + PASSWORD_72_BYTES;
+
+    @Test
+    void registerLimitsPasswordByBytesNotCharacters() throws Exception {
+        assertEquals(72, PASSWORD_72_BYTES.getBytes(java.nio.charset.StandardCharsets.UTF_8).length);
+
+        // 30 ký tự (qua được @Size) nhưng 90 byte: phải bị chặn bằng thông báo rõ ràng, không phải lỗi 500
+        String email = email();
+        mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content(body(email, "ậ".repeat(30))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Mật khẩu quá dài")));
+        assertTrue(userRepository.findByEmailIgnoreCase(email).isEmpty(), "đăng ký bị từ chối thì không tạo tài khoản");
+
+        mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content(body(email(), PASSWORD_73_BYTES)))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content(body(email(), PASSWORD_72_BYTES)))
+                .andExpect(status().isCreated());   // đúng 72 byte vẫn hợp lệ
+    }
+
+    @Test
+    void encoderRefusesPasswordOver72BytesInsteadOfTruncatingSilently() {
+        // Spring Security chưa vá CVE-2025-22228 (6.3.0 đến 6.3.7, đi kèm Spring Boot 3.3.4) cắt âm thầm ở 72 byte.
+        // Bản đã vá (6.3.8 trở lên) ném lỗi. Test này đỏ nếu pom lùi về Spring Boot cũ.
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalArgumentException.class,
+                () -> passwordEncoder.encode(PASSWORD_73_BYTES));
+        assertTrue(passwordEncoder.encode(PASSWORD_72_BYTES).startsWith("$2"));
     }
 
     @Test

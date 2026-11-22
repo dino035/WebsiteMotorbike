@@ -35,7 +35,7 @@ export default function ResetPasswordPage() {
         e.preventDefault()
         setError('')
         const errors = {}
-        if (form.password.length < 8) errors.password = 'Mật khẩu phải từ 8 đến 72 ký tự.'
+        if (form.password.length < 8) errors.password = 'Mật khẩu phải có ít nhất 8 ký tự.'
         if (form.confirm !== form.password) errors.confirm = 'Mật khẩu nhập lại không khớp.'
         setFieldErrors(errors)
         if (Object.keys(errors).length > 0) return

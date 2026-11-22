@@ -198,6 +198,24 @@ class AccountFeaturesTest {
     }
 
     @Test
+    void resetRejectsPasswordOver72BytesAndKeepsTheLinkUsable() throws Exception {
+        String email = email("bytes");
+        register(email);
+        String token = requestResetAndGetToken(email);
+
+        // 30 ký tự tiếng Việt có dấu = 90 byte: 400 với thông báo rõ ràng, không phải 500
+        MvcResult tooLong = doReset(token, "ậ".repeat(30), "ậ".repeat(30));
+        assertEquals(400, tooLong.getResponse().getStatus());
+        assertTrue(tooLong.getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8)
+                .contains("Mật khẩu quá dài"));
+
+        assertTrue(tokenValid(token), "mật khẩu bị từ chối thì mã chưa bị dùng, khách thử lại được");
+        assertEquals(200, loginStatus(email, PASSWORD), "mật khẩu cũ chưa bị đổi");
+        assertEquals(200, doReset(token, "ậ".repeat(24), "ậ".repeat(24)).getResponse().getStatus(),
+                "đúng 72 byte vẫn đặt được");
+    }
+
+    @Test
     void resetRejectsMismatchShortPasswordAndBadToken() throws Exception {
         String email = email("rules");
         register(email);
