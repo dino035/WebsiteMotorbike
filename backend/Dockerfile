@@ -6,12 +6,12 @@
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Tải thư viện trước để lớp này được dùng lại khi chỉ sửa code
 COPY pom.xml .
-RUN mvn -B -q dependency:go-offline
-
 COPY src ./src
-RUN mvn -B -q -DskipTests package
+
+# Không tách bước dependency:go-offline: trên Render nó chạy rất lâu rồi chết với
+# "No plugin found for prefix 'dependency'". mvn package tự tải đủ thư viện cần thiết.
+RUN mvn -B -DskipTests package
 
 # ---- Giai đoạn 2: chỉ chạy, không cần Maven ----
 FROM eclipse-temurin:17-jre
