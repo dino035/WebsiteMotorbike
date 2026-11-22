@@ -1,0 +1,72 @@
+/* Nút "Tài khoản" và bảng bung xuống trên thanh điều hướng. */
+
+.account { position: relative; display: flex; align-items: center; }
+
+.account__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    padding: 24px 0 21px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    border-radius: 0;
+    background: none;
+    color: var(--c-text);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.account__toggle:hover:not(:disabled) { background: none; color: var(--c-text); border-bottom-color: var(--c-text); }
+.account__toggle--open { color: var(--c-brand); border-bottom-color: var(--c-brand); }
+
+.account__caret { font-size: 10px; }
+/* Chấm đỏ báo có thông báo chưa đọc, vì số đếm nằm trong bảng bung xuống */
+.account__dot { width: 7px; height: 7px; border-radius: var(--r-full); background: var(--c-brand); }
+
+.account__menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+    padding: var(--s-2) 0;
+    background: #fff;
+    border: 1px solid var(--c-border);
+    box-shadow: var(--sh-2);
+}
+
+.account__email {
+    margin: 0;
+    padding: var(--s-2) var(--s-4) var(--s-3);
+    border-bottom: 1px solid var(--c-border);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: var(--fs-xs);
+    color: var(--c-text-3);
+}
+
+.account__menu a,
+.account__logout {
+    padding: var(--s-3) var(--s-4);
+    border: 0;
+    border-radius: 0;
+    background: none;
+    color: var(--c-text);
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    letter-spacing: 0;
+    text-align: left;
+    text-transform: none;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.account__menu a:hover,
+.account__logout:hover:not(:disabled) { background: var(--c-surface-2); color: var(--c-text); }
+.account__menu a.active { color: var(--c-brand); font-weight: 600; }
+
+.account__logout { margin-top: var(--s-2); border-top: 1px solid var(--c-border); color: var(--c-brand); }
+.account__logout:hover:not(:disabled) { background: var(--c-brand-soft); color: var(--c-brand); }

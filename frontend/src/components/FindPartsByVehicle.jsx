@@ -31,47 +31,51 @@ export default function FindPartsByVehicle() {
 
     return (
         <section className="find-parts">
-            <h2>Chọn xe của bạn</h2>
-            <p className="find-parts__hint">
-                Chọn đủ hãng, dòng xe và năm để xem những phụ tùng lắp vừa xe bạn.
-            </p>
+            <div className="find-parts__panel">
+                <h2>Chọn xe của bạn</h2>
+                <p className="find-parts__hint">
+                    Chọn đủ hãng, dòng xe và năm để xem những phụ tùng lắp vừa xe bạn.
+                </p>
 
-            <VehicleModelPicker onChange={handleVehicleChange} />
+                <VehicleModelPicker onChange={handleVehicleChange} />
 
-            <div className="find-parts__actions">
-                <button
-                    type="button"
-                    className="find-parts__button"
-                    onClick={handleSearch}
-                    disabled={!vehicle || loading}
-                >
-                    {loading ? 'Đang tìm...' : 'Xem phụ tùng hợp với xe này'}
-                </button>
+                <div className="find-parts__actions">
+                    <button
+                        type="button"
+                        className="find-parts__button"
+                        onClick={handleSearch}
+                        disabled={!vehicle || loading}
+                    >
+                        {loading ? 'Đang tìm...' : 'Xem phụ tùng hợp với xe này'}
+                    </button>
 
-                {vehicle && (
-                    <span className="find-parts__selected">
-                        Đã chọn: {vehicle.brand} {vehicle.model} {vehicle.year}
-                    </span>
-                )}
+                    {vehicle && (
+                        <span className="find-parts__selected">
+                            Đã chọn: {vehicle.brand} {vehicle.model} {vehicle.year}
+                        </span>
+                    )}
+                </div>
+
+                {error && <p className="find-parts__error">{error}</p>}
             </div>
 
-            {error && <p className="find-parts__error">{error}</p>}
-
             {parts !== null && !loading && !error && (
-                parts.length === 0 ? (
-                    <p className="find-parts__empty">
-                        Chưa có phụ tùng nào được khai báo cho xe này.
-                    </p>
-                ) : (
-                    <>
-                        <p className="find-parts__count">Tìm thấy {parts.length} phụ tùng.</p>
-                        <div className="product-grid">
-                            {parts.map((p) => (
-                                <ProductCard key={p.productId} product={p} />
-                            ))}
-                        </div>
-                    </>
-                )
+                <div className="find-parts__results">
+                    {parts.length === 0 ? (
+                        <p className="find-parts__empty">
+                            Chưa có phụ tùng nào được khai báo cho xe này.
+                        </p>
+                    ) : (
+                        <>
+                            <p className="find-parts__count">Tìm thấy {parts.length} phụ tùng.</p>
+                            <div className="product-grid">
+                                {parts.map((p) => (
+                                    <ProductCard key={p.productId} product={p} />
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
             )}
         </section>
     );

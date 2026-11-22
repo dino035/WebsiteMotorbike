@@ -1,12 +1,319 @@
+/* ============================================================
+   Nền tảng giao diện, lấy theo phong cách bản JSP của môn Lập trình web:
+   nền trắng, khối phẳng vuông góc, chữ đậm in hoa, nút đen bo tròn, điểm nhấn đỏ trầm.
+   Mọi màu, cỡ chữ, khoảng cách khai báo ở đây; CSS từng trang dùng biến, không viết số cứng.
+   ============================================================ */
+
+:root {
+  /* --- Màu trung tính --- */
+  --c-bg: #ffffff;
+  --c-surface: #ffffff;
+  --c-surface-2: #f3f3f4;     /* nền khối phụ, thẻ sản phẩm, dòng bảng khi rê chuột */
+  --c-border: #e4e5e7;
+  --c-border-strong: #cfd2d6;
+  --c-text: #111111;
+  --c-text-2: #6b6f76;
+  --c-text-3: #9aa0a6;
+
+  /* --- Màu nhấn --- */
+  --c-brand: #a8262d;
+  --c-brand-dark: #86191f;
+  --c-brand-soft: #fdeeee;
+
+  /* --- Màu trạng thái --- */
+  --c-ok: #1a7f37;        --c-ok-soft: #ecf8ef;
+  --c-warn: #9a6700;      --c-warn-soft: #fff7e0;
+  --c-info: #1565c0;      --c-info-soft: #e3f2fd;
+  --c-danger: #b42318;    --c-danger-soft: #fdeeee;
+
+  /* --- Chữ --- */
+  --f-sans: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 15px;
+  --fs-md: 17px;
+  --fs-lg: 20px;
+  --fs-xl: 26px;
+  --fs-2xl: 36px;
+
+  /* --- Khoảng cách: thang bội số của 4 --- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+
+  /* --- Bo góc: khối lớn vuông góc như bản JSP, chỉ ô nhập bo nhẹ --- */
+  --r-sm: 4px;
+  --r-md: 0;
+  --r-lg: 0;
+  --r-full: 999px;
+
+  /* --- Đổ bóng: mặc định không có, chỉ dùng khi nhấc thẻ lên lúc rê chuột --- */
+  --sh-1: none;
+  --sh-2: 0 8px 22px rgba(0, 0, 0, .12);
+  --sh-3: 0 14px 32px rgba(0, 0, 0, .16);
+
+  --w-content: 1200px;
+}
+
 * { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, sans-serif; color: #222; background: #fafafa; }
-.header { display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 24px; background: #fff; border-bottom: 1px solid #e5e5e5; }
-.brand { font-weight: 700; font-size: 20px; color: #222; text-decoration: none; }
-.nav { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px 16px; }
-.nav a { color: #444; text-decoration: none; white-space: nowrap; }
-.nav a.active { color: #d32f2f; font-weight: 600; }
-.content { max-width: 1100px; margin: 0 auto; padding: 24px; }
-.nav__user { color: #888; font-size: 14px; }
-.nav__logout { padding: 0; border: 0; background: none; color: #444; font: inherit; cursor: pointer; }
-.nav__logout:hover { color: #d32f2f; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+/* --- Thanh cuộn mảnh, bỏ hai nút mũi tên ở hai đầu của thanh cuộn mặc định trên Windows --- */
+* { scrollbar-width: thin; scrollbar-color: var(--c-border-strong) transparent; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--c-border-strong);
+  border: 3px solid transparent;      /* viền trong suốt làm nút cuộn mảnh lại */
+  border-radius: var(--r-full);
+  background-clip: content-box;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--c-text-3); background-clip: content-box; }
+*::-webkit-scrollbar-button { display: none; }
+*::-webkit-scrollbar-corner { background: transparent; }
+
+body {
+  margin: 0;
+  font-family: var(--f-sans);
+  font-size: var(--fs-base);
+  line-height: 1.55;
+  color: var(--c-text);
+  background: var(--c-bg);
+}
+
+/* --- Tiêu đề in hoa; h1 có thanh đỏ gạch dưới, rộng đúng bằng chữ --- */
+h1 {
+  display: table;
+  margin: 0 0 var(--s-5);
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+h1::after {
+  content: "";
+  display: block;
+  height: 4px;
+  margin-top: var(--s-3);
+  background: var(--c-brand);
+}
+
+h2 {
+  margin: 0 0 var(--s-3);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+}
+h3, h4 { margin: 0 0 var(--s-2); font-weight: 700; }
+h3 { font-size: var(--fs-md); }
+h4 { font-size: var(--fs-base); }
+
+p { margin: 0 0 var(--s-3); }
+
+a { color: var(--c-text); text-decoration-color: #b5b8bd; text-underline-offset: 3px; }
+a:hover { color: var(--c-brand); }
+
+img { max-width: 100%; }
+
+small { font-size: var(--fs-sm); color: var(--c-text-2); }
+
+/* --- Nút: đen bo tròn, rê chuột đổi sang đỏ --- */
+button, .btn {
+  display: inline-block;
+  padding: 11px 28px;
+  border: none;
+  border-radius: var(--r-full);
+  background: var(--c-text);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+button:hover:not(:disabled), .btn:hover { background: var(--c-brand); color: #fff; text-decoration: none; }
+button:disabled { opacity: .45; cursor: default; }
+
+/* Nút phụ: nền trắng viền mảnh */
+.btn--ghost {
+  background: #fff;
+  color: var(--c-text);
+  box-shadow: inset 0 0 0 1.5px var(--c-border-strong);
+}
+.btn--ghost:hover { background: var(--c-surface-2); color: var(--c-text); }
+
+/* Hành động rủi ro: viền đỏ, chỉ tô đỏ khi rê chuột */
+.btn--danger {
+  background: #fff;
+  color: var(--c-brand);
+  box-shadow: inset 0 0 0 1.5px var(--c-brand);
+}
+.btn--danger:hover { background: var(--c-brand); color: #fff; }
+
+/* --- Ô nhập --- */
+input, select, textarea {
+  padding: 11px 14px;
+  border: 1px solid var(--c-border-strong);
+  border-radius: var(--r-sm);
+  background: #fff;
+  font: inherit;
+  color: var(--c-text);
+}
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--c-text);
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, .1);
+}
+input::placeholder, textarea::placeholder { color: var(--c-text-3); }
+
+/* Radio và checkbox cũng là <input> nên bị quy tắc trên tô padding/viền/bo góc,
+   làm cái ô tròn méo đi. Trả chúng về mặc định của trình duyệt.
+   Màu tích thì để nguyên xanh hệ thống: người dùng quen với màu đó, nhìn là biết ô nào đang chọn. */
+input[type="radio"], input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+}
+input[type="radio"]:focus, input[type="checkbox"]:focus {
+  outline: 2px solid var(--c-text);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+input[type="radio"]:disabled, input[type="checkbox"]:disabled { cursor: default; }
+
+/* --- Bảng --- */
+table { width: 100%; border-collapse: collapse; background: #fff; }
+th, td {
+  padding: 14px;
+  border: none;
+  border-bottom: 1px solid var(--c-border);
+  text-align: left;
+  vertical-align: middle;
+}
+th {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--c-text-2);
+  border-bottom: 2px solid var(--c-text);
+  white-space: nowrap;
+}
+tbody tr:hover td { background: var(--c-surface-2); }
+
+/* --- Nhãn trạng thái --- */
+.badge {
+  display: inline-block;
+  flex: none;
+  padding: 3px 12px;
+  border-radius: var(--r-full);
+  background: var(--c-surface-2);
+  color: var(--c-text);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.badge--available { background: #e3f5e8; color: var(--c-ok); }
+.badge--sold { background: #ececee; color: var(--c-text-2); }
+
+/* ============================================================
+   Khung trang: thanh điều hướng và vùng nội dung
+   ============================================================ */
+
+.layout { min-height: 100vh; display: flex; flex-direction: column; }
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 22px;
+  min-height: 68px;
+  padding: 0 var(--s-6);
+  background: #fff;
+  border-bottom: 1px solid var(--c-border);
+}
+
+.brand {
+  margin-right: var(--s-3);
+  font-size: var(--fs-lg);
+  font-weight: 800;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+  color: var(--c-text);
+  text-decoration: none;
+}
+.brand:hover { color: var(--c-text); }
+
+/* Khách hàng có tới 11 mục: khoảng cách hẹp lại để không bị tràn xuống dòng thứ hai */
+.nav { display: flex; flex-wrap: wrap; align-items: center; gap: 0 18px; margin-left: auto; }
+
+/* Mục menu: in hoa, nhỏ, đậm; đang mở thì gạch chân đỏ, rê chuột gạch chân đen */
+.nav a {
+  padding: 24px 0 21px;
+  border-bottom: 3px solid transparent;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  color: var(--c-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.nav a:hover { color: var(--c-text); border-bottom-color: var(--c-text); }
+.nav a.active { color: var(--c-brand); border-bottom-color: var(--c-brand); }
+
+/* Email dài là thủ phạm chính làm tràn hàng: cắt bớt bằng dấu ba chấm thay vì đẩy nút Đăng xuất xuống dòng */
+.nav__user {
+  max-width: 180px;
+  font-size: var(--fs-sm);
+  color: var(--c-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav__logout {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--c-text);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+.nav__logout:hover:not(:disabled) { background: none; color: var(--c-brand); }
+
+.content {
+  flex: 1;
+  width: 100%;
+  max-width: var(--w-content);
+  margin: 0 auto;
+  padding: var(--s-6) var(--s-5) var(--s-8);
+}
+
+@media (max-width: 1250px) {
+  .header { padding: 0 var(--s-5); }
+}
+
+@media (max-width: 700px) {
+  .header { gap: 0 16px; padding: var(--s-3) var(--s-4); }
+  .nav { margin-left: 0; width: 100%; }
+  .nav a { padding: 12px 0 10px; }
+  .content { padding: var(--s-5) var(--s-4) var(--s-7); }
+  h1 { font-size: var(--fs-xl); }
+}

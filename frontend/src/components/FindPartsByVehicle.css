@@ -1,12 +1,29 @@
-.find-parts { max-width: 1200px; margin: 32px auto 0; padding: 0 16px; }
-.find-parts h2 { margin: 0 0 4px; }
-.find-parts__hint { margin: 0 0 12px; color: #666; }
+/* Khung "Chọn xe của bạn" ở trang chủ. */
 
-.find-parts__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 12px 0 16px; }
-.find-parts__button { padding: 10px 18px; border: none; border-radius: 6px; background: #d32f2f; color: #fff; font: inherit; cursor: pointer; }
-.find-parts__button:disabled { background: #ccc; cursor: default; }
-.find-parts__selected { color: #555; }
+.find-parts { margin-top: var(--s-7); }
 
-.find-parts__error { color: #c62828; }
+.find-parts__panel { padding: var(--s-5); background: var(--c-surface-2); }
+
+.find-parts h2 { margin: 0 0 var(--s-2); }
+.find-parts__hint { margin: 0 0 var(--s-4); font-size: var(--fs-sm); color: var(--c-text-2); }
+
+.find-parts__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-4);
+    margin-top: var(--s-4);
+}
+.find-parts__button { margin: 0; }
+.find-parts__selected {
+    font-size: var(--fs-sm);
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: var(--c-text-2);
+}
+
+/* --- Kết quả nằm ngoài khối chọn xe, sát lưới sản phẩm --- */
+.find-parts__results { margin-top: var(--s-5); }
+.find-parts__error { margin: var(--s-3) 0 0; color: var(--c-danger); }
 .find-parts__empty,
-.find-parts__count { color: #666; }
+.find-parts__count { margin: var(--s-4) 0 0; font-size: var(--fs-sm); color: var(--c-text-2); }

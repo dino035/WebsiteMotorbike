@@ -1,17 +1,35 @@
-.report__cards { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
-.report__card { flex: 1 1 180px; padding: 14px 16px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
-.report__card-label { display: block; margin-bottom: 6px; font-size: 13px; color: #888; }
-.report__card strong { font-size: 18px; color: #222; }
+/* Trang báo cáo doanh thu của Admin. */
 
-.report__heading { margin: 24px 0 10px; font-size: 17px; }
+.report__cards { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-bottom: var(--s-6); }
+.report__card { flex: 1 1 190px; padding: var(--s-4) var(--s-5); background: var(--c-surface-2); }
+.report__card-label {
+    display: block;
+    margin-bottom: var(--s-2);
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--c-text-2);
+}
+.report__card strong { font-size: var(--fs-lg); font-weight: 700; }
 
-.report__chart-wrap { padding: 14px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
+.report__heading { margin: var(--s-6) 0 var(--s-3); font-size: var(--fs-md); }
+
+.report__chart-wrap { padding: var(--s-4); background: var(--c-surface-2); }
 .report__chart {
     display: flex; align-items: flex-end; gap: 2px;
-    height: 180px; margin: 0; padding: 0; list-style: none; overflow-x: auto;
+    height: 190px; margin: 0; padding: 0; list-style: none; overflow-x: auto;
 }
 .report__bar-slot { flex: 1 0 4px; display: flex; align-items: flex-end; height: 100%; }
-.report__bar { display: block; width: 100%; min-height: 1px; background: #d32f2f; border-radius: 2px 2px 0 0; }
-.report__bar-slot:hover .report__bar { background: #8e0000; }
+.report__bar { display: block; width: 100%; min-height: 1px; background: var(--c-brand); }
+.report__bar-slot:hover .report__bar { background: var(--c-text); }
 
-.report__axis { display: flex; justify-content: space-between; margin: 8px 0 0; font-size: 12px; color: #888; }
+.report__axis {
+    display: flex;
+    justify-content: space-between;
+    margin: var(--s-3) 0 0;
+    font-size: var(--fs-xs);
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: var(--c-text-2);
+}

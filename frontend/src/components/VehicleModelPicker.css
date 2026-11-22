@@ -1,4 +1,14 @@
-.vehicle-picker { display: flex; flex-wrap: wrap; gap: 8px; }
-.vehicle-picker select { min-width: 160px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; background: #fff; font: inherit; }
-.vehicle-picker select:disabled { background: #f3f3f3; color: #999; }
-.vehicle-picker__error { flex-basis: 100%; margin: 4px 0 0; color: #c62828; }
+.vehicle-picker { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.vehicle-picker select {
+    min-width: 180px;
+    height: 42px;
+    /* Chiều cao cố định thì bỏ đệm trên dưới, nếu không đuôi chữ g, y, p bị cắt */
+    padding: 0 var(--s-4);
+    line-height: normal;
+    border-color: transparent;
+    border-radius: var(--r-full);
+    background: #fff;
+}
+.vehicle-picker select:focus { border-color: var(--c-text); }
+.vehicle-picker select:disabled { background: #e8e8ea; color: var(--c-text-3); cursor: not-allowed; }
+.vehicle-picker__error { flex-basis: 100%; margin: var(--s-1) 0 0; font-size: var(--fs-sm); color: var(--c-danger); }

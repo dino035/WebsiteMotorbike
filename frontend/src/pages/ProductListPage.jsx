@@ -76,12 +76,12 @@ export default function ProductListPage() {
             <form className="filter-bar" onSubmit={handleSubmit}>
                 <input name="keyword" value={form.keyword} onChange={handleChange} placeholder="Tìm theo tên..." />
                 <select name="type" value={form.type} onChange={handleChange}>
-                    <option value="">Tất cả loại</option>
+                    <option value="">Tất cả</option>
                     <option value="motorbike">Xe máy</option>
                     <option value="sparepart">Phụ tùng</option>
                 </select>
                 <select name="status" value={form.status} onChange={handleChange}>
-                    <option value="">Mọi trạng thái</option>
+                    <option value="">Tình trạng</option>
                     <option value="AVAILABLE">Có sẵn</option>
                     <option value="SOLD">Hết hàng</option>
                 </select>
