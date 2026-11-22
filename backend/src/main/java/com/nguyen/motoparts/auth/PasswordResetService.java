@@ -5,8 +5,8 @@ import com.nguyen.motoparts.account.entity.User;
 import com.nguyen.motoparts.account.repository.PasswordResetTokenRepository;
 import com.nguyen.motoparts.account.repository.UserRepository;
 import com.nguyen.motoparts.common.exception.BadRequestException;
-import com.nguyen.motoparts.mail.EmailService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,20 +34,20 @@ public class PasswordResetService {
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
+    private final ApplicationEventPublisher events;
     private final String frontendUrl;
     private final int expireMinutes;
     private final int maxPerHour;
 
     public PasswordResetService(UserRepository userRepository, PasswordResetTokenRepository tokenRepository,
-                                PasswordEncoder passwordEncoder, EmailService emailService,
+                                PasswordEncoder passwordEncoder, ApplicationEventPublisher events,
                                 @Value("${app.frontend-url:http://localhost:5173}") String frontendUrl,
                                 @Value("${app.reset.expire-minutes:30}") int expireMinutes,
                                 @Value("${app.reset.max-per-hour:5}") int maxPerHour) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.passwordEncoder = passwordEncoder;
-        this.emailService = emailService;
+        this.events = events;
         this.frontendUrl = frontendUrl.endsWith("/") ? frontendUrl.substring(0, frontendUrl.length() - 1) : frontendUrl;
         this.expireMinutes = expireMinutes;
         this.maxPerHour = maxPerHour;
@@ -60,7 +60,8 @@ public class PasswordResetService {
     /**
      * Gửi liên kết đặt lại mật khẩu nếu email có tài khoản. Email không có tài khoản hoặc đã yêu cầu quá nhiều
      * lần thì im lặng không làm gì, để người ngoài không dò ra được email nào đã đăng ký.
-     * Gửi email lỗi thì ném EmailSendException và giao dịch rollback (mã vừa tạo không được lưu).
+     * Email không gửi ở đây mà được giao cho {@link PasswordResetMailListener}: gửi sau khi giao dịch commit và ở luồng
+     * khác, nên thời gian trả lời không tố cáo email nào có tài khoản. Gửi lỗi chỉ ghi log, mã vừa tạo vẫn nằm trong DB.
      */
     @Transactional
     public void requestReset(String email) {
@@ -90,7 +91,7 @@ public class PasswordResetService {
                 + " phút, chỉ dùng được một lần):\n\n"
                 + link + "\n\n"
                 + "Nếu bạn không yêu cầu, hãy bỏ qua email này; mật khẩu của bạn không bị thay đổi.\n";
-        emailService.send(user.getEmail(), "Đặt lại mật khẩu - MotoParts", body);
+        events.publishEvent(new PasswordResetMail(user.getEmail(), "Đặt lại mật khẩu - MotoParts", body));
     }
 
     /** Mã còn dùng được không (tồn tại, chưa dùng, chưa hết hạn). */
