@@ -1,28 +1,99 @@
+/* Bảo hành: khách xem phiếu, gửi yêu cầu; admin duyệt hoặc từ chối. */
+
 .warranty h1 { margin-top: 0; }
-.warranty h2 { margin: 24px 0 10px; font-size: 18px; }
-.warranty__rule { margin: 0 0 12px; color: #555; }
-.warranty__message { padding: 12px 0; color: #666; }
-.warranty__message--error { color: #c62828; }
+.warranty h2 { margin: var(--s-6) 0 var(--s-3); font-size: var(--fs-md); }
+.warranty__rule { margin: 0 0 var(--s-3); color: var(--c-text-2); }
+.warranty__message { padding: var(--s-3) 0; color: var(--c-text-2); }
+.warranty__message--error { color: var(--c-danger); }
 
-.warranty__list { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.warranty-card { padding: 14px 16px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
-.warranty-card__head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-.warranty-card__sub { display: block; font-size: 13px; color: #777; margin-top: 2px; }
-.warranty-card__text { margin: 10px 0 4px; white-space: pre-wrap; overflow-wrap: anywhere; }
-.warranty-card__result { margin: 8px 0 0; padding: 8px 10px; border-radius: 6px; background: #f5f5f5; font-size: 14px; overflow-wrap: anywhere; }
-.warranty-card a { color: #d32f2f; overflow-wrap: anywhere; }
+.warranty__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
 
-.status-badge--approved { background: #e8f5e9; color: #2e7d32; }
-.status-badge--rejected { background: #fdecea; color: #c62828; }
+.warranty-card {
+    padding: var(--s-4);
+    background: #fff;
+    border: 1px solid var(--c-border);
+}
+.warranty-card__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+}
+.warranty-card__head strong { text-transform: uppercase; }
+.warranty-card__sub { display: block; margin-top: 2px; font-size: var(--fs-sm); color: var(--c-text-3); }
+.warranty-card__text { margin: var(--s-3) 0 var(--s-1); white-space: pre-wrap; overflow-wrap: anywhere; }
+.warranty-card__result {
+    margin: var(--s-2) 0 0;
+    padding: var(--s-3);
+    border-left: 3px solid var(--c-border-strong);
+    background: var(--c-surface-2);
+    font-size: var(--fs-sm);
+    overflow-wrap: anywhere;
+}
+.warranty-card a { color: var(--c-brand); overflow-wrap: anywhere; }
 
-.warranty__btn { padding: 7px 14px; border: 1px solid #ccc; border-radius: 6px; background: #fff; color: #333; font: inherit; font-size: 14px; cursor: pointer; }
-.warranty__btn--primary { background: #d32f2f; border-color: #d32f2f; color: #fff; }
-.warranty__btn--danger { border-color: #c62828; color: #c62828; }
-.warranty__btn:disabled { opacity: .6; cursor: default; }
+.status-badge--approved { background: var(--c-ok-soft); color: var(--c-ok); }
+.status-badge--rejected { background: var(--c-danger-soft); color: var(--c-danger); }
 
-.warranty-form { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e0e0e0; }
-.warranty-form label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: #444; }
-.warranty-form textarea, .warranty-form input { padding: 9px; border: 1px solid #ccc; border-radius: 6px; font: inherit; font-size: 15px; }
-.warranty-form__error { color: #c62828; font-size: 13px; }
-.warranty-form__alert { margin: 0; padding: 8px 10px; border-radius: 6px; background: #fdecea; color: #c62828; font-size: 14px; }
-.warranty-form__actions { display: flex; gap: 10px; }
+/* ----- Nút ----- */
+.warranty__btn {
+    padding: 7px 18px;
+    border: 0;
+    border-radius: var(--r-full);
+    background: #fff;
+    box-shadow: inset 0 0 0 1.5px var(--c-border-strong);
+    color: var(--c-text);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: normal;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.warranty__btn:hover:not(:disabled) { background: var(--c-surface-2); color: var(--c-text); }
+.warranty__btn:disabled { opacity: .45; cursor: default; }
+
+.warranty__btn--primary { background: var(--c-text); box-shadow: none; color: #fff; }
+.warranty__btn--primary:hover:not(:disabled) { background: var(--c-brand); color: #fff; }
+
+.warranty__btn--danger { background: #fff; box-shadow: inset 0 0 0 1.5px var(--c-brand); color: var(--c-brand); }
+.warranty__btn--danger:hover:not(:disabled) { background: var(--c-brand); color: #fff; }
+
+/* ----- Biểu mẫu gửi yêu cầu ----- */
+.warranty-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+    margin-top: var(--s-3);
+    padding-top: var(--s-4);
+    border-top: 1px solid var(--c-border);
+}
+.warranty-form label {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-1);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-text-2);
+}
+.warranty-form input { height: 42px; padding: 0 var(--s-4); line-height: normal; }
+.warranty-form textarea { padding: var(--s-3) var(--s-4); resize: vertical; }
+.warranty-form__error { color: var(--c-danger); font-size: var(--fs-sm); font-weight: 400; }
+.warranty-form__alert {
+    margin: 0;
+    padding: var(--s-3) var(--s-4);
+    border-left: 3px solid var(--c-danger);
+    background: var(--c-danger-soft);
+    color: var(--c-danger);
+    font-size: var(--fs-sm);
+}
+.warranty-form__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); }

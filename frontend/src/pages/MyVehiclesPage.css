@@ -1,26 +1,95 @@
-.vehicles h1 { margin: 0 0 6px; }
-.vehicles__intro { margin: 0 0 16px; color: #666; }
-.vehicles__message { padding: 10px 0; color: #666; }
-.vehicles__message--error { color: #c62828; }
+/* "Xe của tôi": danh sách xe khách khai báo, dùng để gợi ý phụ tùng tương thích. */
 
-.vehicles__list { margin: 18px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
-.vehicle-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px;
-    padding: 12px 14px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
+.vehicles h1 { margin: 0 0 var(--s-4); }
+.vehicles__intro { margin: 0 0 var(--s-5); color: var(--c-text-2); }
+.vehicles__message { padding: var(--s-3) 0; color: var(--c-text-2); }
+.vehicles__message--error { color: var(--c-danger); }
+
+.vehicles__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-2);
+    margin: var(--s-5) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.vehicle-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3) var(--s-4);
+    padding: var(--s-3) var(--s-4);
+    background: #fff;
+    border: 1px solid var(--c-border);
+}
+.vehicle-card:hover { background: var(--c-surface-2); }
+
 .vehicle-card__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
-.vehicle-card__info span { font-size: 14px; color: #666; }
-.vehicle-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.vehicle-card__ask { font-size: 14px; }
+.vehicle-card__info strong { text-transform: uppercase; }
+.vehicle-card__info span { font-size: var(--fs-sm); color: var(--c-text-2); }
+
+.vehicle-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.vehicle-card__ask { font-size: var(--fs-sm); }
 .vehicle-card .vehicle-form { width: 100%; }
 
-.vehicles__btn { display: inline-block; padding: 7px 14px; border: 1px solid #ccc; border-radius: 6px; background: #fff; color: #333;
-    font: inherit; font-size: 14px; text-decoration: none; cursor: pointer; }
-.vehicles__btn--primary { background: #d32f2f; border-color: #d32f2f; color: #fff; }
-.vehicles__btn--danger { border-color: #c62828; color: #c62828; }
-.vehicles__btn:disabled { opacity: .5; cursor: default; }
+/* ----- Nút ----- */
+/* .vehicles__btn dùng cho cả <a> lẫn <button> nên khai báo đủ, không dựa vào quy tắc button chung */
+.vehicles__btn {
+    display: inline-block;
+    padding: 7px 18px;
+    border: 0;
+    border-radius: var(--r-full);
+    background: #fff;
+    box-shadow: inset 0 0 0 1.5px var(--c-border-strong);
+    color: var(--c-text);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: normal;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.vehicles__btn:hover:not(:disabled) { background: var(--c-surface-2); color: var(--c-text); }
+.vehicles__btn:disabled { opacity: .45; cursor: default; }
 
-.vehicle-form { display: flex; flex-direction: column; gap: 12px; padding: 14px; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
-.vehicle-form h2 { margin: 0; font-size: 18px; }
-.vehicle-form__field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
-.vehicle-form__field input[type="text"] { max-width: 360px; padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
-.vehicle-form__check { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-.vehicle-form__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.vehicles__btn--primary { background: var(--c-text); box-shadow: none; color: #fff; }
+.vehicles__btn--primary:hover:not(:disabled) { background: var(--c-brand); color: #fff; }
+
+.vehicles__btn--danger { background: #fff; box-shadow: inset 0 0 0 1.5px var(--c-brand); color: var(--c-brand); }
+.vehicles__btn--danger:hover:not(:disabled) { background: var(--c-brand); color: #fff; }
+
+/* ----- Biểu mẫu ----- */
+.vehicle-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-3);
+    padding: var(--s-4);
+    background: var(--c-surface-2);
+}
+.vehicle-form h2 { margin: 0; font-size: var(--fs-md); }
+.vehicle-form__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-1);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-text-2);
+}
+.vehicle-form__field input[type="text"] {
+    max-width: 360px;
+    height: 42px;
+    padding: 0 var(--s-4);
+    line-height: normal;
+}
+.vehicle-form__check {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-size: var(--fs-sm);
+    color: var(--c-text-2);
+}
+.vehicle-form__actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
