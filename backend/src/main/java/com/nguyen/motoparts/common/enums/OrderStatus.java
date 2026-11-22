@@ -19,6 +19,18 @@ public enum OrderStatus {
         this.label = label;
     }
 
+    /**
+     * Nhãn hiển thị cho một đơn cụ thể. SHIPPING là một giai đoạn duy nhất trong máy trạng thái (hàng đã rời kho,
+     * chưa tới tay khách), nhưng gọi khác nhau theo cách nhận hàng: giao tận nơi là "Đang giao", còn nhận hoặc
+     * lắp tại cửa hàng là "Chờ lấy". Đơn không rõ cách nhận (nhập tay, dữ liệu cũ) giữ nhãn chung.
+     */
+    public String labelFor(DeliveryMethod method) {
+        if (this != SHIPPING || method == null) {
+            return label;
+        }
+        return method == DeliveryMethod.DELIVERY ? "Đang giao" : "Chờ lấy";
+    }
+
     /** Trạng thái Admin được chuyển tiếp từ trạng thái này. COMPLETED và CANCELLED là trạng thái cuối. */
     public List<OrderStatus> getNextStatuses() {
         return switch (this) {

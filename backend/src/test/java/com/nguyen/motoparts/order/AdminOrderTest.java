@@ -493,4 +493,87 @@ class AdminOrderTest {
         assertEquals(1, conflict, "thao tác thứ hai thấy đơn đã CONFIRMED nên bị từ chối");
         assertEquals("CONFIRMED", adminOrder(admin, orderId).get("order").get("status").asText());
     }
+
+    /** Đơn nhận tại cửa hàng: giống partOrder nhưng PICKUP. */
+    private String pickupOrder(Customer c) throws Exception {
+        addToCart(c, newPart("100000").getProductId(), 1);
+        Map<String, Object> body = checkout();
+        body.put("deliveryMethod", "PICKUP");
+        body.put("shippingAddress", null);
+        return place(c, body);
+    }
+
+    private JsonNode customerOrder(Customer c, String orderId) throws Exception {
+        MvcResult r = mvc.perform(auth(get("/api/orders/" + orderId), c.token())).andReturn();
+        assertEquals(200, r.getResponse().getStatus());
+        return read(r);
+    }
+
+    /** Danh sách của khách là mảng thẳng, của Admin là trang có "items". */
+    private JsonNode rowOf(JsonNode list, String orderId) {
+        for (JsonNode row : list.isArray() ? list : list.get("items")) {
+            if (orderId.equals(row.get("orderId").asText())) {
+                return row;
+            }
+        }
+        throw new AssertionError("không thấy đơn " + orderId + " trong danh sách");
+    }
+
+    @Test
+    void shippingLabelFollowsTheDeliveryMethodEverywhereItIsShown() throws Exception {
+        String admin = adminToken();
+        Customer c = register();
+        String deliveryId = partOrder(c);
+        String pickupId = pickupOrder(c);
+        for (String id : new String[]{deliveryId, pickupId}) {
+            assertEquals(200, setStatus(admin, id, "CONFIRMED").getResponse().getStatus());
+        }
+
+        // bước kế tiếp Admin thấy trên nút bấm cũng đã đúng nhãn trước khi chuyển
+        assertEquals("Đang giao", adminOrder(admin, deliveryId).get("nextStatuses").get(0).get("label").asText());
+        assertEquals("Chờ lấy", adminOrder(admin, pickupId).get("nextStatuses").get(0).get("label").asText());
+
+        for (String id : new String[]{deliveryId, pickupId}) {
+            MvcResult r = setStatus(admin, id, "SHIPPING");
+            assertEquals(200, r.getResponse().getStatus());
+            assertEquals("SHIPPING", read(r).get("order").get("status").asText(), "mã trạng thái không đổi");
+        }
+
+        // trang chi tiết của Admin và của khách
+        assertEquals("Đang giao", adminOrder(admin, deliveryId).get("order").get("statusLabel").asText());
+        assertEquals("Chờ lấy", adminOrder(admin, pickupId).get("order").get("statusLabel").asText());
+        assertEquals("Đang giao", customerOrder(c, deliveryId).get("statusLabel").asText());
+        assertEquals("Chờ lấy", customerOrder(c, pickupId).get("statusLabel").asText());
+
+        // danh sách của khách và của Admin
+        JsonNode mine = read(mvc.perform(auth(get("/api/orders?size=50"), c.token())).andReturn());
+        assertEquals("Đang giao", rowOf(mine, deliveryId).get("statusLabel").asText());
+        assertEquals("Chờ lấy", rowOf(mine, pickupId).get("statusLabel").asText());
+        JsonNode all = read(mvc.perform(auth(get("/api/admin/orders?status=SHIPPING&size=50"), admin)).andReturn());
+        assertEquals("Đang giao", rowOf(all, deliveryId).get("statusLabel").asText());
+        assertEquals("Chờ lấy", rowOf(all, pickupId).get("statusLabel").asText());
+
+        // thông báo gửi cho khách cũng không còn chữ gạch chéo
+        JsonNode notes = read(mvc.perform(auth(get("/api/notifications?size=50"), c.token())).andReturn());
+        String text = notes.toString();
+        assertTrue(text.contains("trạng thái: Đang giao") && text.contains("trạng thái: Chờ lấy"), text);
+        assertTrue(!text.contains("Đang giao/Chờ lấy"), "khách không được thấy nhãn ghép hai nghĩa");
+    }
+
+    @Test
+    void installationListShowsTheSameOrderLabel() throws Exception {
+        String admin = adminToken();
+        Customer c = register();
+        String[] ids = installOrder(c, admin, randomFutureDate());
+        assertEquals(200, setStatus(admin, ids[0], "CONFIRMED").getResponse().getStatus());
+        assertEquals(200, setStatus(admin, ids[0], "SHIPPING").getResponse().getStatus());
+        MvcResult r = mvc.perform(auth(get("/api/admin/installations"), admin)).andReturn();
+        for (JsonNode row : read(r)) {
+            if (ids[0].equals(row.get("orderId").asText())) {
+                assertEquals("Chờ lấy", row.get("orderStatusLabel").asText());
+                return;
+            }
+        }
+        throw new AssertionError("không thấy lịch lắp đặt");
+    }
 }
