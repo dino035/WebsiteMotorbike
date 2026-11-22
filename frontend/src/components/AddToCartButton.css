@@ -1,9 +1,46 @@
-.add-to-cart { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 20px; }
-.add-to-cart__qty { display: flex; align-items: center; gap: 8px; font-size: 14px; color: #444; }
-.add-to-cart__qty input { width: 64px; padding: 8px; border: 1px solid #ccc; border-radius: 6px; }
-.add-to-cart__button { padding: 11px 22px; border: 0; border-radius: 6px; background: #d32f2f; color: #fff; font-size: 15px; cursor: pointer; }
-.add-to-cart__button:disabled { background: #bbb; cursor: default; }
-.add-to-cart__msg { flex-basis: 100%; margin: 0; font-size: 14px; }
-.add-to-cart__msg--ok { color: #2e7d32; }
-.add-to-cart__msg--error { color: #c62828; }
-.add-to-cart__msg a { color: #d32f2f; }
+.add-to-cart {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3);
+    margin-top: var(--s-5);
+}
+
+.add-to-cart__qty {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-size: var(--fs-sm);
+    color: var(--c-text-2);
+}
+.add-to-cart__qty input {
+    width: 72px;
+    height: 42px;
+    padding: 0 var(--s-3);
+    line-height: normal;
+    text-align: center;
+}
+
+/* Nút theo đúng ngôn ngữ thiết kế chung: viên thuốc đen, hover sang đỏ.
+   Trước đây nút này tự tô #d32f2f nên lệch hẳn với mọi nút khác trong trang. */
+.add-to-cart__button {
+    padding: 12px 28px;
+    border: 0;
+    border-radius: var(--r-full);
+    background: var(--c-text);
+    color: #fff;
+    font-family: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background .15s;
+}
+.add-to-cart__button:hover:not(:disabled) { background: var(--c-brand); }
+.add-to-cart__button:disabled { background: var(--c-border-strong); cursor: default; }
+
+.add-to-cart__msg { flex-basis: 100%; margin: 0; font-size: var(--fs-sm); }
+.add-to-cart__msg--ok { color: var(--c-ok); }
+.add-to-cart__msg--error { color: var(--c-brand); }
+.add-to-cart__msg a { color: var(--c-brand); }

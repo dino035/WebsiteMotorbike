@@ -1,34 +1,92 @@
-.admin h1 { margin-top: 0; }
-.admin__title { margin: 0; font-size: 22px; }
-.admin__message { padding: 16px 0; color: #666; }
-.admin__message--error { color: #c62828; }
-.admin__sub { display: block; font-size: 12px; color: #888; }
-.admin__hint { margin: 8px 0 0; font-size: 13px; color: #8a6100; }
+/* Khung chung của chín trang quản trị: tiêu đề, thanh tab, bộ lọc, bảng, phân trang, nút. */
 
-.admin-nav { display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #e5e5e5; }
-.admin-nav a { padding: 8px 14px; color: #444; text-decoration: none; border-bottom: 2px solid transparent; }
-.admin-nav a.active { color: #d32f2f; border-bottom-color: #d32f2f; font-weight: 600; }
+.admin__title { margin: 0; font-size: var(--fs-lg); text-transform: uppercase; }
+.admin__message { padding: var(--s-5) 0; color: var(--c-text-2); }
+.admin__message--error { color: var(--c-danger); }
+.admin__sub { display: block; margin-top: var(--s-1); font-size: var(--fs-xs); color: var(--c-text-3); }
+.admin__hint {
+    margin: var(--s-2) 0 0;
+    padding: var(--s-2) var(--s-3);
+    background: var(--c-warn-soft);
+    border-left: 4px solid var(--c-warn);
+    font-size: var(--fs-sm);
+    color: var(--c-warn);
+}
 
-.admin__filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-.admin__filter { padding: 6px 14px; border: 1px solid #ddd; border-radius: 999px; background: #fff; color: #444; font: inherit; font-size: 14px; cursor: pointer; }
-.admin__filter--on { background: #d32f2f; border-color: #d32f2f; color: #fff; }
+/* --- Thanh tab giữa các trang quản trị --- */
+.admin-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--s-5);
+    margin-bottom: var(--s-5);
+    border-bottom: 1px solid var(--c-border);
+}
+.admin-nav a {
+    padding: var(--s-3) 0;
+    margin-bottom: -1px;            /* gạch chân của tab đè lên viền dưới, không tạo hai đường */
+    border-bottom: 3px solid transparent;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: var(--c-text-2);
+    text-decoration: none;
+}
+.admin-nav a:hover { color: var(--c-text); border-bottom-color: var(--c-text); }
+.admin-nav a.active { color: var(--c-brand); border-bottom-color: var(--c-brand); }
 
-.admin__table-wrap { overflow-x: auto; background: #fff; border: 1px solid #e5e5e5; border-radius: 10px; }
-.admin__table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.admin__table th, .admin__table td { padding: 10px 12px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
-.admin__table th { background: #fafafa; font-weight: 600; white-space: nowrap; }
-.admin__table tbody tr:last-child td { border-bottom: 0; }
-.admin__table td .pay-badge, .admin__table td .status-badge { margin-left: 6px; }
+/* --- Bộ lọc dạng viên thuốc --- */
+.admin__filters { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-4); }
+.admin__filter {
+    padding: 8px 20px;
+    background: var(--c-surface-2);
+    color: var(--c-text-2);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+}
+.admin__filter:hover:not(.admin__filter--on) { background: #e8e8ea; color: var(--c-text); }
+.admin__filter--on { background: var(--c-text); color: #fff; }
+.admin__filter--on:hover { background: var(--c-brand); }
 
-.admin__pager { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 14px; font-size: 14px; color: #555; }
-.admin__pager button { padding: 6px 12px; border: 1px solid #ddd; border-radius: 6px; background: #fff; font: inherit; cursor: pointer; }
-.admin__pager button:disabled { opacity: .5; cursor: default; }
+/* --- Bảng: kế thừa dáng bảng chung trong index.css, chỉ thêm phần cuộn ngang --- */
+.admin__table-wrap { overflow-x: auto; }
+.admin__table th,
+.admin__table td { vertical-align: top; }
+.admin__table td .pay-badge,
+.admin__table td .status-badge { margin-left: var(--s-2); }
 
-.admin__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 16px; }
-.admin__inline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.admin__inline input[type="date"] { padding: 5px; border: 1px solid #ccc; border-radius: 6px; font: inherit; }
-.admin__btn { padding: 7px 14px; border: 1px solid #ccc; border-radius: 6px; background: #fff; color: #333; font: inherit; font-size: 14px; cursor: pointer; }
-.admin__btn--primary { background: #d32f2f; border-color: #d32f2f; color: #fff; }
-.admin__btn--danger { border-color: #c62828; color: #c62828; }
-.admin__btn:disabled { opacity: .5; cursor: default; }
+/* --- Phân trang --- */
+.admin__pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-4);
+    margin-top: var(--s-5);
+    font-size: var(--fs-sm);
+    color: var(--c-text-2);
+}
+.admin__pager button {
+    padding: 8px 22px;
+    background: #fff;
+    color: var(--c-text);
+    box-shadow: inset 0 0 0 1.5px var(--c-border-strong);
+}
+.admin__pager button:hover:not(:disabled) { background: var(--c-text); color: #fff; box-shadow: none; }
+
+/* --- Hàng nút và ô nhập nằm ngang --- */
+.admin__actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); margin: 0 0 var(--s-5); }
+.admin__inline { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); font-size: var(--fs-sm); color: var(--c-text-2); }
+/* Chiều cao cố định thì bỏ đệm trên dưới, nếu không đuôi chữ g, y, p bị cắt */
+.admin__inline input[type="date"] { height: 40px; padding: 0 var(--s-4); line-height: normal; margin: 0; border-radius: var(--r-full); }
+
+.admin__btn { margin: 0; padding: 9px 24px; font-size: var(--fs-sm); }
+.admin__btn--primary { background: var(--c-text); color: #fff; }
+.admin__btn--primary:hover:not(:disabled) { background: var(--c-brand); }
+.admin__btn--danger {
+    background: #fff;
+    color: var(--c-brand);
+    box-shadow: inset 0 0 0 1.5px var(--c-brand);
+}
+.admin__btn--danger:hover:not(:disabled) { background: var(--c-brand); color: #fff; box-shadow: none; }
+
 .admin__question { max-width: 420px; overflow-wrap: anywhere; }

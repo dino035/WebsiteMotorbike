@@ -1,0 +1,75 @@
+/* Trang chủ: khối mở đầu, ba điểm bán hàng, lưới sản phẩm đang bán. Phẳng, vuông góc như bản JSP. */
+
+.hero {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: var(--s-7);
+    align-items: center;
+    padding-bottom: var(--s-6);
+    margin-bottom: var(--s-6);
+    border-bottom: 1px solid var(--c-border);
+}
+
+.hero__eyebrow {
+    margin: 0 0 var(--s-3);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+}
+
+/* Tiêu đề trang chủ dùng lại dáng h1 chung (in hoa, thanh đỏ gạch dưới) */
+.hero__title { margin-bottom: var(--s-4); font-size: clamp(28px, 3.6vw, 40px); }
+
+.hero__lead {
+    margin: 0 0 var(--s-5);
+    max-width: 48ch;
+    font-size: var(--fs-md);
+    color: var(--c-text-2);
+}
+
+.hero__actions { display: flex; flex-wrap: wrap; gap: var(--s-3); }
+
+.hero__points { display: grid; gap: var(--s-2); margin: 0; padding: 0; list-style: none; }
+.hero__points li {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s-1);
+    padding: var(--s-4) var(--s-5);
+    background: var(--c-surface-2);
+    border-left: 3px solid var(--c-brand);
+}
+.hero__points strong {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+.hero__points span { font-size: var(--fs-sm); color: var(--c-text-2); line-height: 1.5; }
+
+/* --- Khối có tiêu đề và liên kết "xem tất cả" --- */
+.home-section { margin-top: var(--s-7); }
+.home-section__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--s-4);
+    margin-bottom: var(--s-4);
+}
+.home-section__head h2 { margin: 0; }
+.home-section__head a {
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    color: var(--c-brand);
+    text-decoration: none;
+}
+
+.home-section__message { padding: var(--s-6) 0; text-align: center; color: var(--c-text-2); }
+.home-section__message--error { color: var(--c-danger); }
+
+@media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; gap: var(--s-5); }
+}

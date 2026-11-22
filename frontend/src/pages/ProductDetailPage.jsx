@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import client from '../api/client';
 import AddToCartButton from '../components/AddToCartButton.jsx';
+import ConditionReport from '../components/ConditionReport.jsx';
 import ProductReviews from '../components/ProductReviews.jsx';
 import './ProductDetailPage.css';
 
@@ -78,6 +79,8 @@ export default function ProductDetailPage() {
                             </table>
                         </div>
                     </div>
+
+                    <ConditionReport condition={product.motorbike?.condition}/>
                     <ProductReviews key={product.productId} productId={product.productId}/>
                 </>
             )}
