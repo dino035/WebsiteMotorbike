@@ -59,4 +59,11 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             + "where o.accountId in :accountIds and o.status in :statuses group by o.accountId")
     List<Object[]> countByAccountIds(@Param("accountIds") Collection<String> accountIds,
                                      @Param("statuses") Collection<OrderStatus> statuses);
+
+    /** Đơn hoàn tất trong khoảng; chỉ lấy ngày đặt và tổng tiền để tự gộp theo ngày ở Java. */
+    @Query("select o.orderDate, o.totalAmount from Order o "
+            + "where o.status = :status and o.orderDate >= :from and o.orderDate < :to")
+    List<Object[]> findRevenueRows(@Param("status") OrderStatus status,
+                                   @Param("from") LocalDateTime from,
+                                   @Param("to") LocalDateTime to);
 }

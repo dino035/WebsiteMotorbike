@@ -33,6 +33,7 @@ import AdminChatSessionPage from './pages/AdminChatSessionPage.jsx'
 import AdminAccountsPage from './pages/AdminAccountsPage.jsx'
 import VnpayReturnPage from './pages/VnpayReturnPage.jsx'
 import ComparePage from './pages/ComparePage.jsx'
+import AdminReportsPage from './pages/AdminReportsPage.jsx'
 
 export default function App() {
   return (
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="/admin/chat" element={<RequireAdmin><AdminChatPage /></RequireAdmin>} />
           <Route path="/admin/chat/:id" element={<RequireAdmin><AdminChatSessionPage /></RequireAdmin>} />
           <Route path="/admin/accounts" element={<RequireAdmin><AdminAccountsPage /></RequireAdmin>} />
+          <Route path="/admin/reports" element={<RequireAdmin><AdminReportsPage /></RequireAdmin>} />
           <Route path="/chat" element={<RequireAuth><ChatPage /></RequireAuth>} />
           <Route path="/vehicles" element={<RequireAuth><MyVehiclesPage /></RequireAuth>} />
           <Route path="/warranty" element={<RequireAuth><WarrantyPage /></RequireAuth>} />
