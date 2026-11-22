@@ -5,6 +5,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -92,6 +94,24 @@ public class PhotoStorageService {
         } catch (IOException e) {
             log.warn("Khong goi duoc Supabase de xoa anh {}", storagePath, e);
         }
+    }
+
+    /**
+     * Xóa file sau khi giao dịch commit xong.
+     * Cơ sở dữ liệu là nguồn sự thật: commit hỏng thì dòng ảnh quay lại, nên file phải còn.
+     * Gọi ngoài giao dịch thì xóa luôn.
+     */
+    public void deleteAfterCommit(String storagePath) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            delete(storagePath);
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                delete(storagePath);
+            }
+        });
     }
 
     /** Đường dẫn công khai để trình duyệt hiển thị ảnh. */
