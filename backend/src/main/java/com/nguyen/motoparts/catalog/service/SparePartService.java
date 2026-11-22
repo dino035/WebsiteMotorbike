@@ -55,7 +55,7 @@ public class SparePartService {
         }
 
         ruleRepository.deleteBySparePart_ProductId(productId);
-        part.getPhotos().forEach(p -> photoStorage.delete(p.getStoragePath()));
+        part.getPhotos().forEach(p -> photoStorage.deleteAfterCommit(p.getStoragePath()));
         sparePartRepository.delete(part);
     }
 
@@ -103,7 +103,7 @@ public class SparePartService {
         }
 
         part.removePhoto(photo);
-        photoStorage.delete(photo.getStoragePath());
+        photoStorage.deleteAfterCommit(photo.getStoragePath());
 
         return ProductDetailResponse.from(part);
     }

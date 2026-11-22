@@ -68,7 +68,7 @@ public class MotorbikeService {
                             + "Bạn có thể đổi tình trạng sang Hết hàng.");
         }
 
-        bike.getPhotos().forEach(p -> photoStorage.delete(p.getStoragePath()));
+        bike.getPhotos().forEach(p -> photoStorage.deleteAfterCommit(p.getStoragePath()));
         motorbikeRepository.delete(bike);
     }
 
@@ -137,7 +137,7 @@ public class MotorbikeService {
         }
 
         bike.removePhoto(photo);
-        photoStorage.delete(photo.getStoragePath());
+        photoStorage.deleteAfterCommit(photo.getStoragePath());
 
         return ProductDetailResponse.from(bike);
     }
