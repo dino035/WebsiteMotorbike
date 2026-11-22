@@ -12,9 +12,12 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -83,6 +86,22 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Map<String, String>> handleUnreadable(HttpMessageNotReadableException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "Nội dung gửi lên không hợp lệ."));
+    }
+
+    /**
+     * Query string sai kiểu (?status=ABC, ?page=abc) là lỗi của người gọi → 400 thay vì 500.
+     * Class này không cài ErrorResponse nên nhánh instanceof ở handleGeneral không bắt được.
+     * Chỉ nêu tên tham số, không trả lại giá trị người dùng gửi lên (React đổ message thẳng vào DOM).
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<Map<String, String>> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String message = "Giá trị của tham số '" + ex.getName() + "' không hợp lệ.";
+        Class<?> type = ex.getRequiredType();
+        if (type != null && type.isEnum()) {
+            message += " Giá trị hợp lệ: " + Arrays.stream(type.getEnumConstants())
+                    .map(Object::toString).collect(Collectors.joining(", ")) + ".";
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", message));
     }
 
     @ExceptionHandler(Exception.class)
