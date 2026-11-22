@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import {useEffect, useState} from 'react';
+import {Link, useParams} from 'react-router-dom';
 import client from '../api/client';
 import AddToCartButton from '../components/AddToCartButton.jsx';
+import ProductReviews from '../components/ProductReviews.jsx';
 import './ProductDetailPage.css';
 
-const priceFormat = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' });
+const priceFormat = new Intl.NumberFormat('vi-VN', {style: 'currency', currency: 'VND'});
 const numberFormat = new Intl.NumberFormat('vi-VN');
 
 export default function ProductDetailPage() {
-    const { id } = useParams();
-    const [result, setResult] = useState({ id: null, product: null, error: '' });
+    const {id} = useParams();
+    const [result, setResult] = useState({id: null, product: null, error: ''});
 
     useEffect(() => {
         let ignore = false;
@@ -17,14 +18,14 @@ export default function ProductDetailPage() {
         client
             .get(`/products/${encodeURIComponent(id)}`)
             .then((res) => {
-                if (!ignore) setResult({ id, product: res.data, error: '' });
+                if (!ignore) setResult({id, product: res.data, error: ''});
             })
             .catch((err) => {
                 if (ignore) return;
                 const message = err.response?.status === 404
                     ? 'Không tìm thấy sản phẩm này.'
                     : 'Không tải được sản phẩm. Kiểm tra backend đã chạy chưa.';
-                setResult({ id, product: null, error: message });
+                setResult({id, product: null, error: message});
             });
 
         return () => {
@@ -45,42 +46,46 @@ export default function ProductDetailPage() {
             )}
 
             {!loading && product && (
-                <div className="product-detail__layout">
-                    <PhotoGallery key={product.productId} photos={product.photos} name={product.name} />
+                <>
+                    <div className="product-detail__layout">
+                        <PhotoGallery key={product.productId} photos={product.photos} name={product.name}/>
 
-                    <div className="product-detail__info">
-                        <span className="product-detail__type">{product.productType}</span>
-                        <h1>{product.name}</h1>
-                        <p className="product-detail__summary">{product.detail}</p>
+                        <div className="product-detail__info">
+                            <span className="product-detail__type">{product.productType}</span>
+                            <h1>{product.name}</h1>
+                            <p className="product-detail__summary">{product.detail}</p>
 
-                        <div className="product-detail__price-row">
-                            <strong className="product-detail__price">{priceFormat.format(product.price)}</strong>
-                            <span className={product.status === 'SOLD' ? 'badge badge--sold' : 'badge badge--available'}>
+                            <div className="product-detail__price-row">
+                                <strong className="product-detail__price">{priceFormat.format(product.price)}</strong>
+                                <span
+                                    className={product.status === 'SOLD' ? 'badge badge--sold' : 'badge badge--available'}>
                 {product.statusLabel}
               </span>
+                            </div>
+
+                            <AddToCartButton key={product.productId} product={product}/>
+
+                            <h2>Thông số</h2>
+                            <table className="spec-table">
+                                <tbody>
+                                {buildSpecs(product).map(([label, value]) => (
+                                    <tr key={label}>
+                                        <th>{label}</th>
+                                        <td>{value ?? '—'}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
                         </div>
-
-                        <AddToCartButton key={product.productId} product={product} />
-
-                        <h2>Thông số</h2>
-                        <table className="spec-table">
-                            <tbody>
-                            {buildSpecs(product).map(([label, value]) => (
-                                <tr key={label}>
-                                    <th>{label}</th>
-                                    <td>{value ?? '—'}</td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
                     </div>
-                </div>
+                    <ProductReviews key={product.productId} productId={product.productId}/>
+                </>
             )}
         </section>
     );
 }
 
-function PhotoGallery({ photos, name }) {
+function PhotoGallery({photos, name}) {
     const [selected, setSelected] = useState(0);
 
     if (photos.length === 0) {
@@ -91,7 +96,7 @@ function PhotoGallery({ photos, name }) {
 
     return (
         <div className="gallery">
-            <img className="gallery__main" src={current.imageUrl} alt={current.caption || name} />
+            <img className="gallery__main" src={current.imageUrl} alt={current.caption || name}/>
             {photos.length > 1 && (
                 <div className="gallery__thumbs">
                     {photos.map((photo, index) => (
@@ -101,7 +106,7 @@ function PhotoGallery({ photos, name }) {
                             className={index === selected ? 'gallery__thumb gallery__thumb--active' : 'gallery__thumb'}
                             onClick={() => setSelected(index)}
                         >
-                            <img src={photo.imageUrl} alt={photo.caption || `${name} ${index + 1}`} />
+                            <img src={photo.imageUrl} alt={photo.caption || `${name} ${index + 1}`}/>
                         </button>
                     ))}
                 </div>
