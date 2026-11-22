@@ -1,284 +1,207 @@
-.ap-page {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 24px 16px 64px;
-}
+/* Trang quản lý sản phẩm của Admin: danh sách, biểu mẫu thêm/sửa, ảnh, đánh giá tình trạng.
+   Trước đây file này dùng bảng màu xanh lam riêng (#1d4ed8, #cbd5e1, #f8fafc) nên trông như
+   một website khác ghép vào. Nay dùng chung biến với mọi trang. */
+
+/* .content ở index.css đã giới hạn bề ngang 1200px và căn giữa rồi,
+   nên ở đây không đặt max-width/margin nữa, tránh lồng hai lớp khung. */
+.ap-page { padding-bottom: var(--s-6); }
 
 .ap-header {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: var(--s-3);
+    margin-bottom: var(--s-5);
 }
+.ap-header h1 { margin: 0; font-size: var(--fs-xl); }
+.ap-header h1::after { display: none; }   /* gạch đỏ của h1 không hợp khi tiêu đề nằm cùng hàng với nút */
 
-.ap-header h1 {
-    margin: 0;
-    font-size: 24px;
-}
+.ap-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); }
 
-.ap-actions {
-    display: flex;
-    gap: 8px;
-}
-
-/* ----- nút ----- */
+/* ----- Nút ----- */
+/* .ap-btn dùng cho cả <a> lẫn <button> nên phải tự khai báo đủ, không dựa vào quy tắc button chung */
 .ap-btn {
     display: inline-block;
-    padding: 8px 14px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    padding: 9px 20px;
+    border: 0;
+    border-radius: var(--r-full);
     background: #fff;
-    color: #0f172a;
-    font-size: 14px;
+    box-shadow: inset 0 0 0 1.5px var(--c-border-strong);
+    color: var(--c-text);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    line-height: normal;
     text-decoration: none;
+    white-space: nowrap;
     cursor: pointer;
+    transition: background .15s, color .15s, box-shadow .15s;
 }
-
-.ap-btn:hover {
-    background: #f1f5f9;
-}
-
-.ap-btn:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-}
+.ap-btn:hover:not(:disabled) { background: var(--c-surface-2); color: var(--c-text); }
+.ap-btn:disabled { opacity: .45; cursor: default; }
 
 .ap-btn-primary {
-    background: #1d4ed8;
-    border-color: #1d4ed8;
+    background: var(--c-text);
+    box-shadow: none;
     color: #fff;
 }
-
-.ap-btn-primary:hover {
-    background: #1e40af;
-}
+.ap-btn-primary:hover:not(:disabled) { background: var(--c-brand); color: #fff; }
 
 .ap-btn-danger {
     background: #fff;
-    border-color: #fca5a5;
-    color: #b91c1c;
+    box-shadow: inset 0 0 0 1.5px var(--c-brand);
+    color: var(--c-brand);
 }
+.ap-btn-danger:hover:not(:disabled) { background: var(--c-brand); color: #fff; }
 
-.ap-btn-danger:hover {
-    background: #fef2f2;
-}
-
-/* ----- thông báo ----- */
-.ap-error {
-    padding: 10px 12px;
-    border: 1px solid #fca5a5;
-    border-radius: 6px;
-    background: #fef2f2;
-    color: #b91c1c;
-}
-
+/* ----- Thông báo ----- */
+.ap-error,
 .ap-success {
-    padding: 10px 12px;
-    border: 1px solid #86efac;
-    border-radius: 6px;
-    background: #f0fdf4;
-    color: #15803d;
+    margin-bottom: var(--s-4);
+    padding: var(--s-3) var(--s-4);
+    border-left: 3px solid;
+    font-size: var(--fs-sm);
 }
+.ap-error { border-color: var(--c-danger); background: var(--c-danger-soft); color: var(--c-danger); }
+.ap-success { border-color: var(--c-ok); background: var(--c-ok-soft); color: var(--c-ok); }
 
-.ap-muted {
-    color: #64748b;
-}
+.ap-muted { color: var(--c-text-2); }
+.ap-hint { margin: var(--s-1) 0 var(--s-3); font-size: var(--fs-sm); color: var(--c-text-2); }
 
-.ap-hint {
-    margin: 4px 0 12px;
-    font-size: 13px;
-    color: #64748b;
-}
-
-/* ----- lọc ----- */
+/* ----- Lọc ----- */
 .ap-filter {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 16px;
+    gap: var(--s-2);
+    margin-bottom: var(--s-4);
+    padding: var(--s-3) var(--s-4);
+    background: var(--c-surface-2);
+}
+.ap-filter label { font-size: var(--fs-sm); font-weight: 600; color: var(--c-text-2); }
+.ap-filter select {
+    height: 38px;
+    padding: 0 var(--s-3);
+    line-height: normal;   /* không để line-height 1.55 cắt mất dấu của chữ tiếng Việt */
 }
 
-.ap-filter label {
-    font-size: 14px;
-    color: #334155;
-}
-
-/* ----- bảng ----- */
-.ap-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-}
-
-.ap-table th,
-.ap-table td {
-    padding: 10px 8px;
-    border-bottom: 1px solid #e2e8f0;
-    text-align: left;
-    vertical-align: middle;
-}
-
-.ap-table th {
-    background: #f8fafc;
-    font-weight: 600;
-}
+/* ----- Bảng ----- */
+/* Quy tắc table ở index.css đã lo phần lớn: tiêu đề in hoa, gạch đậm dưới hàng đầu, rê chuột đổi nền */
+.ap-table { font-size: var(--fs-sm); }
+.ap-table td { padding: var(--s-3) var(--s-2); }
+.ap-table th { padding: var(--s-3) var(--s-2); }
 
 .ap-thumb {
-    width: 56px;
-    height: 42px;
+    display: block;
+    width: 64px;
+    height: 48px;
     object-fit: cover;
-    border-radius: 4px;
+    background: var(--c-surface-2);
 }
+.ap-no-thumb { color: var(--c-text-3); font-size: var(--fs-xs); }
 
-.ap-no-thumb {
-    color: #cbd5e1;
-}
+.ap-row-actions { display: flex; gap: var(--s-2); white-space: nowrap; }
+/* Nút trong hàng bảng nhỏ lại cho vừa chiều cao dòng */
+.ap-row-actions .ap-btn { padding: 5px 14px; font-size: var(--fs-xs); }
 
-.ap-row-actions {
-    display: flex;
-    gap: 6px;
-    white-space: nowrap;
-}
-
-/* ----- phân trang ----- */
+/* ----- Phân trang ----- */
 .ap-paging {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-top: 16px;
+    gap: var(--s-3);
+    margin-top: var(--s-5);
+    font-size: var(--fs-sm);
+    color: var(--c-text-2);
 }
-
 .ap-paging button {
-    padding: 6px 12px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    padding: 7px 18px;
+    border-radius: var(--r-full);
     background: #fff;
-    cursor: pointer;
+    box-shadow: inset 0 0 0 1.5px var(--c-border-strong);
+    color: var(--c-text);
+    font-size: var(--fs-sm);
 }
+.ap-paging button:hover:not(:disabled) { background: var(--c-surface-2); color: var(--c-text); }
 
-.ap-paging button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* ----- form ----- */
+/* ----- Biểu mẫu ----- */
 .ap-form {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: var(--s-4);
     max-width: 760px;
+    padding: var(--s-5);
+    background: var(--c-surface-2);
 }
 
-.ap-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-}
+.ap-row { display: flex; flex-wrap: wrap; gap: var(--s-4); }
+.ap-row .ap-field { flex: 1 1 180px; }
 
-.ap-row .ap-field {
-    flex: 1 1 180px;
-}
-
-.ap-field {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
+.ap-field { display: flex; flex-direction: column; gap: var(--s-1); }
 .ap-field label {
-    font-size: 14px;
-    font-weight: 500;
-    color: #334155;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--c-text-2);
 }
-
 .ap-field input,
-.ap-field select,
-.ap-field textarea {
-    padding: 8px 10px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font: inherit;
-}
+.ap-field select { height: 42px; padding: 0 var(--s-4); line-height: normal; }
+.ap-field textarea { padding: var(--s-3) var(--s-4); resize: vertical; }
 
-.ap-field textarea {
-    resize: vertical;
-}
-
-/* ----- khối phụ (đánh giá, ảnh) ----- */
+/* ----- Khối phụ: đánh giá tình trạng, ảnh ----- */
 .ap-section {
-    margin-top: 32px;
-    padding-top: 20px;
-    border-top: 1px solid #e2e8f0;
+    margin-top: var(--s-7);
+    padding-top: var(--s-5);
+    border-top: 2px solid var(--c-text);
 }
-
-.ap-section h2 {
-    margin: 0 0 12px;
-    font-size: 19px;
-}
+.ap-section h2 { margin: 0 0 var(--s-3); font-size: var(--fs-lg); }
 
 .ap-verdict {
-    padding: 12px 14px;
-    border: 1px solid #bfdbfe;
-    border-radius: 6px;
-    background: #eff6ff;
-    margin-bottom: 16px;
+    margin-bottom: var(--s-4);
+    padding: var(--s-4);
+    border-left: 3px solid var(--c-text);
+    background: var(--c-surface-2);
 }
+.ap-verdict p { margin: 0 0 var(--s-2); font-weight: 600; }
+.ap-verdict ul { margin: 0; padding-left: var(--s-5); font-size: var(--fs-sm); color: var(--c-text-2); }
 
-.ap-verdict p {
-    margin: 0 0 6px;
-}
-
-.ap-verdict ul {
-    margin: 0;
-    padding-left: 20px;
-    color: #334155;
-    font-size: 14px;
-}
-
-/* ----- ảnh ----- */
+/* ----- Ảnh ----- */
 .ap-upload {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 10px;
+    gap: var(--s-2);
+    margin-bottom: var(--s-4);
 }
-
 .ap-upload input[type='text'] {
     flex: 1 1 220px;
-    padding: 8px 10px;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font: inherit;
+    height: 42px;
+    padding: 0 var(--s-4);
+    line-height: normal;
 }
 
 .ap-photo-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 14px;
-    list-style: none;
+    gap: var(--s-4);
     margin: 0;
     padding: 0;
+    list-style: none;
 }
-
 .ap-photo-list li {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--s-2);
     width: 180px;
 }
-
 .ap-photo-list img {
     width: 180px;
     height: 135px;
     object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
+    background: var(--c-surface-2);
+    border: 1px solid var(--c-border);
 }
-
 .ap-photo-list span {
-    font-size: 13px;
-    color: #64748b;
     min-height: 18px;
+    font-size: var(--fs-sm);
+    color: var(--c-text-2);
 }
