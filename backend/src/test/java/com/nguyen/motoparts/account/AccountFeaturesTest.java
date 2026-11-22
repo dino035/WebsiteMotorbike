@@ -7,6 +7,7 @@ import com.nguyen.motoparts.account.entity.PasswordResetToken;
 import com.nguyen.motoparts.account.repository.AccountLockRepository;
 import com.nguyen.motoparts.account.repository.PasswordResetTokenRepository;
 import com.nguyen.motoparts.account.repository.UserRepository;
+import com.nguyen.motoparts.auth.PasswordResetMail;
 import com.nguyen.motoparts.common.enums.OrderStatus;
 import com.nguyen.motoparts.common.exception.EmailSendException;
 import com.nguyen.motoparts.mail.EmailService;
@@ -19,10 +20,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -35,9 +39,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.after;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -80,6 +87,8 @@ class AccountFeaturesTest {
     @Autowired PasswordResetTokenRepository tokenRepository;
     @Autowired OrderRepository orderRepository;
     @MockBean EmailService emailService;
+    @Autowired ApplicationEventPublisher events;
+    @Autowired PlatformTransactionManager transactionManager;
 
     // ---------------------------------------------------------------- helpers
 
@@ -129,7 +138,7 @@ class AccountFeaturesTest {
         reset(emailService);
         mvcForgot(email);
         ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
-        verify(emailService).send(eq(email), anyString(), bodyCaptor.capture());
+        verify(emailService, timeout(5000)).send(eq(email), anyString(), bodyCaptor.capture());   // email gửi ở luồng khác
         Matcher m = TOKEN_IN_MAIL.matcher(bodyCaptor.getValue());
         assertTrue(m.find(), "email phải chứa liên kết đặt lại mật khẩu");
         return m.group(1);
@@ -167,8 +176,9 @@ class AccountFeaturesTest {
                 .andReturn().getResponse().getContentAsString();
 
         assertEquals(a, b, "không để lộ email nào đã đăng ký");
-        verify(emailService, times(1)).send(eq(known), anyString(), anyString());
-        verify(emailService, times(1)).send(anyString(), anyString(), anyString());
+        // email gửi ở luồng khác: chờ nó tới rồi mới kết luận "chỉ có một email, gửi cho người có tài khoản"
+        verify(emailService, timeout(5000)).send(eq(known), anyString(), anyString());
+        verify(emailService, after(500).times(1)).send(anyString(), anyString(), anyString());
     }
 
     @Test
@@ -264,23 +274,68 @@ class AccountFeaturesTest {
         for (int i = 0; i < 7; i++) {
             mvcForgot(email);
         }
-        verify(emailService, times(5)).send(eq(email), anyString(), anyString());
+        verify(emailService, after(1000).times(5)).send(eq(email), anyString(), anyString());   // đủ 5, không hơn
     }
 
     @Test
-    void mailFailureReturns503AndLeavesNoToken() throws Exception {
-        String email = email("mailfail");
-        register(email);
+    void mailFailureDoesNotChangeTheAnswerAndTheTokenStaysInTheDatabase() throws Exception {
+        String known = email("mailfail");
+        register(known);
         reset(emailService);
-        doThrow(new EmailSendException("loi gia lap", null)).when(emailService).send(eq(email), anyString(), anyString());
+        doThrow(new EmailSendException("loi gia lap", null)).when(emailService).send(eq(known), anyString(), anyString());
 
+        String failing = mvc.perform(post("/api/auth/forgot-password").contentType(MediaType.APPLICATION_JSON)
+                        .content(body(Map.of("email", known)))).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String unknown = mvc.perform(post("/api/auth/forgot-password").contentType(MediaType.APPLICATION_JSON)
+                        .content(body(Map.of("email", email("nobody"))))).andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        verify(emailService, timeout(5000)).send(eq(known), anyString(), anyString());   // đã thử gửi và bị lỗi
+        assertEquals(unknown, failing, "gửi lỗi cũng không để lộ email này có tài khoản (không còn 503 riêng)");
+        String accountId = accountId(known);
+        assertEquals(1, tokenRepository.findAll().stream().filter(t -> accountId.equals(t.getAccountId())).count(),
+                "mã đã commit trước khi gửi nên vẫn nằm trong DB (vô hại: hết hạn và không ai biết)");
+    }
+
+    @Test
+    void forgotPasswordDoesNotWaitForTheMailToBeSent() throws Exception {
+        String known = email("slowmail");
+        register(known);
+        reset(emailService);
+        doAnswer(inv -> {
+            Thread.sleep(3000);   // một dịch vụ email chậm
+            return null;
+        }).when(emailService).send(eq(known), anyString(), anyString());
+
+        long start = System.nanoTime();
         mvc.perform(post("/api/auth/forgot-password").contentType(MediaType.APPLICATION_JSON)
-                        .content(body(Map.of("email", email))))
-                .andExpect(status().isServiceUnavailable());
+                .content(body(Map.of("email", known)))).andExpect(status().isOk());
+        long millis = (System.nanoTime() - start) / 1_000_000;
 
-        String accountId = accountId(email);
-        assertEquals(0, tokenRepository.findAll().stream().filter(t -> accountId.equals(t.getAccountId())).count(),
-                "gửi email lỗi thì mã vừa tạo không được lưu");
+        assertTrue(millis < 2000, "phản hồi không được chờ email (3 giây), thực tế " + millis + " ms");
+        verify(emailService, timeout(5000)).send(eq(known), anyString(), anyString());
+    }
+
+    @Test
+    void theMailGoesOutOnlyAfterTheTransactionCommits() throws Exception {
+        TransactionTemplate tx = new TransactionTemplate(transactionManager);
+        String committed = email("commit");
+        String rolledBack = email("rollback");
+        reset(emailService);
+
+        tx.executeWithoutResult(status -> {
+            events.publishEvent(new PasswordResetMail(committed, "chu de", "noi dung"));
+            // giao dịch còn mở: mã chưa chắc đã lưu nên email chưa được đi
+            verify(emailService, after(500).never()).send(eq(committed), anyString(), anyString());
+        });
+        verify(emailService, timeout(5000)).send(eq(committed), anyString(), anyString());   // commit xong thì mới đi
+
+        tx.executeWithoutResult(status -> {
+            events.publishEvent(new PasswordResetMail(rolledBack, "chu de", "noi dung"));
+            status.setRollbackOnly();
+        });
+        verify(emailService, after(500).never()).send(eq(rolledBack), anyString(), anyString());   // rollback thì không đi
     }
 
     // ----------------------------------------------------- admin khóa tài khoản
