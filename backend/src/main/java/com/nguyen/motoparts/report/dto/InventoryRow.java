@@ -1,4 +1,5 @@
 package com.nguyen.motoparts.report.dto;
 
-public record InventoryRow(String typeLabel, String statusLabel, long count) {
-}
+import java.math.BigDecimal;
+
+public record InventoryRow(String typeLabel, String statusLabel, long count, BigDecimal totalValue) {}

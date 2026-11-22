@@ -4,12 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public record SalesReportResponse(
-        LocalDate from,
-        LocalDate to,
-        long orderCount,
-        BigDecimal totalRevenue,
-        List<DailyRevenueRow> daily,
-        List<TopProductRow> topProducts,
-        List<InventoryRow> inventory) {
-}
+public record SalesReportResponse(LocalDate from, LocalDate to, long orderCount, BigDecimal totalRevenue,
+                                  BigDecimal averageOrderValue, List<DailyRevenueRow> daily,
+                                  List<OrderStatusRow> ordersByStatus, List<TopProductRow> topProducts,
+                                  List<InventoryRow> inventory) {}
