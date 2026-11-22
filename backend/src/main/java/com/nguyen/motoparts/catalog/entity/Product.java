@@ -1,5 +1,6 @@
 package com.nguyen.motoparts.catalog.entity;
 
+import com.nguyen.motoparts.common.entity.BaseEntity;
 import com.nguyen.motoparts.common.enums.ProductStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,7 +18,7 @@ import java.math.BigDecimal;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
-public abstract class Product {
+public abstract class Product extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
