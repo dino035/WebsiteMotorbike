@@ -14,6 +14,10 @@ import java.util.Optional;
 public interface OrderItemRepository extends JpaRepository<OrderItem, String> {
     boolean existsByProductId(String productId);
 
+    /** Khách đã mua sản phẩm này trong một đơn có trạng thái cho trước (dùng cho Verified Purchase). */
+    boolean existsByProductIdAndOrder_AccountIdAndOrder_Status(
+            String productId, String accountId, OrderStatus status);
+
     /** Các sản phẩm khách đã mua trong đơn có trạng thái này (thường là Hoàn thành), mới nhất trước. */
     @Query("select i from OrderItem i join fetch i.order o "
             + "where o.accountId = :accountId and o.status = :status order by o.orderDate desc, i.productName")

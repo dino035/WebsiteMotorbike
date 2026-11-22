@@ -49,3 +49,5 @@ src/main/resources/vnpay.properties
 backend/target/
 frontend/node_modules/
 .env
+
+**/http-client.private.env.json
