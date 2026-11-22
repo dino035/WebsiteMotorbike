@@ -117,7 +117,7 @@ Không cần đăng nhập:
 |---|---|---|
 | POST | `/api/auth/forgot-password` `{email}` | Gửi liên kết đặt lại mật khẩu. Luôn trả cùng một thông báo, dù email có tài khoản hay không |
 | POST | `/api/auth/reset-password/validate` `{token}` | `{valid: true/false}`: React gọi khi mở trang để báo liên kết hết hạn sớm |
-| POST | `/api/auth/reset-password` `{token, password, confirmPassword}` | Đặt mật khẩu mới (8 đến 72 ký tự). Mã chỉ dùng một lần |
+| POST | `/api/auth/reset-password` `{token, password, confirmPassword}` | Đặt mật khẩu mới (tối thiểu 8 ký tự, tối đa 72 byte). Mã chỉ dùng một lần |
 
 Liên kết trong email có dạng `FRONTEND_URL/reset-password?token=...`, hết hạn sau 30 phút, mỗi tài khoản tối đa 5 yêu cầu mỗi giờ.
 Chỉ lưu SHA-256 của mã trong CSDL. Yêu cầu mới thay thế mã cũ chưa dùng.

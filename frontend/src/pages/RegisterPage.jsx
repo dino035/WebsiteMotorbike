@@ -21,7 +21,7 @@ export default function RegisterPage() {
 
     function validate() {
         const errors = {}
-        if (form.password.length < 8) errors.password = 'Mật khẩu phải từ 8 đến 72 ký tự.'
+        if (form.password.length < 8) errors.password = 'Mật khẩu phải có ít nhất 8 ký tự.'
         if (form.confirm !== form.password) errors.confirm = 'Mật khẩu nhập lại không khớp.'
         if (form.phone && !/^0\d{9}$/.test(form.phone.trim())) {
             errors.phone = 'Số điện thoại phải gồm 10 chữ số, bắt đầu bằng 0.'

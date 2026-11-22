@@ -106,10 +106,11 @@ public class PasswordResetService {
     /**
      * Đặt mật khẩu mới. Mã dùng được một lần: xong thì mã này và mọi mã còn lại của tài khoản bị vô hiệu.
      *
-     * @throws BadRequestException mã không hợp lệ, đã dùng hoặc hết hạn
+     * @throws BadRequestException mã không hợp lệ, đã dùng hoặc hết hạn, hoặc mật khẩu dài quá 72 byte
      */
     @Transactional
     public void resetPassword(String rawToken, String newPassword) {
+        PasswordPolicy.requireFitsBcrypt(newPassword);   // trước khi đụng tới mã: mật khẩu quá dài không làm mất mã
         LocalDateTime now = LocalDateTime.now();
         PasswordResetToken token = rawToken == null ? null
                 : tokenRepository.findUsableForUpdate(hash(rawToken.trim()), now).orElse(null);
