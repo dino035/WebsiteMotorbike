@@ -140,7 +140,6 @@ public class OrderService {
         order.setOrderDate(now);
 
         // 3) Khóa và kiểm tra từng sản phẩm, theo thứ tự mã sản phẩm
-        BigDecimal total = BigDecimal.ZERO;
         boolean hasSparePart = false;
         List<CartItem> ordered = cartItems.stream().sorted(Comparator.comparing(CartItem::getProductId)).toList();
         for (CartItem item : ordered) {
@@ -167,7 +166,6 @@ public class OrderService {
             line.setUnitPrice(product.getPrice() == null ? BigDecimal.ZERO : product.getPrice());
             line.setQuantity(item.getQuantity());
             order.addItem(line);
-            total = total.add(line.getLineTotal());
         }
 
         // 4) Lắp đặt tại cửa hàng: chỉ cho đơn có phụ tùng, ngày hẹn còn chỗ; phí công cộng vào tổng đơn
@@ -187,9 +185,9 @@ public class OrderService {
             installation.setStatus(InstallationStatus.SCHEDULED);
             installation.setCreatedAt(now);
             order.attachInstallation(installation);
-            total = total.add(InstallationPolicy.LABOR_FEE);
         }
-        order.setTotalAmount(total);
+        order.recalculateTotal();   // một công thức duy nhất: các dòng hàng + phí công của lịch lắp đặt còn hiệu lực
+        BigDecimal total = order.getTotalAmount();
         orderRepository.save(order);
 
         // 5) Thanh toán (COD: chờ Admin xác nhận đã thu tiền; VNPay: khách bấm trả tiền ở bước sau), xóa giỏ, thông báo
