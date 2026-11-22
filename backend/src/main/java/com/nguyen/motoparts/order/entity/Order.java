@@ -2,6 +2,7 @@ package com.nguyen.motoparts.order.entity;
 
 import com.nguyen.motoparts.common.entity.BaseEntity;
 import com.nguyen.motoparts.common.enums.DeliveryMethod;
+import com.nguyen.motoparts.common.enums.InstallationStatus;
 import com.nguyen.motoparts.common.enums.OrderStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -67,6 +68,20 @@ public class Order extends BaseEntity {
     public void attachInstallation(InstallationRequest request) {
         this.installationRequest = request;
         request.setOrder(this);
+    }
+
+    /**
+     * Tính lại totalAmount từ các thành phần: tổng các dòng hàng, cộng phí công của lịch lắp đặt nếu lịch đó chưa hủy.
+     * Đây là chỗ DUY NHẤT ghi totalAmount sau khi đặt hàng: tổng luôn bằng tổng các thành phần của nó, chạy lại bao nhiêu
+     * lần cũng ra cùng kết quả, và đổi mức phí công sau này thì đơn cũ vẫn giữ đúng số phí đã lưu trong lịch của nó.
+     */
+    public void recalculateTotal() {
+        BigDecimal sum = items.stream().map(OrderItem::getLineTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (installationRequest != null && installationRequest.getLaborFee() != null
+                && installationRequest.getStatus() != InstallationStatus.CANCELLED) {
+            sum = sum.add(installationRequest.getLaborFee());
+        }
+        this.totalAmount = sum;
     }
 
     /** Mã ngắn hiển thị cho khách (8 ký tự đầu của UUID). */

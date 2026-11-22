@@ -27,6 +27,13 @@ public interface InstallationRequestRepository extends JpaRepository<Installatio
     @Query("select r from InstallationRequest r where r.requestId = :requestId")
     Optional<InstallationRequest> findForUpdate(@Param("requestId") String requestId);
 
+    /**
+     * Chỉ lấy mã đơn của một lịch (không nạp cả bản ghi) để khóa dòng đơn trước rồi mới đọc lại lịch: đọc sau khóa thì
+     * luôn thấy trạng thái mới nhất, không bị bản cũ trong bộ nhớ đệm của phiên làm việc.
+     */
+    @Query("select r.order.orderId from InstallationRequest r where r.requestId = :requestId")
+    Optional<String> findOrderIdByRequestId(@Param("requestId") String requestId);
+
     /** Số lịch còn hiệu lực (khác trạng thái) trong một ngày, dùng giới hạn số lượt mỗi ngày. */
     long countByPreferredDateAndStatusNot(LocalDate preferredDate, InstallationStatus status);
 
