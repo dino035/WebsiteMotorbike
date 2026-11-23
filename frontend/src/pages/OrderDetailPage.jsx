@@ -110,7 +110,8 @@ export default function OrderDetailPage() {
                                             <td>{formatPrice(i.lineTotal)}</td>
                                         </tr>
                                     ))}
-                                    {o.installation && (
+                                    {/* Lịch đã hủy thì phí công không còn nằm trong tổng, nên không liệt kê để các dòng cộng ra đúng tổng. */}
+                                    {o.installation && o.installation.status !== 'CANCELLED' && (
                                         <tr>
                                             <td colSpan="3">Phí công lắp đặt</td>
                                             <td>{formatPrice(o.installation.laborFee)}</td>
