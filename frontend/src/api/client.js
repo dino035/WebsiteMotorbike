@@ -9,10 +9,10 @@ export const TOKEN_KEY = 'motoparts.token'
  * Để timeout 15 giây như trước thì lần đầu vào trang luôn báo "Không kết nối được máy chủ"
  * dù backend vẫn tốt, chỉ là đang dậy.
  *
- * Nhưng để 120 giây cho mọi lời gọi cũng sai: lúc mạng hỏng thật, người dùng ngồi chờ hai phút
+ * Nhưng để 4 phút cho mọi lời gọi cũng sai: lúc mạng hỏng thật, người dùng ngồi chờ hai phút
  * mới biết. Nên chia làm hai mức.
  */
-const WAKE_TIMEOUT = 120000   // lần đầu trong phiên: máy chủ có thể đang ngủ
+const WAKE_TIMEOUT = 240000   // lần đầu trong phiên: máy chủ có thể đang ngủ
 const NORMAL_TIMEOUT = 20000  // đã có phản hồi: máy chủ tỉnh, chờ lâu nghĩa là hỏng thật
 
 let serverAwake = false
