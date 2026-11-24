@@ -80,7 +80,7 @@ const RULES = [
     // Ắc quy
     { part: 'Globe WP5S', xe: XE_GA },
     {
-        part: 'GS 12V-5Ah', xe: [['Honda', 'Air Blade'], ['Honda', 'Vision'], ['Honda', 'SH'],
+        part: 'GTZ6V', xe: [['Honda', 'Air Blade'], ['Honda', 'Vision'], ['Honda', 'SH'],
             ['Honda', 'SH Mode'], ['Honda', 'Vario'], ['Yamaha', 'Janus']],
     },
     {
@@ -97,8 +97,6 @@ const RULES = [
     { part: 'Pilot Street', xe: [...XE_SO, ...CON_TAY] },
 
     // Má phanh
-    { part: 'Má phanh đĩa phổ thông', xe: MOI_XE },
-    { part: 'Má phanh trước Honda Vision', xe: [['Honda', 'Vision']] },
     {
         part: 'Nissin', xe: [['Honda', 'Air Blade'], ['Honda', 'Lead'], ['Honda', 'SH'],
             ['Honda', 'SH Mode'], ['Honda', 'Vario'], ['Honda', 'Vision'],
@@ -107,7 +105,7 @@ const RULES = [
     { part: 'Brembo', xe: CON_TAY },
 
     // Nhông sên dĩa
-    { part: 'nhông sên dĩa phổ thông', xe: XE_SO },
+    { part: 'Jomthai', xe: XE_SO },
     { part: 'DID cho Wave', xe: [['Honda', 'Wave Alpha'], ['Honda', 'Wave RSX']] },
     { part: 'Recto', xe: [...XE_SO, ...CON_TAY] },
 
@@ -121,9 +119,18 @@ const RULES = [
     { part: 'RBF 600', xe: CON_TAY },
 
     // Lọc gió
-    { part: 'Lọc gió xe số', xe: XE_SO },
-    { part: 'Lọc gió Honda Air Blade', xe: [['Honda', 'Air Blade']] },
-    { part: 'Lọc gió Honda Vision', xe: [['Honda', 'Vision'], ['Honda', 'Lead']] },
+    { part: 'Lọc gió xe số Honda', xe: [['Honda', 'Blade'], ['Honda', 'Future'],
+            ['Honda', 'Wave Alpha'], ['Honda', 'Wave RSX']] },
+    { part: 'Lọc gió xe ga Honda', xe: [['Honda', 'Air Blade'], ['Honda', 'Lead'], ['Honda', 'SH'],
+            ['Honda', 'SH Mode'], ['Honda', 'Vario'], ['Honda', 'Vision']] },
+    { part: 'Lọc gió Honda Winner X', xe: [['Honda', 'Winner X']] },
+    { part: 'Lọc gió xe số Yamaha', xe: [['Yamaha', 'Jupiter'], ['Yamaha', 'Sirius']] },
+    { part: 'Lọc gió xe ga Yamaha', xe: [['Yamaha', 'Grande'], ['Yamaha', 'Janus'],
+            ['Yamaha', 'Latte'], ['Yamaha', 'NVX']] },
+    { part: 'Lọc gió Yamaha Exciter', xe: [['Yamaha', 'Exciter']] },
+    { part: 'Lọc gió xe ga SYM', xe: [['SYM', 'Attila'], ['SYM', 'Elegant']] },
+    { part: 'Lọc gió xe ga Piaggio', xe: [['Piaggio', 'Liberty'], ['Piaggio', 'Vespa Sprint']] },
+    { part: 'Lọc gió xe côn tay Suzuki', xe: [['Suzuki', 'Raider'], ['Suzuki', 'Satria']] },
 ]
 
 // ---------------------------------------------------------------- tiện ích

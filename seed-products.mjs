@@ -49,25 +49,32 @@ const PRODUCTS = [
     { name: 'Lốp Michelin Pilot Street 70/90-17', price: 520000, partType: 'Lốp', partOrigin: 'AFTERMARKET' },
 
     // Phanh
-    { name: 'Má phanh đĩa phổ thông', price: 35000, partType: 'Phanh', partOrigin: 'AFTERMARKET' },
+    // Mức thấp của nhóm phanh bỏ trống: hàng rẻ trên thị trường không có thương hiệu
+    // rõ ràng, khai một cái tên chung chung thì không tra được nguồn gốc.
     { name: 'Má phanh đĩa Nissin', price: 150000, partType: 'Phanh', partOrigin: 'GENUINE' },
     { name: 'Má phanh đĩa Brembo', price: 450000, partType: 'Phanh', partOrigin: 'AFTERMARKET' },
 
     // Nhông xích
-    { name: 'Bộ nhông sên dĩa phổ thông', price: 150000, partType: 'Nhông xích', partOrigin: 'AFTERMARKET' },
+    { name: 'Bộ nhông sên dĩa Jomthai Asahi (Mặt Trời)', price: 150000, partType: 'Nhông xích', partOrigin: 'AFTERMARKET' },
     { name: 'Bộ nhông dĩa Recto + sên RK 428', price: 430000, partType: 'Nhông xích', partOrigin: 'AFTERMARKET' },
 
     // Nước làm mát
     { name: 'Nước làm mát Motul Motocool Expert', price: 165000, partType: 'Nước làm mát', partOrigin: 'AFTERMARKET' },
 
     // Dầu phanh
-    { name: 'Dầu phanh DOT 3 phổ thông', price: 45000, partType: 'Dầu phanh', partOrigin: 'AFTERMARKET' },
+    { name: 'Dầu phanh Castrol Brake Fluid DOT 3 1L', price: 45000, partType: 'Dầu phanh', partOrigin: 'AFTERMARKET' },
     { name: 'Dầu phanh Motul DOT 4', price: 120000, partType: 'Dầu phanh', partOrigin: 'AFTERMARKET' },
     { name: 'Dầu phanh Motul RBF 600', price: 350000, partType: 'Dầu phanh', partOrigin: 'AFTERMARKET' },
 
     // Lọc gió
-    { name: 'Lọc gió xe số Wave / Future', price: 60000, partType: 'Lọc gió', partOrigin: 'GENUINE' },
-    { name: 'Lọc gió Honda Vision / Lead chính hãng', price: 120000, partType: 'Lọc gió', partOrigin: 'GENUINE' },
+    { name: 'Lọc gió xe số Honda chính hãng', price: 60000, partType: 'Lọc gió', partOrigin: 'GENUINE' },
+    { name: 'Lọc gió Honda Winner X chính hãng', price: 110000, partType: 'Lọc gió', partOrigin: 'GENUINE' },
+    { name: 'Lọc gió xe số Yamaha chính hãng', price: 60000, partType: 'Lọc gió', partOrigin: 'GENUINE' },
+    { name: 'Lọc gió xe ga Yamaha chính hãng', price: 95000, partType: 'Lọc gió', partOrigin: 'GENUINE' },
+    { name: 'Lọc gió Yamaha Exciter chính hãng', price: 110000, partType: 'Lọc gió', partOrigin: 'GENUINE' },
+    { name: 'Lọc gió xe ga SYM chính hãng', price: 85000, partType: 'Lọc gió', partOrigin: 'GENUINE' },
+    { name: 'Lọc gió xe ga Piaggio chính hãng', price: 180000, partType: 'Lọc gió', partOrigin: 'GENUINE' },
+    { name: 'Lọc gió xe côn tay Suzuki chính hãng', price: 110000, partType: 'Lọc gió', partOrigin: 'GENUINE' },
 ]
 
 async function call(path, { method = 'GET', token, body } = {}) {
