@@ -51,3 +51,5 @@ frontend/node_modules/
 .env
 
 **/http-client.private.env.json
+
+anh-phu-tung/
