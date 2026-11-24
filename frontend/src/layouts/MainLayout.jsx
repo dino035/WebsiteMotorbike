@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import AccountMenu from '../components/AccountMenu.jsx'
 import ChatWidget from '../components/ChatWidget.jsx'
+import WakeNotice from '../components/WakeNotice.jsx'
 import useAuth from '../hooks/useAuth.js'
 import useCart from '../hooks/useCart.js'
 import useNotifications from '../hooks/useNotifications.js'
@@ -56,6 +57,9 @@ export default function MainLayout() {
                     )}
                 </nav>
             </header>
+
+            {/* Báo cho người dùng biết máy chủ đang khởi động, thay vì để màn hình đứng im */}
+            <WakeNotice />
 
             <main className="content">
                 <Outlet />
