@@ -4,13 +4,16 @@ export const TOKEN_KEY = 'motoparts.token'
 
 /*
  * Gói miễn phí của Render cho máy chủ ngủ sau 15 phút không ai gọi. Lần gọi kế tiếp phải chờ
- * máy chủ khởi động lại: dựng container, chạy Spring Boot, kết nối Supabase — mất khoảng 100 giây.
+ * máy chủ khởi động lại: dựng container, chạy Spring Boot, kết nối Supabase. Log Render đo được
+ * "Started MotoPartsApplication in 167.401 seconds".
  *
  * Để timeout 15 giây như trước thì lần đầu vào trang luôn báo "Không kết nối được máy chủ"
  * dù backend vẫn tốt, chỉ là đang dậy.
  *
- * Nhưng để 4 phút cho mọi lời gọi cũng sai: lúc mạng hỏng thật, người dùng ngồi chờ hai phút
+ * Nhưng để 4 phút cho mọi lời gọi cũng sai: lúc mạng hỏng thật, người dùng ngồi chờ bốn phút
  * mới biết. Nên chia làm hai mức.
+ *
+ * Con số 240 giây = 167 giây đo được, cộng thời gian dựng container và chừa biên dao động.
  */
 const WAKE_TIMEOUT = 240000   // lần đầu trong phiên: máy chủ có thể đang ngủ
 const NORMAL_TIMEOUT = 20000  // đã có phản hồi: máy chủ tỉnh, chờ lâu nghĩa là hỏng thật
@@ -28,7 +31,7 @@ function announce(waking) {
 
 const client = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
-    timeout: WAKE_TIMEOUT,
+    timeout: 0,   // interceptor bên dưới quyết định; 0 nghĩa là không đặt mặc định
 })
 
 // Gắn token đăng nhập vào mọi yêu cầu (nếu có). Các API công khai (xem sản phẩm) bỏ qua token.
@@ -40,7 +43,10 @@ client.interceptors.request.use((config) => {
         // trình duyệt chặn localStorage: coi như chưa đăng nhập
     }
 
-    config.timeout = serverAwake ? NORMAL_TIMEOUT : WAKE_TIMEOUT
+    // Lấy mức lớn hơn chứ không gán đè: nơi gọi có thể đã đặt thời gian chờ dài hơn
+    // vì biết việc của mình lâu (khung chat đặt 60 giây do trợ lý gọi Gemini hai lần).
+    const toiThieu = serverAwake ? NORMAL_TIMEOUT : WAKE_TIMEOUT
+    config.timeout = Math.max(config.timeout || 0, toiThieu)
     if (!serverAwake) announce(true)
 
     return config
