@@ -58,6 +58,7 @@
 .cart-line__name:hover { color: var(--c-brand); }
 .cart-line__unit { font-size: var(--fs-sm); color: var(--c-text-2); }
 .cart-line__hold { font-size: var(--fs-sm); color: var(--c-warn); }
+.cart-line__hold--expired { color: var(--c-text-3); }
 .cart-line__total { font-weight: 700; color: var(--c-brand); white-space: nowrap; }
 
 .cart-line__remove {
