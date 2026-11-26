@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import AccountMenu from '../components/AccountMenu.jsx'
 import ChatWidget from '../components/ChatWidget.jsx'
 import WakeNotice from '../components/WakeNotice.jsx'
@@ -24,6 +24,19 @@ export default function MainLayout() {
     // "Quản trị" phải sáng ở mọi trang /admin, không chỉ riêng /admin/orders
     const adminClass = pathname.startsWith('/admin') ? 'active' : undefined
 
+    /*
+     * Đăng xuất xong phải tự về trang chủ. Nếu chỉ xóa token mà đứng yên tại chỗ, RequireAuth sẽ đẩy
+     * sang /login kèm from là trang hiện tại, rồi người đăng nhập sau — có thể là tài khoản khác —
+     * bị ném thẳng vào đúng trang riêng tư đó. Ghi nhớ trang đang dở chỉ dành cho người bị chặn
+     * giữa chừng, không dành cho người chủ động đăng xuất.
+     *
+     * replace: true để trang cũ không nằm lại trong lịch sử, bấm Back không quay về được.
+     */
+    function handleLogout() {
+        logout()
+        window.location.assign('/')
+    }
+
     return (
         <div className="layout">
             <header className="header">
@@ -47,7 +60,7 @@ export default function MainLayout() {
                             email={user?.email}
                             unreadCount={unreadCount}
                             isAdmin={isAdmin}
-                            onLogout={logout}
+                            onLogout={handleLogout}
                         />
                     ) : (
                         <>
