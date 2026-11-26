@@ -4,6 +4,7 @@ import client from '../api/client.js'
 import useAuth from '../hooks/useAuth.js'
 import { apiError } from '../utils/apiError.js'
 import { formatDate, formatDateTime, formatPrice } from '../utils/format.js'
+import { totalIncludesLaborFee } from '../utils/orderTotal.js'
 import './OrderPages.css'
 
 /** Chi tiết một đơn: dòng hàng (giá chụp lúc đặt), người nhận, thanh toán, lịch lắp đặt. */
@@ -110,8 +111,7 @@ export default function OrderDetailPage() {
                                             <td>{formatPrice(i.lineTotal)}</td>
                                         </tr>
                                     ))}
-                                    {/* Lịch đã hủy thì phí công không còn nằm trong tổng, nên không liệt kê để các dòng cộng ra đúng tổng. */}
-                                    {o.installation && o.installation.status !== 'CANCELLED' && (
+                                    {totalIncludesLaborFee(o) && (
                                         <tr>
                                             <td colSpan="3">Phí công lắp đặt</td>
                                             <td>{formatPrice(o.installation.laborFee)}</td>
