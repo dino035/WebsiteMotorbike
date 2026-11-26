@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import useCart from '../hooks/useCart.js'
 import { apiError } from '../utils/apiError.js'
-import { formatPrice, formatTime } from '../utils/format.js'
+import { formatPrice, formatDateTime } from '../utils/format.js'
 import './CartPage.css'
 
 export default function CartPage() {
@@ -79,9 +79,15 @@ export default function CartPage() {
                                         <Link to={`/products/${line.productId}`} className="cart-line__name">{line.name}</Link>
                                         <span className="cart-line__unit">{formatPrice(line.unitPrice)}</span>
                                         {line.motorbike && line.holdExpiresAt && (
-                                            <span className="cart-line__hold">
-                                                Đang giữ xe cho bạn đến {formatTime(line.holdExpiresAt)}
-                                            </span>
+                                            new Date(line.holdExpiresAt) > new Date() ? (
+                                                <span className="cart-line__hold">
+                                                    Giữ chỗ cho bạn đến {formatDateTime(line.holdExpiresAt)}
+                                                </span>
+                                            ) : (
+                                                <span className="cart-line__hold cart-line__hold--expired">
+                                                    Đã quá giờ giữ chỗ ({formatDateTime(line.holdExpiresAt)}) — khách khác có thể lấy xe này
+                                                </span>
+                                            )
                                         )}
                                     </div>
 
@@ -119,7 +125,7 @@ export default function CartPage() {
                         <p className="cart__row"><span>Số món</span><span>{cart.itemCount}</span></p>
                         <p className="cart__row cart__row--total"><span>Tổng tiền</span><strong>{formatPrice(cart.total)}</strong></p>
                         <Link to="/checkout" className="cart__checkout">Đặt hàng</Link>
-                        <p className="cart__hint">Xe máy được tạm giữ {cart.holdMinutes} phút kể từ lúc thêm vào giỏ.</p>
+                        <p className="cart__hint">Xe máy được giữ chỗ {cart.holdMinutes} phút kể từ lúc thêm vào giỏ. Quá giờ, nếu có khách khác thêm chiếc này vào giỏ thì xe sẽ bị gỡ khỏi giỏ của bạn.</p>
                     </aside>
                 </div>
             )}
